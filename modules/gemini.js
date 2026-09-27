@@ -126,48 +126,28 @@ export async function photoCommand(sock, chat, msg, args) {
     if (apiKey) {
       const imageModels = [
         'gemini-3.1-flash-lite-image',
-        'imagen-3.0-generate-002'
+        'gemini-3.1-flash-image'
       ];
       for (const model of imageModels) {
         try {
-          if (model.startsWith('gemini')) {
-            const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
-            const res = await fetch(url, {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                contents: [{ parts: [{ text: prompt }] }]
-              })
-            });
-            if (res.ok) {
-              const json = await res.json();
-              const parts = json?.candidates?.[0]?.content?.parts || [];
-              for (const part of parts) {
-                if (part.inlineData?.data) {
-                  imageBuffer = Buffer.from(part.inlineData.data, 'base64');
-                  break;
-                }
-              }
-              if (imageBuffer) break;
-            }
-          } else {
-            const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:predict?key=${apiKey}`;
-            const res = await fetch(url, {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                instances: [{ prompt }],
-                parameters: { sampleCount: 1, aspectRatio: '1:1', outputOptions: { mimeType: 'image/jpeg' } }
-              })
-            });
-            if (res.ok) {
-              const json = await res.json();
-              const base64Data = json?.predictions?.[0]?.bytesBase64Encoded;
-              if (base64Data) {
-                imageBuffer = Buffer.from(base64Data, 'base64');
+          const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+          const res = await fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              contents: [{ parts: [{ text: prompt }] }]
+            })
+          });
+          if (res.ok) {
+            const json = await res.json();
+            const parts = json?.candidates?.[0]?.content?.parts || [];
+            for (const part of parts) {
+              if (part.inlineData?.data) {
+                imageBuffer = Buffer.from(part.inlineData.data, 'base64');
                 break;
               }
             }
+            if (imageBuffer) break;
           }
         } catch (e1) {
           console.warn(`[photoCommand] ${model} API failed:`, e1.message);

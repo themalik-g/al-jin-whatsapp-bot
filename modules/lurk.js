@@ -68,8 +68,8 @@ export async function lurkCommand(sock, chat, msg, args) {
     }
 
     const s = read();
-    const a0 = (args?.[0] || '').toLowerCase();
-    const a1 = (args?.[1] || '').toLowerCase();
+    let a0 = (args?.[0] || '').toLowerCase();
+    let a1 = (args?.[1] || '').toLowerCase();
 
     const p = getPrefix();
     if (!a0) {

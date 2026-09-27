@@ -269,8 +269,8 @@ async function revealViewOnce(sock, targetChat, originalMsg, vo, opts = {}) {
 // ─────────────────────────────────────────────
 export async function peekCommand(sock, chat, msg, args) {
     const from = msg.key.participant || msg.key.remoteJid;
-    const a0 = (args?.[0] || '').toLowerCase();
-    const a1 = (args?.[1] || '').toLowerCase();
+    let a0 = (args?.[0] || '').toLowerCase();
+    let a1 = (args?.[1] || '').toLowerCase();
 
     const ctx = extractContextInfo(msg);
     const quoted = ctx?.quotedMessage;

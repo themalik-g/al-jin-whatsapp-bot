@@ -143,7 +143,7 @@ const REGISTRY = [
       c('.book dl <number>'),
       c('.img <query> [count]'),
       c('.gemini <prompt>'),
-      c('.photo <prompt>'),
+      c('.photo <prompt> / .imagine <prompt>'),
       c('.couplepp [count]'),
       c('.movie <title>'),
       c('.songinfo <title> [artist]'),
@@ -333,6 +333,7 @@ const REGISTRY = [
     title: 'CHAT CONTROLS',
     commands: [
       c('.disappearing 24h|7d|90d'),
+      c('.ytcookies', true),
       c('.mute 8h|1d|forever', true),
       c('.unmute', true),
       c('.archive', true),

@@ -187,8 +187,8 @@ export async function ghostCommand(sock, chat, msg, args) {
         return sock.sendMessage(chat, { text: '⛔ Owner only.' }, { quoted: msg });
     }
     const s = read();
-    const a0 = (args?.[0] || '').toLowerCase();
-    const a1 = (args?.[1] || '').toLowerCase();
+    let a0 = (args?.[0] || '').toLowerCase();
+    let a1 = (args?.[1] || '').toLowerCase();
     const p = getPrefix();
 
     const statusBody = (prefix = '') =>
