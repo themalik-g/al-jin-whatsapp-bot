@@ -54,6 +54,9 @@ const redditCommand   = lazy('./modules/download.js', 'redditCommand');
 const youtubeCommand  = lazy('./modules/download.js', 'youtubeCommand');
 const urlCommand      = lazy('./modules/url.js', 'urlCommand');
 const usermanualCommand = lazy('./modules/usermanual.js', 'usermanualCommand');
+const detailsCommand    = lazy('./modules/details.js', 'detailsCommand');
+const settingsCommand   = lazy('./modules/settings-cmd.js', 'settingsCommand');
+const forwardCommand    = lazy('./modules/forward.js', 'forwardCommand');
 
 const currencyCommand = lazy('./modules/utility.js', 'currencyCommand');
 const qrCommand       = lazy('./modules/utility.js', 'qrCommand');
@@ -238,15 +241,23 @@ function plainText(msg) {
       if (lowerQ.includes('ghost')) {
         if (lowerD === 'on' || lowerD === 'off') return `${prefix}ghost ${lowerD}`;
         if (lowerD === 'edit on' || lowerD === 'edit off') return `${prefix}ghost ${lowerD}`;
+        if (lowerD === '1') return `${prefix}ghost toggle1`;
+        if (lowerD === '2') return `${prefix}ghost toggle2`;
       }
       if (lowerQ.includes('lurk')) {
         if (lowerD === 'on' || lowerD === 'off') return `${prefix}lurk ${lowerD}`;
+        if (lowerD === '1') return `${prefix}lurk toggle1`;
+        if (lowerD === '2') return `${prefix}lurk toggle2`;
+        if (lowerD === '3') return `${prefix}lurk toggle3`;
         if (lowerD.startsWith('react ') || lowerD.startsWith('download ') || lowerD.startsWith('emoji ')) {
           return `${prefix}lurk ${lowerD}`;
         }
       }
       if (lowerQ.includes('peek')) {
         if (lowerD === 'on' || lowerD === 'off') return `${prefix}peek auto ${lowerD}`;
+        if (lowerD === '1') return `${prefix}peek toggle1`;
+        if (lowerD === '2') return `${prefix}peek toggle2`;
+        if (lowerD === '3') return `${prefix}peek toggle3`;
         if (lowerD.startsWith('auto ') || lowerD.startsWith('watch ') || lowerD.startsWith('dest ')) {
           return `${prefix}peek ${lowerD}`;
         }
@@ -394,7 +405,7 @@ export async function dispatch(sock, update, sessionId = 'main') {
         'wp', 'dp', 'resetwp',
         'prayertimes', 'pts', 'quran', 'sora', 'para', 'muslim', 'bukhari', 'search',
         'islamic', 'hadith', 'quransearch', 'hadeessearch', 'islamsearch', 'qs', 'hs', 'is',
-        'relocation',
+        'relocation', 'details', 'settings', 'forward',
       ]);
 
       if (KNOWN.has(verb)) {
@@ -462,6 +473,9 @@ export async function dispatch(sock, update, sessionId = 'main') {
           case 'pdd': await pddCommand(csock, chat, msg, rest); break;
           case 'songinfo': await songInfoCommand(csock, chat, msg, rest); break;
           case 'prefix': await prefixCommand(csock, chat, msg, rest); break;
+          case 'details': await detailsCommand(csock, chat, msg, rest); break;
+          case 'settings': await settingsCommand(csock, chat, msg); break;
+          case 'forward': await forwardCommand(csock, chat, msg, rest); break;
           case 'help':
           case 'menu': await helpCommand(csock, chat, msg, rest); break;
           case 'islamic':
