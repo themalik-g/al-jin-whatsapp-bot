@@ -210,8 +210,23 @@ export async function ghostCommand(sock, chat, msg, args) {
         }, { quoted: msg });
     }
 
+    if (a0 === 'toggle1') {
+        a0 = s.on ? 'off' : 'on';
+    } else if (a0 === 'toggle2') {
+        a0 = 'edit';
+        a1 = s.edit ? 'off' : 'on';
+    }
+
     if (a0 === 'on' || a0 === 'off') {
-        s.on = a0 === 'on'; write(s);
+        const targetState = a0 === 'on';
+        if (s.on === targetState) {
+            return sendInteractive(sock, chat, {
+                body: `ℹ️ Antidelete is already *${s.on ? 'ARMED (ON)' : 'DISARMED (OFF)'}*.\n\n${statusBody()}`,
+                footer: 'Provided by 𝗪𝗥𝗔𝗜𝗧🇭',
+                buttons: buttons(),
+            }, { quoted: msg });
+        }
+        s.on = targetState; write(s);
         return sendInteractive(sock, chat, {
             body: `👻 Antidelete is now *${s.on ? 'ARMED (ON)' : 'DISARMED (OFF)'}*.\n\n${statusBody()}`,
             footer: 'Provided by 𝗪𝗥𝗔𝗜𝗧🇭',
@@ -223,7 +238,15 @@ export async function ghostCommand(sock, chat, msg, args) {
         if (a1 !== 'on' && a1 !== 'off') {
             return sock.sendMessage(chat, { text: '👻 use _.ghost edit on_ or _.ghost edit off_' }, { quoted: msg });
         }
-        s.edit = a1 === 'on'; write(s);
+        const targetState = a1 === 'on';
+        if (s.edit === targetState) {
+            return sendInteractive(sock, chat, {
+                body: `ℹ️ Antiedit is already *${s.edit ? 'ARMED (ON)' : 'DISARMED (OFF)'}*.\n\n${statusBody()}`,
+                footer: 'Provided by 𝗪𝗥𝗔𝗜𝗧🇭',
+                buttons: buttons(),
+            }, { quoted: msg });
+        }
+        s.edit = targetState; write(s);
         return sendInteractive(sock, chat, {
             body: `👻 Antiedit is now *${s.edit ? 'ARMED (ON)' : 'DISARMED (OFF)'}*.\n\n${statusBody()}`,
             footer: 'Provided by 𝗪𝗥𝗔𝗜𝗧🇭',

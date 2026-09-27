@@ -41,6 +41,10 @@ export async function geminiCommand(sock, chat, msg, args) {
 
   const apiKey = process.env.GEMINI_API_KEY || getKey('GEMINI_API_KEY');
 
+  if (!apiKey) {
+    return sendWithCta(sock, chat, `❌ *Gemini API Key Required*\n\nPlease set your Gemini API key using:\n\`.setvar GEMINI_API_KEY <your_key>\``, { quoted: msg });
+  }
+
   const statusMsg = await sock.sendMessage(chat, {
     text: `🤖 *Thinking with Gemini AI…*`
   }, { quoted: msg });
@@ -48,49 +52,34 @@ export async function geminiCommand(sock, chat, msg, args) {
   try {
     let aiResponse = '';
 
-    // 1. Try Gemini API if API key is configured
-    if (apiKey) {
-      const models = ['gemini-3.5-flash-lite', 'gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-1.5-flash'];
-      for (const model of models) {
-        try {
-          const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
-          const res = await fetch(url, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              contents: [{ parts: [{ text: fullPrompt }] }]
-            })
-          });
-
-          if (res.ok) {
-            const json = await res.json();
-            const text = json?.candidates?.[0]?.content?.parts?.[0]?.text;
-            if (text) {
-              aiResponse = text.trim();
-              break;
-            }
-          }
-        } catch (e) {
-          console.warn(`[geminiCommand] ${model} API error:`, e.message);
-        }
-      }
-    }
-
-    // 2. Keyless AI Fallback if no API key or API call failed
-    if (!aiResponse) {
+    // Standard primary model: gemini-3.5-flash-lite, fallback: gemini-3.8-flash, followed by other Gemini models
+    const models = ['gemini-3.5-flash-lite', 'gemini-3.8-flash', 'gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-1.5-flash'];
+    for (const model of models) {
       try {
-        const fallbackUrl = `https://text.pollinations.ai/${encodeURIComponent(fullPrompt)}`;
-        const text = await httpGetText(fallbackUrl, { timeout: 20000 });
-        if (text && text.trim().length > 0) {
-          aiResponse = text.trim();
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+        const res = await fetch(url, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            contents: [{ parts: [{ text: fullPrompt }] }]
+          })
+        });
+
+        if (res.ok) {
+          const json = await res.json();
+          const text = json?.candidates?.[0]?.content?.parts?.[0]?.text;
+          if (text) {
+            aiResponse = text.trim();
+            break;
+          }
         }
       } catch (e) {
-        console.warn('[geminiCommand] Keyless AI fallback failed:', e.message);
+        console.warn(`[geminiCommand] ${model} API error:`, e.message);
       }
     }
 
     if (!aiResponse) {
-      throw new Error('Unable to generate AI text response at this time.');
+      throw new Error('Unable to generate AI response from Gemini API. Please check your GEMINI_API_KEY.');
     }
 
     const replyText = `🤖 *Gemini AI*\n\n${aiResponse}\n\nProvided by 𝗪𝗥𝗔𝗜𝗧🇭`;

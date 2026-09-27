@@ -286,11 +286,27 @@ export async function peekCommand(sock, chat, msg, args) {
         }
         const s = read();
 
+        if (a0 === 'toggle1') {
+            a0 = 'auto';
+            a1 = s.auto ? 'off' : 'on';
+        } else if (a0 === 'toggle2') {
+            a0 = 'watch';
+            a1 = s.watchQuoted ? 'off' : 'on';
+        } else if (a0 === 'toggle3') {
+            a0 = 'dest';
+            a1 = s.dest === 'owner' ? 'same' : (s.dest === 'same' ? 'both' : 'owner');
+        }
+
         if (a0 === 'auto' || a0 === 'on' || a0 === 'off') {
             const wantOn = a0 === 'on' || a1 === 'on';
             if (a0 === 'auto' && a1 !== 'on' && a1 !== 'off') {
                 return sock.sendMessage(chat, {
                     text: '👁️ use _.peek auto on_ or _.peek auto off_'
+                }, { quoted: msg });
+            }
+            if (s.auto === wantOn) {
+                return sock.sendMessage(chat, {
+                    text: `ℹ️ auto-peek is already *${s.auto ? 'armed (ON)' : 'disarmed (OFF)'}*.`
                 }, { quoted: msg });
             }
             s.auto = wantOn;
@@ -306,7 +322,13 @@ export async function peekCommand(sock, chat, msg, args) {
                     text: '👁️ use _.peek watch on_ or _.peek watch off_'
                 }, { quoted: msg });
             }
-            s.watchQuoted = a1 === 'on';
+            const wantOn = a1 === 'on';
+            if (s.watchQuoted === wantOn) {
+                return sock.sendMessage(chat, {
+                    text: `ℹ️ quoted-watcher is already *${s.watchQuoted ? 'armed (ON)' : 'disarmed (OFF)'}*.`
+                }, { quoted: msg });
+            }
+            s.watchQuoted = wantOn;
             write(s);
             return sock.sendMessage(chat, {
                 text: s.watchQuoted

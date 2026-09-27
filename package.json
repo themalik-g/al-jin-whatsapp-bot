@@ -27,6 +27,7 @@
     "mumaker": "^2.0.0",
     "p-queue": "^9.0.0",
     "pino": "^9.0.0",
+    "pptxgenjs": "^3.12.0",
     "ytdlp-nodejs": "^3.4.5"
   }
 }
