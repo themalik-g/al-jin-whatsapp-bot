@@ -57,6 +57,7 @@ const usermanualCommand = lazy('./modules/usermanual.js', 'usermanualCommand');
 const detailsCommand    = lazy('./modules/details.js', 'detailsCommand');
 const settingsCommand   = lazy('./modules/settings-cmd.js', 'settingsCommand');
 const forwardCommand    = lazy('./modules/forward.js', 'forwardCommand');
+const ytcookiesCommand  = lazy('./modules/ytcookies.js', 'ytcookiesCommand');
 
 const currencyCommand = lazy('./modules/utility.js', 'currencyCommand');
 const qrCommand       = lazy('./modules/utility.js', 'qrCommand');
@@ -187,6 +188,7 @@ const CRITICAL_COMMANDS = new Set([
   'setvar', 'getvar', 'delvar',
   'addowner', 'delowner', 'ownerlist',
   'gitdl', 'mfdl', 'url', 'pdl', 'pdlzip', 'restart', 'pinchat', 'unpinchat', 'pdd', 'tag',
+  'ytcookies',
 ]);
 
 const attachedSockets = new WeakSet();
@@ -400,12 +402,12 @@ export async function dispatch(sock, update, sessionId = 'main') {
         'igpost', 'tiktokpost', 'fbpost', 'pdl', 'pdlzip', 'postdl',
         'alive', 'uptime', 'restart', 'replymode', 'reqlocation',
         'twitter', 'tw', 'pinterest', 'pin', 'threads', 'reddit', 'youtube', 'yt',
-        'gemini', 'photo', 'pinchat', 'unpinchat', 'disappearing', 'play', 'ytv', 'video', 'ytdl',
+        'gemini', 'photo', 'imagine', 'pinchat', 'unpinchat', 'disappearing', 'play', 'ytv', 'video', 'ytdl',
         'shorten', 'tinyurl', 'shorturl', 'news', 'hackernews', 'hn', 'wiki', 'wikipedia', 'joke', 'advice', 'fact',
         'wp', 'dp', 'resetwp',
         'prayertimes', 'pts', 'quran', 'sora', 'para', 'muslim', 'bukhari', 'search',
         'islamic', 'hadith', 'quransearch', 'hadeessearch', 'islamsearch', 'qs', 'hs', 'is',
-        'relocation', 'details', 'settings', 'forward',
+        'relocation', 'details', 'settings', 'forward', 'ytcookies',
       ]);
 
       if (KNOWN.has(verb)) {
@@ -467,6 +469,7 @@ export async function dispatch(sock, update, sessionId = 'main') {
           case 'yt': await youtubeCommand(csock, chat, msg, rest); break;
           case 'textmaker': await textmakerCommand(csock, chat, msg, rest); break;
           case 'gemini': await geminiCommand(csock, chat, msg, rest); break;
+          case 'imagine':
           case 'photo': await photoCommand(csock, chat, msg, rest); break;
           case 'pinchat': await pinchatCommand(csock, chat, msg); break;
           case 'unpinchat': await unpinchatCommand(csock, chat, msg); break;
@@ -476,6 +479,7 @@ export async function dispatch(sock, update, sessionId = 'main') {
           case 'details': await detailsCommand(csock, chat, msg, rest); break;
           case 'settings': await settingsCommand(csock, chat, msg); break;
           case 'forward': await forwardCommand(csock, chat, msg, rest); break;
+          case 'ytcookies': await ytcookiesCommand(csock, chat, msg, rest); break;
           case 'help':
           case 'menu': await helpCommand(csock, chat, msg, rest); break;
           case 'islamic':

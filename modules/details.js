@@ -115,6 +115,18 @@ const COMMAND_DETAILS = {
       '.disappearing 90d — Set to 90 days',
     ],
   },
+  ytcookies: {
+    title: '🍪 YouTube Cookies (.ytcookies)',
+    description: 'Configures Netscape formatted YouTube cookies for yt-dlp to bypass bot detection, sign-in restrictions, and age gate limits when downloading media.',
+    usage: [
+      '.ytcookies — Show guide on how to export and set YouTube cookies',
+      '.ytcookies status — Check active YouTube cookies status',
+      '.ytcookies clear | del — Remove saved YouTube cookies',
+      '.ytcookies <pasted cookies text> — Save Netscape format cookies text',
+      'Reply to a cookies.txt document file with .ytcookies — Save uploaded cookie file',
+    ],
+    notes: 'Cookies are stored per-session in data/youtube_cookies.txt and automatically attached to yt-dlp downloads.',
+  },
 };
 
 export async function detailsCommand(sock, chat, msg, args) {
@@ -122,14 +134,24 @@ export async function detailsCommand(sock, chat, msg, args) {
   const query = (args || []).join(' ').toLowerCase().trim();
 
   if (!query || query === 'all') {
-    let listText = `📘 *WRAITH Command Details Index*\n\n`;
-    listText += `Use \`${p}details <command>\` for detailed instructions on a specific command.\n\n`;
+    let listText = `📘 *WRAITH Detailed Command Guide*\n\n`;
+    listText += `Below are extensive details, usage guidelines, and examples for commands:\n\n`;
 
     for (const [cmd, data] of Object.entries(COMMAND_DETAILS)) {
-      listText += `• *${p}${cmd}* — ${data.title}\n`;
+      listText += `━━━━━━━━━━━━━━━━━━━━━\n`;
+      listText += `${data.title}\n`;
+      listText += `📝 *Description:* ${data.description}\n`;
+      listText += `💡 *Usage & Examples:*\n`;
+      for (const u of data.usage) {
+        listText += `• \`${u}\` \n`;
+      }
+      if (data.notes) {
+        listText += `📌 *Note:* ${data.notes}\n`;
+      }
+      listText += `\n`;
     }
 
-    listText += `\nProvided by 𝗪𝗥𝗔𝗜𝗧🇭`;
+    listText += `Provided by 𝗪𝗥𝗔𝗜𝗧🇭`;
     return sendWithCta(sock, chat, listText, { quoted: msg });
   }
 
