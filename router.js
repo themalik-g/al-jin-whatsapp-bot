@@ -134,6 +134,7 @@ const stalkCommand = lazy('./modules/presence-track.js', 'stalkCommand');
 const textmakerCommand = lazy('./modules/textmaker.js', 'textmakerCommand');
 const handleTextmakerCommand = lazy('./modules/textmaker.js', 'handleTextmakerCommand');
 const geminiCommand = lazy('./modules/gemini.js', 'geminiCommand');
+const scholarCommand = lazy('./modules/gemini.js', 'scholarCommand');
 const photoCommand  = lazy('./modules/gemini.js', 'photoCommand');
 const pinchatCommand   = lazy('./modules/pin.js', 'pinchatCommand');
 const unpinchatCommand = lazy('./modules/pin.js', 'unpinchatCommand');
@@ -402,7 +403,7 @@ export async function dispatch(sock, update, sessionId = 'main') {
         'igpost', 'tiktokpost', 'fbpost', 'pdl', 'pdlzip', 'postdl',
         'alive', 'uptime', 'restart', 'replymode', 'reqlocation',
         'twitter', 'tw', 'pinterest', 'pin', 'threads', 'reddit', 'youtube', 'yt',
-        'gemini', 'photo', 'imagine', 'pinchat', 'unpinchat', 'disappearing', 'play', 'ytv', 'video', 'ytdl',
+        'gemini', 'scholar', 'scholor', 'photo', 'imagine', 'pinchat', 'unpinchat', 'disappearing', 'play', 'ytv', 'video', 'ytdl',
         'shorten', 'tinyurl', 'shorturl', 'news', 'hackernews', 'hn', 'wiki', 'wikipedia', 'joke', 'advice', 'fact',
         'wp', 'dp', 'resetwp',
         'prayertimes', 'pts', 'quran', 'sora', 'para', 'muslim', 'bukhari', 'search',
@@ -469,6 +470,8 @@ export async function dispatch(sock, update, sessionId = 'main') {
           case 'yt': await youtubeCommand(csock, chat, msg, rest); break;
           case 'textmaker': await textmakerCommand(csock, chat, msg, rest); break;
           case 'gemini': await geminiCommand(csock, chat, msg, rest); break;
+          case 'scholar':
+          case 'scholor': await scholarCommand(csock, chat, msg, rest); break;
           case 'imagine':
           case 'photo': await photoCommand(csock, chat, msg, rest); break;
           case 'pinchat': await pinchatCommand(csock, chat, msg); break;

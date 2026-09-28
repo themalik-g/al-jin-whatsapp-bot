@@ -143,6 +143,7 @@ const REGISTRY = [
       c('.book dl <number>'),
       c('.img <query> [count]'),
       c('.gemini <prompt>'),
+      c('.scholar <topic/question>'),
       c('.photo <prompt> / .imagine <prompt>'),
       c('.couplepp [count]'),
       c('.movie <title>'),

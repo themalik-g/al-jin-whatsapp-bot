@@ -9,12 +9,18 @@ const VARS_FILE = () => inState('vars.json');
 
 let _cache = null;
 
-function loadVars() {
+export function loadVars() {
     if (_cache) return _cache;
     try {
         const file = VARS_FILE();
         if (fs.existsSync(file)) {
             _cache = JSON.parse(fs.readFileSync(file, 'utf-8')) || {};
+            // Populate process.env with persisted variables
+            for (const [k, v] of Object.entries(_cache)) {
+                if (v !== undefined && v !== null && !process.env[k]) {
+                    process.env[k] = String(v);
+                }
+            }
         } else {
             _cache = {};
         }

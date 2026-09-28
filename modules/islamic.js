@@ -56,7 +56,7 @@ const SURAH_MAP = {
   'sajdah': 32, 'as-sajdah': 32,
   'ahzab': 33, 'al-ahzab': 33,
   'saba': 34,
-   mefatir: 35, 'fatir': 35,
+  'fatir': 35,
   'yasin': 36, 'yaseen': 36, 'ya-sin': 36,
   'saffat': 37, 'as-saffat': 37,
   'sad': 38,
@@ -118,8 +118,7 @@ const SURAH_MAP = {
   'sharh': 94, 'ash-sharh': 94, 'inshirah': 94,
   'tin': 95, 'at-tin': 95,
   'alaq': 96, 'al-alaq': 96,
-  'qadr': 97, 'al-qadr': 97,
-  'bayyinah': 98, 'al-bayyinah': 98,
+  'qadr': 97, 'al-qadr': 97, 'bayyinah': 98, 'al-bayyinah': 98,
   'zalzalah': 99, 'az-zalzalah': 99, 'zilzal': 99,
   'adiyat': 100, 'al-adiyat': 100,
   'qariah': 101, 'al-qariah': 101,
@@ -192,7 +191,7 @@ export async function prayertimesCommand(sock, chat, msg, args) {
 │ 🌅 *Maghrib:* ${t.Maghrib}
 │ 🌙 *Isha:* ${t.Isha}
 └───────────────────
-Provided by 𝗪𝗥𝗔𝗜𝗧🇭`;
+Provided by 𝗪𝗥ÃIТ🇭`;
 
     await sendWithCta(sock, chat, reply, { quoted: msg });
   } catch (err) {
@@ -259,7 +258,7 @@ export async function quranCommand(sock, chat, msg, args) {
 │ 🇬🇧 *English (Saheeh International):*
 │ ${englishData.text}
 └───────────────────
-Provided by 𝗪𝗥𝗔𝗜𝗧🇭`;
+Provided by 𝗪𝗥ÃIТ🇭`;
 
     await sendWithCta(sock, chat, reply, { quoted: msg });
   } catch (err) {
@@ -334,7 +333,7 @@ export async function soraCommand(sock, chat, msg, args) {
           document: buffer,
           fileName: cleanName,
           mimetype: 'application/pdf',
-          caption: `📖 *Surah ${surahNum}: ${surahTitle}* ${surahArabic}${surahTrans}\n\nProvided by 𝗪𝗥𝗔𝗜𝗧🇭`
+          caption: `📖 *Surah ${surahNum}: ${surahTitle}* ${surahArabic}${surahTrans}\n\nProvided by 𝗪𝗥ÃIТ🇭`
         }, { quoted: msg });
       }
     }
@@ -371,7 +370,7 @@ export async function paraCommand(sock, chat, msg, args) {
           document: buffer,
           fileName: `Quran_Para_${paddedPara}.pdf`,
           mimetype: 'application/pdf',
-          caption: `📖 *Quran Para / Juz ${paraNum} Document*\n\nProvided by 𝗪𝗥𝗔𝗜𝗧🇭`
+          caption: `📖 *Quran Para / Juz ${paraNum} Document*\n\nProvided by 𝗪𝗥ÃIТ🇭`
         }, { quoted: msg });
       }
     }
@@ -427,7 +426,7 @@ export async function muslimCommand(sock, chat, msg, args) {
 │ 📌 *Hadith Number:* #${num}
 ├───────────────────
 ${arabic ? `│ 🕌 *Arabic:*\n│ ${arabic}\n│\n` : ''}${english ? `│ 🇬🇧 *English:*\n│ ${english}\n` : ''}└───────────────────
-Provided by 𝗪𝗥𝗔𝗜𝗧🇭`;
+Provided by 𝗪𝗥ÃIТ🇭`;
 
     await sendWithCta(sock, chat, reply, { quoted: msg });
   } catch (err) {
@@ -458,7 +457,7 @@ export async function bukhariCommand(sock, chat, msg, args) {
 │ 📌 *Hadith Number:* #${num}
 ├───────────────────
 ${arabic ? `│ 🕌 *Arabic:*\n│ ${arabic}\n│\n` : ''}${english ? `│ 🇬🇧 *English:*\n│ ${english}\n` : ''}└───────────────────
-Provided by 𝗪𝗥𝗔𝗜𝗧🇭`;
+Provided by 𝗪𝗥ÃIТ🇭`;
 
     await sendWithCta(sock, chat, reply, { quoted: msg });
   } catch (err) {
@@ -500,7 +499,7 @@ export async function searchQuranCommand(sock, chat, msg, args) {
         `"${m.text.trim()}"\n\n`;
     }
 
-    reply += `└───────────────────\nProvided by 𝗪𝗥𝗔𝗜𝗧🇭`;
+    reply += `└───────────────────\nProvided by 𝗪𝗥ÃIТ🇭`;
 
     await sendWithCta(sock, chat, reply, { quoted: msg });
   } catch (err) {
@@ -524,10 +523,11 @@ async function fetchIslamicReferencesFromGemini(query, mode) {
   let schema = {};
 
   if (mode === 'quran') {
-    promptContent = `Provide up to 5 of the most relevant Quran verses for the following question or topic: "${query}". Return exact Surah numbers (1-114) and Ayah numbers.`;
+    promptContent = `Provide up to 5 of the most relevant Quran verses for the following question or topic: "${query}". Return exact Surah numbers (1-114) and Ayah numbers. Also write a 2 to 5 line short answer/explanation directly addressing the user's question and explaining how these Quranic verses relate to their topic.`;
     schema = {
       type: 'object',
       properties: {
+        explanation: { type: 'string' },
         quran_references: {
           type: 'array',
           items: {
@@ -540,13 +540,14 @@ async function fetchIslamicReferencesFromGemini(query, mode) {
           }
         }
       },
-      required: ['quran_references']
+      required: ['explanation', 'quran_references']
     };
   } else if (mode === 'hadees') {
-    promptContent = `Provide up to 5 of the most relevant authentic Hadiths for the following question or topic: "${query}". Use collection book key from: bukhari, muslim, abudawud, tirmidhi, nasai, ibnmajah, malik, nawawi, qudsi, dehlawi.`;
+    promptContent = `Provide up to 5 of the most relevant authentic Hadiths for the following question or topic: "${query}". Use collection book key from: bukhari, muslim, abudawud, tirmidhi, nasai, ibnmajah, malik, nawawi, qudsi, dehlawi. Also write a 2 to 5 line short answer/explanation directly addressing the user's question and explaining how these Hadiths relate to their topic.`;
     schema = {
       type: 'object',
       properties: {
+        explanation: { type: 'string' },
         hadith_references: {
           type: 'array',
           items: {
@@ -559,14 +560,15 @@ async function fetchIslamicReferencesFromGemini(query, mode) {
           }
         }
       },
-      required: ['hadith_references']
+      required: ['explanation', 'hadith_references']
     };
   } else {
     // mode === 'islam'
-    promptContent = `Provide up to 5 of the most relevant Quran verses and up to 5 of the most relevant authentic Hadiths for the following question or topic: "${query}". Use collection book key from: bukhari, muslim, abudawud, tirmidhi, nasai, ibnmajah, malik, nawawi, qudsi, dehlawi for Hadiths.`;
+    promptContent = `Provide up to 5 of the most relevant Quran verses and up to 5 of the most relevant authentic Hadiths for the following question or topic: "${query}". Use collection book key from: bukhari, muslim, abudawud, tirmidhi, nasai, ibnmajah, malik, nawawi, qudsi, dehlawi for Hadiths. Also write a 2 to 5 line short answer/explanation directly addressing the user's question and explaining how these verses and Hadiths relate to their topic.`;
     schema = {
       type: 'object',
       properties: {
+        explanation: { type: 'string' },
         quran_references: {
           type: 'array',
           items: {
@@ -590,11 +592,11 @@ async function fetchIslamicReferencesFromGemini(query, mode) {
           }
         }
       },
-      required: ['quran_references', 'hadith_references']
+      required: ['explanation', 'quran_references', 'hadith_references']
     };
   }
 
-  const systemInstruction = `You are a specialized Islamic reference lookup assistant. For any asked question or topic, provide only related Hadith numbers and related verses from the Quran in structured JSON format. Do not write full texts, only provide accurate references.`;
+  const systemInstruction = `You are a specialized Islamic reference lookup assistant. For any asked question or topic, provide related Hadith numbers, related verses from the Quran, and a concise 2-5 line explanation connecting the user's question to the Islamic sources in structured JSON format.`;
 
   const payload = {
     contents: [
@@ -741,7 +743,14 @@ export async function quransearchCommand(sock, chat, msg, args) {
 
     let reply = `┌──❮ 📖 *QURAN SEARCH* ❯──\n` +
       `│ 🔍 *Topic:* ${query}\n` +
-      `├───────────────────\n\n`;
+      `├───────────────────\n`;
+
+    if (aiData.explanation) {
+      reply += `💡 *Answer & Context:*\n${aiData.explanation.trim()}\n` +
+        `├───────────────────\n\n`;
+    } else {
+      reply += `\n`;
+    }
 
     for (const v of fetchedVerses) {
       reply += `📌 *${v.surahName} (${v.surah}:${v.ayah})*\n` +
@@ -750,7 +759,7 @@ export async function quransearchCommand(sock, chat, msg, args) {
         `───────────────────\n\n`;
     }
 
-    reply += `Provided by 𝗪𝗥𝗔𝗜𝗧🇭`;
+    reply += `Provided by 𝗪𝗥ÃIТ🇭`;
 
     await sendWithCta(sock, chat, reply.trim(), { quoted: msg });
   } catch (err) {
@@ -791,7 +800,14 @@ export async function hadeessearchCommand(sock, chat, msg, args) {
 
     let reply = `┌──❮ 📜 *HADEES SEARCH* ❯──\n` +
       `│ 🔍 *Topic:* ${query}\n` +
-      `├───────────────────\n\n`;
+      `├───────────────────\n`;
+
+    if (aiData.explanation) {
+      reply += `💡 *Answer & Context:*\n${aiData.explanation.trim()}\n` +
+        `├───────────────────\n\n`;
+    } else {
+      reply += `\n`;
+    }
 
     for (const h of fetchedHadiths) {
       reply += `📌 *${h.bookTitle} (#${h.num})*\n` +
@@ -800,7 +816,7 @@ export async function hadeessearchCommand(sock, chat, msg, args) {
         `───────────────────\n\n`;
     }
 
-    reply += `Provided by 𝗪𝗥𝗔𝗜𝗧🇭`;
+    reply += `Provided by 𝗪𝗥ÃIТ🇭`;
 
     await sendWithCta(sock, chat, reply.trim(), { quoted: msg });
   } catch (err) {
@@ -846,7 +862,14 @@ export async function islamsearchCommand(sock, chat, msg, args) {
 
     let reply = `┌──❮ 🕋 *ISLAM SEARCH* ❯──\n` +
       `│ 🔍 *Topic:* ${query}\n` +
-      `├───────────────────\n\n`;
+      `├───────────────────\n`;
+
+    if (aiData.explanation) {
+      reply += `💡 *Answer & Context:*\n${aiData.explanation.trim()}\n` +
+        `├───────────────────\n\n`;
+    } else {
+      reply += `\n`;
+    }
 
     if (validVerses.length > 0) {
       reply += `📖 *QURANIC VERSES:*\n\n`;
@@ -868,7 +891,7 @@ export async function islamsearchCommand(sock, chat, msg, args) {
       }
     }
 
-    reply += `Provided by 𝗪𝗥𝗔𝗜𝗧🇭`;
+    reply += `Provided by 𝗪𝗥ÃIТ🇭`;
 
     await sendWithCta(sock, chat, reply.trim(), { quoted: msg });
   } catch (err) {

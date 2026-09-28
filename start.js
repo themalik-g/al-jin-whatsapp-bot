@@ -36,6 +36,7 @@ import { startScheduler, stopScheduler } from './modules/schedule.js';
 import { startPresenceHeartbeat, stopPresenceHeartbeat } from './modules/presence.js';
 import { revealDelete } from './modules/ghost.js';
 import { sessionPath, statePath, inState } from './core/paths.js';
+import { loadVars } from './core/vars.js';
 import { NEWSLETTER_CONTEXT } from './lib/buttons.js';
 
 // ── CLI Arg Parsing ──
@@ -53,6 +54,13 @@ const pairingNumber = rawNumber ? rawNumber.replace(/\D/g, '') : null;
 const AUTH_DIR   = sessionPath();
 const STATE_DIR  = statePath();
 const OWNER_FILE = inState('owner.json');
+
+// Ensure persistent session vars (such as GEMINI_API_KEY) are initialized into process.env
+try {
+  loadVars();
+} catch (e) {
+  if (process.env.WRAITH_DEBUG) console.warn('[start.js] loadVars error:', e.message);
+}
 
 if (pairingNumber) {
   const parseFn = parsePhoneNumber.parsePhoneNumber || parsePhoneNumber;
