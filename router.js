@@ -58,6 +58,7 @@ const detailsCommand    = lazy('./modules/details.js', 'detailsCommand');
 const settingsCommand   = lazy('./modules/settings-cmd.js', 'settingsCommand');
 const forwardCommand    = lazy('./modules/forward.js', 'forwardCommand');
 const ytcookiesCommand  = lazy('./modules/ytcookies.js', 'ytcookiesCommand');
+const fetchCommand      = lazy('./modules/fetch.js', 'fetchCommand');
 
 const currencyCommand = lazy('./modules/utility.js', 'currencyCommand');
 const qrCommand       = lazy('./modules/utility.js', 'qrCommand');
@@ -408,7 +409,7 @@ export async function dispatch(sock, update, sessionId = 'main') {
         'wp', 'dp', 'resetwp',
         'prayertimes', 'pts', 'quran', 'sora', 'para', 'muslim', 'bukhari', 'search',
         'islamic', 'hadith', 'quransearch', 'hadeessearch', 'islamsearch', 'qs', 'hs', 'is',
-        'relocation', 'details', 'settings', 'forward', 'ytcookies',
+        'relocation', 'details', 'settings', 'forward', 'ytcookies', 'fetch',
       ]);
 
       if (KNOWN.has(verb)) {
@@ -483,6 +484,7 @@ export async function dispatch(sock, update, sessionId = 'main') {
           case 'settings': await settingsCommand(csock, chat, msg); break;
           case 'forward': await forwardCommand(csock, chat, msg, rest); break;
           case 'ytcookies': await ytcookiesCommand(csock, chat, msg, rest); break;
+          case 'fetch': await fetchCommand(csock, chat, msg, rest); break;
           case 'help':
           case 'menu': await helpCommand(csock, chat, msg, rest); break;
           case 'islamic':
