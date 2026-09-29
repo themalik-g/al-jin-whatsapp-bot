@@ -530,9 +530,9 @@ const BASE_COMMAND_DETAILS = {
     usage: ['.setstatus <text>', 'Reply to media with .setstatus <caption_optional>'],
   },
   getstatus: {
-    title: '🔍 Get User Status / About',
-    description: 'Fetches status about text for a specified contact or phone number.',
-    usage: ['.getstatus <phone_number_or_jid>'],
+    title: '📱 Get User Status Story',
+    description: 'Fetches active WhatsApp status story updates (media/text) for a specified contact.',
+    usage: ['.getstatus <phone_number_or_jid>', '.getstatus @mention', 'Reply with .getstatus'],
   },
   getpair: {
     title: '🔑 Generate Pairing Code',

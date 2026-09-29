@@ -150,7 +150,7 @@ URLs containing picture posts or carousels (e.g. Instagram `/p/`, TikTok `/photo
 | `.blocklist` | Show blocked users list |
 | `.unblockall` | Unblock all users |
 | `.setstatus <text>` | Post status update to `status@broadcast` |
-| `.getstatus <num>` | Fetch user's status bio |
+| `.getstatus <num>` | Fetch user's active status story |
 | `.getpair <number>` | Generate pairing code session |
 | `.setsession [number]` | Add new session instance by replying to a `creds.json` document (main session only) |
 | `.addsession <number>` | Initialize and pair new session instance by phone number (main session only) |
