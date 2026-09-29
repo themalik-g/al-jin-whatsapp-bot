@@ -152,6 +152,81 @@ const BASE_COMMAND_DETAILS = {
     description: 'Shortens long URLs into compact TinyURL or is.gd links.',
     usage: ['.shorten <long_url>'],
   },
+  unroll: {
+    title: '🔓 URL Unroller / Reveal Link',
+    description: 'Tracks HTTP redirect chains to reveal the final destination of short or obfuscated links.',
+    usage: ['.unroll <short_url>', 'Reply to a message with .unroll'],
+  },
+  speedtest: {
+    title: '🚀 Network Speedtest',
+    description: 'Tests host server latency, download speed, and upload speed directly in WhatsApp.',
+    usage: ['.speedtest'],
+  },
+  npm: {
+    title: '📦 NPM Registry Package Info',
+    description: 'Fetches package metadata, version, license, author, and weekly download stats from registry.npmjs.org.',
+    usage: ['.npm <package_name>'],
+  },
+  web2img: {
+    title: '📸 Web Page Screenshot',
+    description: 'Captures a full-page screenshot of any webpage via Microlink API.',
+    usage: ['.web2img <url>', '.webss <url>'],
+  },
+  tempmail: {
+    title: '📧 Temporary Disposable Email',
+    description: 'Generates a disposable temp email address and reads inbox messages directly in chat.',
+    usage: ['.tempmail — Generate temporary email address', '.readmail <address> — Read inbox messages'],
+  },
+  ocr: {
+    title: '🔤 Optical Character Recognition (OCR)',
+    description: 'Extracts all readable text from an image or document using Tesseract OCR.',
+    usage: ['Reply to an image with .ocr or .readtext'],
+  },
+  barcode: {
+    title: '📊 Barcode & QR Code Generator',
+    description: 'Generates customizable standard barcodes (CODE128, EAN13, UPC) or QR codes.',
+    usage: ['.barcode <text>', '.barcode ean13 <numbers>', '.barcode qr <text>'],
+  },
+  vcard: {
+    title: '📱 WhatsApp Contact Card Generator',
+    description: 'Generates and sends a downloadable WhatsApp contact card for any tagged or mentioned user.',
+    usage: ['.vcard @user', '.vcard <phone_number>'],
+  },
+  tts: {
+    title: '🗣️ Text-To-Speech (TTS Voice Note)',
+    description: 'Converts written text into a native WhatsApp voice note audio message.',
+    usage: ['.tts Hello world', '.tts es Hola mundo', '.tts ur السلام عليكم'],
+  },
+  sanitize: {
+    title: '🧹 EXIF Metadata Sanitizer',
+    description: 'Strips all hidden EXIF metadata (GPS, camera info, timestamp) from images, videos, or documents.',
+    usage: ['Reply to media with .sanitize or .exifwipe'],
+  },
+  trim: {
+    title: '✂️ Media Trimmer',
+    description: 'Trims video or audio files between start and end timestamps without re-encoding.',
+    usage: ['Reply to video/audio with .trim <start_time> <end_time>', 'Example: .trim 00:05 00:20'],
+  },
+  tomp3: {
+    title: '🎧 Video / Audio to MP3 Converter',
+    description: 'Converts any video or document audio file into a clean MP3 audio track.',
+    usage: ['Reply to video/audio with .tomp3'],
+  },
+  vn: {
+    title: '🎙️ Audio to Voice Note Converter',
+    description: 'Converts any audio or video file into a native WhatsApp voice note (Opus codec).',
+    usage: ['Reply to video/audio with .vn'],
+  },
+  compress: {
+    title: '📉 Media Compressor',
+    description: 'Compresses videos under 10MB or images under 400KB / 200KB for fast sharing.',
+    usage: ['Reply to video/image with .compress', 'Reply to image with .extracompress (under 200KB)'],
+  },
+  whatanime: {
+    title: '🎬 WhatAnime Scene Identifier',
+    description: 'Identifies anime name, episode, exact timestamp, and preview video clip from an image screenshot.',
+    usage: ['Reply to an anime screenshot with .whatanime'],
+  },
   news: {
     title: '📰 Google News RSS',
     description: 'Fetches recent news headlines for a specific topic or general news.',
@@ -739,6 +814,11 @@ const COMMAND_DETAILS = {
   qs: BASE_COMMAND_DETAILS.quransearch,
   hs: BASE_COMMAND_DETAILS.hadeessearch,
   is: BASE_COMMAND_DETAILS.islamsearch,
+  readtext: BASE_COMMAND_DETAILS.ocr,
+  exifwipe: BASE_COMMAND_DETAILS.sanitize,
+  webss: BASE_COMMAND_DETAILS.web2img,
+  readmail: BASE_COMMAND_DETAILS.tempmail,
+  extracompress: BASE_COMMAND_DETAILS.compress,
 };
 
 export async function detailsCommand(sock, chat, msg, args) {

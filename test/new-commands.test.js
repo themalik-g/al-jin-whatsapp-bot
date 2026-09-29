@@ -1,0 +1,79 @@
+// ─────────────────────────────────────────────
+// WRAITH · test/new-commands.test.js
+// Unit tests for newly added commands
+// ─────────────────────────────────────────────
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import bwipjs from 'bwip-js';
+import { createCtaUrl } from '../lib/buttons.js';
+
+test('Barcode generation test', async () => {
+  const buf = await bwipjs.toBuffer({
+    bcid: 'code128',
+    text: '123456789',
+    scale: 3,
+    height: 10,
+    includetext: true,
+  });
+  assert.ok(buf instanceof Buffer);
+  assert.ok(buf.length > 100);
+});
+
+test('Barcode QR generation test', async () => {
+  const buf = await bwipjs.toBuffer({
+    bcid: 'qrcode',
+    text: 'https://github.com/themalik-g/wraith',
+    scale: 3,
+    height: 20,
+    includetext: true,
+  });
+  assert.ok(buf instanceof Buffer);
+  assert.ok(buf.length > 100);
+});
+
+test('NPM Registry API test', async () => {
+  const res = await fetch('https://registry.npmjs.org/express');
+  assert.equal(res.ok, true);
+  const json = await res.json();
+  assert.equal(json.name, 'express');
+  assert.ok(json['dist-tags']?.latest);
+});
+
+test('Unroll redirect tracker test', async () => {
+  const targetUrl = 'https://tinyurl.com/2p8v25tw';
+  let currentUrl = targetUrl;
+  const redirectChain = [currentUrl];
+
+  for (let i = 0; i < 5; i++) {
+    try {
+      const res = await fetch(currentUrl, { method: 'HEAD', redirect: 'manual' });
+      const location = res.headers.get('location');
+      if (location) {
+        const nextUrl = new URL(location, currentUrl).href;
+        redirectChain.push(nextUrl);
+        currentUrl = nextUrl;
+      } else {
+        break;
+      }
+    } catch {
+      break;
+    }
+  }
+
+  assert.ok(redirectChain.length >= 1);
+});
+
+test('VCard format test', () => {
+  const digits = '923257853673';
+  const name = `User +${digits}`;
+  const vcard = [
+    'BEGIN:VCARD',
+    'VERSION:3.0',
+    `FN:${name}`,
+    `TEL;type=CELL;type=VOICE;waid=${digits}:+${digits}`,
+    'END:VCARD',
+  ].join('\n');
+
+  assert.ok(vcard.includes('BEGIN:VCARD'));
+  assert.ok(vcard.includes('waid=923257853673'));
+});
