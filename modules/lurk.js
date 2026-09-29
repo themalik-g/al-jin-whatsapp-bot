@@ -3,8 +3,9 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import { pipeline } from 'stream/promises';
 import { downloadContentFromMessage } from '@whiskeysockets/baileys';
-import { isOwner, ownerJid } from '../core/identity.js';
+import { isOwner, ownerJid, digitsOf } from '../core/identity.js';
 import { vaultPath, vaultMediaName, dropFromVault } from '../core/vault.js';
+import { getBestUserJid } from '../core/jid-resolver.js';
 import { sendInteractive, createQuickReply } from '../lib/buttons.js';
 import { getPrefix } from '../core/settings.js';
 
@@ -286,19 +287,20 @@ async function downloadStatus(sock, key, statusMsg) {
 
         if (!node || !type) return;
 
-        const sender = key.participant || key.remoteJid;
+        const rawSender = key.participant || key.remoteJid;
+        const bestSender = await getBestUserJid(rawSender, sock);
 
         // Save to vault via stream
         const ext = type === 'image' ? 'jpg' : (type === 'video' ? 'mp4' : 'ogg');
-        const fp = vaultPath(vaultMediaName(sender, 'status', key.id, ext));
+        const fp = vaultPath(vaultMediaName(bestSender, 'status', key.id, ext));
         const stream = await downloadContentFromMessage(node, type);
         const writeStream = fs.createWriteStream(fp);
         await pipeline(stream, writeStream);
 
         // Forward to owner DM
-        const caption = `🌒 *status captured* · ${type}\nfrom @${sender.split('@')[0]}`;
+        const caption = `🌒 *status captured* · ${type}\nfrom @${digitsOf(bestSender)}`;
 
-        const sendOpts = { caption, mentions: [sender] };
+        const sendOpts = { caption, mentions: [bestSender] };
 
         if (type === 'image') {
             await sock.sendMessage(ownerJid(), { image: { url: fp }, ...sendOpts });

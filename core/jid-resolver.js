@@ -14,6 +14,57 @@ const DEBUG = process.env.WRAITH_DEBUG === '1';
 statePath();
 
 // ─────────────────────────────────────────────
+//  LID ↔ PN Cache
+// ─────────────────────────────────────────────
+const LID_TO_PN_CACHE = new Map();
+
+export function cacheLidPnMapping(lid, pn) {
+    if (!lid || !pn) return;
+    const cleanLid = stripDevice(lid);
+    const cleanPn = stripDevice(pn);
+    if (cleanLid.endsWith('@lid') && cleanPn.endsWith('@s.whatsapp.net')) {
+        LID_TO_PN_CACHE.set(cleanLid, cleanPn);
+    }
+}
+
+export function getCachedPnForLid(lid) {
+    if (!lid) return null;
+    const cleanLid = stripDevice(lid);
+    return LID_TO_PN_CACHE.get(cleanLid) || null;
+}
+
+export function getBestUserJidSync(jid) {
+    if (!jid || typeof jid !== 'string') return jid;
+    const clean = stripDevice(jid);
+    if (clean.endsWith('@lid')) {
+        const cachedPn = getCachedPnForLid(clean);
+        if (cachedPn) return cachedPn;
+    }
+    return clean;
+}
+
+export async function getBestUserJid(jid, sock = null, groupJid = null) {
+    if (!jid || typeof jid !== 'string') return jid;
+    const clean = stripDevice(jid);
+    if (!clean.endsWith('@lid')) return clean;
+
+    const cachedPn = getCachedPnForLid(clean);
+    if (cachedPn) return cachedPn;
+
+    if (sock) {
+        try {
+            const res = await resolveLidToPn(sock, clean, groupJid);
+            if (res?.pn) {
+                cacheLidPnMapping(clean, res.pn);
+                return res.pn;
+            }
+        } catch {}
+    }
+
+    return clean;
+}
+
+// ─────────────────────────────────────────────
 //  Helpers
 // ─────────────────────────────────────────────
 export function stripDevice(jid) {
@@ -185,12 +236,24 @@ export async function resolvePnToLid(sock, pnJid) {
 
 export async function resolveLidToPn(sock, lidJid, groupJid = null) {
     const clean = stripDevice(lidJid);
+    const cached = getCachedPnForLid(clean);
+    if (cached) return { pn: cached, source: 'LID_TO_PN_CACHE' };
+
     try {
         const pn = await sock.signalRepository?.lidMapping?.getPNForLID?.(clean);
-        if (pn) return { pn, source: 'lidMapping.getPNForLID' };
+        if (pn) {
+            cacheLidPnMapping(clean, pn);
+            return { pn, source: 'lidMapping.getPNForLID' };
+        }
     } catch {}
     if (typeof sock.getPNForLID === 'function') {
-        try { const pn = await sock.getPNForLID(clean); if (pn) return { pn, source: 'sock.getPNForLID' }; } catch {}
+        try {
+            const pn = await sock.getPNForLID(clean);
+            if (pn) {
+                cacheLidPnMapping(clean, pn);
+                return { pn, source: 'sock.getPNForLID' };
+            }
+        } catch {}
     }
     if (groupJid) {
         try {
@@ -199,8 +262,11 @@ export async function resolveLidToPn(sock, lidJid, groupJid = null) {
                 const pId = stripDevice(p.id || '');
                 const pLid = stripDevice(p.lid || '');
                 if (pId === clean || pLid === clean) {
-                    const pn = p.phoneNumber || p.pn || null;
-                    if (pn) return { pn, source: 'groupMetadata.participant.phoneNumber' };
+                    const pn = p.phoneNumber || p.pn || (jidType(pId) === 'pn' ? pId : null);
+                    if (pn) {
+                        cacheLidPnMapping(pLid || clean, pn);
+                        return { pn, source: 'groupMetadata.participant.phoneNumber' };
+                    }
                 }
             }
         } catch {}
@@ -273,14 +339,30 @@ export function resolveFromMessageKey(key) {
     if (key.participant) {
         const p = stripDevice(key.participant);
         const alt = stripDevice(key.participantAlt || '');
-        if (jidType(p) === 'lid') return { lid: p, pn: jidType(alt) === 'pn' ? alt : null, source: 'participant' };
-        if (jidType(p) === 'pn') return { pn: p, lid: jidType(alt) === 'lid' ? alt : null, source: 'participant' };
+        if (jidType(p) === 'lid') {
+            const pn = jidType(alt) === 'pn' ? alt : null;
+            if (pn) cacheLidPnMapping(p, pn);
+            return { lid: p, pn, source: 'participant' };
+        }
+        if (jidType(p) === 'pn') {
+            const lid = jidType(alt) === 'lid' ? alt : null;
+            if (lid) cacheLidPnMapping(lid, p);
+            return { pn: p, lid, source: 'participant' };
+        }
     }
     if (key.remoteJid) {
         const r = stripDevice(key.remoteJid);
         const alt = stripDevice(key.remoteJidAlt || '');
-        if (jidType(r) === 'lid') return { lid: r, pn: jidType(alt) === 'pn' ? alt : null, source: 'remoteJid' };
-        if (jidType(r) === 'pn') return { pn: r, lid: jidType(alt) === 'lid' ? alt : null, source: 'remoteJid' };
+        if (jidType(r) === 'lid') {
+            const pn = jidType(alt) === 'pn' ? alt : null;
+            if (pn) cacheLidPnMapping(r, pn);
+            return { lid: r, pn, source: 'remoteJid' };
+        }
+        if (jidType(r) === 'pn') {
+            const lid = jidType(alt) === 'lid' ? alt : null;
+            if (lid) cacheLidPnMapping(lid, r);
+            return { pn: r, lid, source: 'remoteJid' };
+        }
         if (jidType(r) === 'group' || jidType(r) === 'newsletter') return { pn: null, lid: null, source: 'group', groupJid: r };
     }
     return { pn: null, lid: null, source: null };

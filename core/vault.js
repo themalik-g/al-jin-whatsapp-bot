@@ -2,6 +2,7 @@ import fs from 'fs';
 import path from 'path';
 import { CONFIG } from '../config.js';
 import { vaultPathRoot } from './paths.js';
+import { getBestUserJidSync } from './jid-resolver.js';
 
 const VAULT = vaultPathRoot();
 
@@ -14,8 +15,9 @@ const MAX_MB = typeof CONFIG.vaultMaxMB === 'number' && CONFIG.vaultMaxMB > 0
 const SWEEP_MS = 60 * 1000;
 
 export function vaultMediaName(senderJid, category = 'chat', msgId = '', ext = 'bin') {
-    const rawDigits = (senderJid || '').split(':')[0].split('@')[0].replace(/\D/g, '');
-    const cleanPrefix = rawDigits || (senderJid || 'unknown').split('@')[0].replace(/[^a-zA-Z0-9]/g, '');
+    const bestJid = getBestUserJidSync(senderJid);
+    const rawDigits = (bestJid || '').split(':')[0].split('@')[0].replace(/\D/g, '');
+    const cleanPrefix = rawDigits || (bestJid || 'unknown').split('@')[0].replace(/[^a-zA-Z0-9]/g, '');
     const cleanId = String(msgId || Date.now()).replace(/[^a-zA-Z0-9_-]/g, '');
     const cleanExt = String(ext).replace(/^\./, '');
     return `${cleanPrefix}_${category}_${cleanId}.${cleanExt}`;
@@ -75,4 +77,4 @@ export function dropFromVault(fp) {
 // unlink media that is actively being sent.
 setInterval(() => {
     if (vaultSizeMB() > MAX_MB) purgeVault(5 * 60 * 1000);
-}, SWEEP_MS);
+}, SWEEP_MS).unref?.();
