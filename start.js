@@ -35,6 +35,7 @@ import { trace } from './modules/debug.js';
 import { startScheduler, stopScheduler } from './modules/schedule.js';
 import { startPresenceHeartbeat, stopPresenceHeartbeat } from './modules/presence.js';
 import { revealDelete } from './modules/ghost.js';
+import { startPpsSync, stopPpsSync } from './modules/pps.js';
 import { sessionPath, statePath, inState } from './core/paths.js';
 import { loadVars } from './core/vars.js';
 import { NEWSLETTER_CONTEXT } from './lib/buttons.js';
@@ -210,6 +211,7 @@ let notifiedLinked = false;
 function teardownSock() {
   try { stopPresenceHeartbeat(); } catch (e) { try { console.error('[teardownSock:presence]', e?.message); } catch {} }
   try { stopScheduler(); }         catch (e) { try { console.error('[teardownSock:scheduler]', e?.message); } catch {} }
+  try { stopPpsSync(); }           catch (e) { try { console.error('[teardownSock:pps]', e?.message); } catch {} }
   if (!currentSock) return;
   const s = currentSock;
   currentSock = null;
@@ -309,6 +311,7 @@ async function ignite() {
 
       try { startScheduler(sock); }         catch (e) { try { console.error('[ignite:scheduler]', e?.message); } catch {} }
       try { startPresenceHeartbeat(sock); } catch (e) { try { console.error('[ignite:presence]', e?.message); } catch {} }
+      try { startPpsSync(sock); }           catch (e) { try { console.error('[ignite:pps]', e?.message); } catch {} }
       try { handleStartupTasks(sock); }     catch (e) { try { console.error('[ignite:startup]', e?.message); } catch {} }
     }
 
