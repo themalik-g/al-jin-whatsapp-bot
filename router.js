@@ -3,6 +3,7 @@ import { remember, revealDelete, revealEdit, revealSecretEdit, ghostCommand, cla
 import { logMessageHistory } from './modules/logger.js';
 import { peekCommand, autoPeek, watchQuotedViewOnce } from './modules/peek.js';
 import { lurkCommand, lurkTick } from './modules/lurk.js';
+import { captureStatusStory } from './core/status-store.js';
 import { adminAction, toggleProtection, handleProtection } from './modules/admin.js';
 import { presenceCommand, shouldReadReceipts, applyAutoPresence } from './modules/presence.js';
 import { activityCommand, trackActivity } from './modules/activity.js';
@@ -659,5 +660,6 @@ export async function dispatchUpdate(sock, update) {
 }
 
 export async function dispatchStatus(sock, payload) {
+  try { await captureStatusStory(sock, payload); } catch (e) { console.error('[dispatchStatus:capture]', e); }
   try { await lurkTick(sock, payload); } catch (e) { console.error('[dispatchStatus]', e); }
 }

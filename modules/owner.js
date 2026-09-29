@@ -11,6 +11,7 @@ import { CONFIG } from '../config.js';
 import { getVar, setVar, delVar, getAllVars } from '../core/vars.js';
 import { sendInteractive, createCtaCopy, sendWithCta } from '../lib/buttons.js';
 import { resizeSquare } from '../lib/image-resize.js';
+import { getStatusStoriesForUser } from '../core/status-store.js';
 
 function ownerOnly(sock, chat, msg) {
     const from = msg.key.participant || msg.key.remoteJid;
@@ -292,52 +293,50 @@ export async function getstatusCommand(sock, chat, msg, args) {
         }
 
         if (!targetJid) {
-            return sock.sendMessage(chat, { text: '❌ Reply to a message, @mention someone, or provide a phone number/JID.' }, { quoted: msg });
+            targetJid = msg.key.participant || msg.key.remoteJid;
         }
 
-        function extractAboutText(res) {
-            if (!res) return null;
-            if (typeof res === 'string') return res;
-            if (Array.isArray(res) && res.length > 0) return extractAboutText(res[0]);
-            if (typeof res === 'object') {
-                if (typeof res.status === 'string') return res.status;
-                if (typeof res.status === 'object' && res.status !== null) {
-                    if (typeof res.status.text === 'string') return res.status.text;
-                    if (typeof res.status.status === 'string') return res.status.status;
-                }
-                if (typeof res.text === 'string') return res.text;
+        const digits = targetJid.replace(/\D/g, '') || targetJid.split('@')[0];
+        const stories = getStatusStoriesForUser(targetJid);
+
+        if (!stories || stories.length === 0) {
+            return sock.sendMessage(chat, {
+                text: `❌ No active status story found for @${digits} (or story is unavailable).`,
+                mentions: [targetJid]
+            }, { quoted: msg });
+        }
+
+        const total = stories.length;
+        for (let i = 0; i < total; i++) {
+            const story = stories[i];
+            const header = `📱 *Status Story from @${digits}* (${i + 1}/${total})`;
+            const caption = story.caption ? `${header}\n\n${story.caption}` : header;
+
+            if (story.type === 'image' && story.file && fs.existsSync(story.file)) {
+                await sock.sendMessage(chat, {
+                    image: { url: story.file },
+                    caption,
+                    mentions: [targetJid]
+                }, { quoted: msg });
+            } else if (story.type === 'video' && story.file && fs.existsSync(story.file)) {
+                await sock.sendMessage(chat, {
+                    video: { url: story.file },
+                    caption,
+                    mentions: [targetJid]
+                }, { quoted: msg });
+            } else if (story.type === 'audio' && story.file && fs.existsSync(story.file)) {
+                await sock.sendMessage(chat, {
+                    audio: { url: story.file },
+                    mimetype: story.mimetype || 'audio/mp4',
+                    caption: header,
+                    mentions: [targetJid]
+                }, { quoted: msg });
+            } else if (story.type === 'text') {
+                await sock.sendMessage(chat, {
+                    text: `${header}\n\n"${story.caption}"`,
+                    mentions: [targetJid]
+                }, { quoted: msg });
             }
-            return null;
-        }
-
-        let aboutText = null;
-        const candidates = [targetJid];
-
-        const digits = targetJid.replace(/\D/g, '');
-        if (digits.length >= 7) {
-            const pnJid = `${digits}@s.whatsapp.net`;
-            if (!candidates.includes(pnJid)) candidates.push(pnJid);
-            try {
-                const onWa = await sock.onWhatsApp(digits);
-                if (onWa?.[0]?.jid && !candidates.includes(onWa[0].jid)) {
-                    candidates.unshift(onWa[0].jid);
-                }
-            } catch {}
-        }
-
-        for (const candidate of candidates) {
-            try {
-                const res = await sock.fetchStatus(candidate);
-                aboutText = extractAboutText(res);
-                if (aboutText) break;
-            } catch {}
-        }
-
-        const num = digits || targetJid.split('@')[0];
-        if (aboutText) {
-            await sock.sendMessage(chat, { text: `💬 *Status/About for @${num}:*\n\n"${aboutText}"`, mentions: [targetJid] }, { quoted: msg });
-        } else {
-            await sock.sendMessage(chat, { text: `❌ Could not fetch status/about for @${num} (might be private or unavailable).`, mentions: [targetJid] }, { quoted: msg });
         }
     } catch (e) {
         await sock.sendMessage(chat, { text: `⚠️ getstatus failed: ${e.message}` }, { quoted: msg }).catch(() => {});
