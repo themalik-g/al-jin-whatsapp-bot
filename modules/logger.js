@@ -6,6 +6,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { logsPath } from '../core/paths.js';
+import { getBestUserJid } from '../core/jid-resolver.js';
 
 const FLUSH_MS = 2000;
 
@@ -53,18 +54,19 @@ export function flushSync() {
 process.on('SIGINT', flushSync);
 process.on('SIGTERM', flushSync);
 
-function formatIdentity(jid) {
+async function formatIdentity(jid, sock = null, groupJid = null) {
   if (!jid) return 'N/A';
   const clean = String(jid).split(':')[0];
-  const digits = clean.split('@')[0].replace(/\D/g, '');
-  if (clean.endsWith('@s.whatsapp.net')) return digits ? `+${digits}` : clean;
-  if (clean.endsWith('@lid')) return digits ? `+${digits}` : clean;
-  if (clean.endsWith('@g.us')) return digits ? `Group(${digits})` : clean;
+  const bestJid = await getBestUserJid(clean, sock, groupJid);
+  const digits = bestJid.split('@')[0].replace(/\D/g, '');
+  if (bestJid.endsWith('@s.whatsapp.net')) return digits ? `+${digits}` : bestJid;
+  if (bestJid.endsWith('@lid')) return digits ? `+${digits}` : bestJid;
+  if (bestJid.endsWith('@g.us')) return digits ? `Group(${digits})` : bestJid;
   if (digits.length >= 7) return `+${digits}`;
-  return clean;
+  return bestJid;
 }
 
-export function logMessageHistory({
+export async function logMessageHistory({
   sessionId = 'main',
   direction = 'INCOMING',
   chatJid = '',
@@ -74,6 +76,7 @@ export function logMessageHistory({
   mediaPath = null,
   timestamp = null,
   msgId = null,
+  sock = null,
 }) {
   try {
     if (chatJid?.endsWith('@newsletter') || senderJid?.endsWith('@newsletter')) return;
@@ -91,8 +94,9 @@ export function logMessageHistory({
     const logFileName = `messages_${sessionId}_${dateStr}.txt`;
     const logFilePath = path.join(logsPath(), logFileName);
 
-    const formattedSender = formatIdentity(senderJid);
-    const formattedChat = formatIdentity(chatJid);
+    const groupJid = chatJid?.endsWith('@g.us') ? chatJid : null;
+    const formattedSender = await formatIdentity(senderJid, sock, groupJid);
+    const formattedChat = await formatIdentity(chatJid, sock, groupJid);
 
     let logLine = `[${dateStr}, ${hours}:${minutes}:${seconds}] ${formattedSender} -> ${formattedChat}`;
     if (direction) logLine += ` [${direction}]`;

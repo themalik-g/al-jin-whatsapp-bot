@@ -273,7 +273,8 @@ async function ignite() {
           mediaType,
           mediaPath,
           timestamp: Date.now(),
-          msgId: sent.key.id
+          msgId: sent.key.id,
+          sock
         });
       }
     } catch (e) {

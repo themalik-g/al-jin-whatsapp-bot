@@ -347,7 +347,7 @@ export async function dispatch(sock, update, sessionId = 'main') {
         );
         const mediaPath = ledgerRec?.file || null;
         const timestamp = msg.messageTimestamp ? (Number(msg.messageTimestamp) * 1000) : Date.now();
-        logMessageHistory({ sessionId, direction, chatJid: chat, senderJid: sender, messageText: text, mediaType, mediaPath, timestamp, msgId });
+        logMessageHistory({ sessionId, direction, chatJid: chat, senderJid: sender, messageText: text, mediaType, mediaPath, timestamp, msgId, sock });
       } catch (e) { console.error('[router] logMessageHistory', e.message); }
 
       if (chat === 'status@broadcast') continue;

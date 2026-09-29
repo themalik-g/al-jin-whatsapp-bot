@@ -22,7 +22,7 @@ async function runTests() {
   }
 
   // Test 1: Log incoming text message
-  logMessageHistory({
+  await logMessageHistory({
     sessionId: testSession,
     direction: 'INCOMING',
     chatJid: '1234567890@s.whatsapp.net',
@@ -39,7 +39,7 @@ async function runTests() {
   assert.ok(content.includes('Hello WRAITH bot!'), 'Should contain message text');
 
   // Test 2: Log duplicate message ID (should be skipped)
-  logMessageHistory({
+  await logMessageHistory({
     sessionId: testSession,
     direction: 'INCOMING',
     chatJid: '1234567890@s.whatsapp.net',
@@ -53,7 +53,7 @@ async function runTests() {
   assert.strictEqual(lines.length, 1, 'Duplicate msgId should not create extra log lines');
 
   // Test 3: Log outgoing media message with vault location
-  logMessageHistory({
+  await logMessageHistory({
     sessionId: testSession,
     direction: 'OUTGOING',
     chatJid: '1234567890@s.whatsapp.net',

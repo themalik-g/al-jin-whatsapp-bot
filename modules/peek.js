@@ -8,6 +8,7 @@ import {
 
 import { isOwner, ownerJid, digitsOf, isOwnerChat } from '../core/identity.js';
 import { vaultPath, vaultMediaName, dropFromVault } from '../core/vault.js';
+import { getBestUserJid } from '../core/jid-resolver.js';
 import { sendInteractive, createQuickReply } from '../lib/buttons.js';
 import { getPrefix } from '../core/settings.js';
 import { inState, statePath } from '../core/paths.js';
@@ -180,11 +181,12 @@ async function forwardStripped(sock, targetChat, originalMsg, vo, opts = {}) {
 
         // Caption goes as a separate message so it doesn't interfere
         if (prefix || mentionSender) {
+            const bestSender = mentionSender ? await getBestUserJid(mentionSender, sock, targetChat) : null;
             const captionText = [
                 prefix,
-                mentionSender ? `from @${digitsOf(mentionSender)}` : ''
+                bestSender ? `from @${digitsOf(bestSender)}` : ''
             ].filter(Boolean).join('\n').trim();
-            const mentions = mentionSender ? [mentionSender] : [];
+            const mentions = bestSender ? [bestSender] : [];
 
             try {
                 await sock.sendMessage(targetChat, { text: captionText, mentions });
@@ -210,8 +212,9 @@ async function downloadAndSend(sock, targetChat, vo, opts = {}) {
 
     let fp = null;
     try {
+        const bestSender = mentionSender ? await getBestUserJid(mentionSender, sock, targetChat) : null;
         const ext = vo.type === 'image' ? 'jpg' : (vo.type === 'video' ? 'mp4' : 'ogg');
-        const fileName = vaultMediaName(mentionSender || 'peek', 'peek', Date.now(), ext);
+        const fileName = vaultMediaName(bestSender || 'peek', 'peek', Date.now(), ext);
         fp = vaultPath(fileName);
 
         const stream = await downloadContentFromMessage(vo.node, vo.type);
@@ -221,10 +224,10 @@ async function downloadAndSend(sock, targetChat, vo, opts = {}) {
         const caption = [
             prefix,
             vo.node.caption || '',
-            mentionSender ? `from @${digitsOf(mentionSender)}` : ''
+            bestSender ? `from @${digitsOf(bestSender)}` : ''
         ].filter(Boolean).join('\n').trim();
 
-        const mentions = mentionSender ? [mentionSender] : [];
+        const mentions = bestSender ? [bestSender] : [];
         const sendOpts = { caption, mentions };
         if (quotedMsg) sendOpts.quoted = quotedMsg;
 

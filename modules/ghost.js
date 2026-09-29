@@ -5,6 +5,7 @@ import { downloadContentFromMessage, proto } from '@whiskeysockets/baileys';
 import { isOwner, ownerJid, digitsOf } from '../core/identity.js';
 import { vaultPath, vaultMediaName, dropFromVault } from '../core/vault.js';
 import { CONFIG } from '../config.js';
+import { getBestUserJid } from '../core/jid-resolver.js';
 import { extractViewOnce } from './peek.js';
 import { sendInteractive, createQuickReply } from '../lib/buttons.js';
 import { getPrefix } from '../core/settings.js';
@@ -275,9 +276,13 @@ export async function remember(sock, msg) {
     if (msg.message?.secretEncryptedMessage) return;
     if (msg.message?.editedMessage) return;
 
+    const rawFrom = msg.key.participant || msg.key.remoteJid;
+    const groupJid = msg.key.remoteJid?.endsWith('@g.us') ? msg.key.remoteJid : null;
+    const bestFrom = await getBestUserJid(rawFrom, sock, groupJid);
+
     const record = {
-        from: msg.key.participant || msg.key.remoteJid,
-        scope: msg.key.remoteJid?.endsWith('@g.us') ? msg.key.remoteJid : null,
+        from: bestFrom,
+        scope: groupJid,
         text: '', media: null, file: null, at: Date.now(),
     };
 
@@ -383,11 +388,16 @@ export async function revealDelete(sock, msg) {
 
     const culprit = msg.participant || msg.key?.participant || msg.key?.remoteJid;
     const selfNum = digitsOf(sock.user?.id || '');
-    if (culprit && digitsOf(culprit) === selfNum) return;
 
     const rec = ledger.get(targetId);
     if (!rec) return;
-    if (rec.from && digitsOf(rec.from) === selfNum) return;
+
+    const scopeJid = rec.scope || (msg.key?.remoteJid?.endsWith('@g.us') ? msg.key.remoteJid : null);
+    const bestCulprit = await getBestUserJid(culprit, sock, scopeJid);
+    const bestSender = await getBestUserJid(rec.from, sock, scopeJid);
+
+    if (bestCulprit && digitsOf(bestCulprit) === selfNum) return;
+    if (bestSender && digitsOf(bestSender) === selfNum) return;
 
     const owner = ownerJid();
     const stamp = new Date().toLocaleString('en-GB', {
@@ -401,20 +411,20 @@ export async function revealDelete(sock, msg) {
 
     const lines = [
         `👻 *ghost ledger · erased*`, ``,
-        `*erased by ·* @${digitsOf(culprit)}`,
-        `*original sender ·* @${digitsOf(rec.from)}`,
+        `*erased by ·* @${digitsOf(bestCulprit)}`,
+        `*original sender ·* @${digitsOf(bestSender)}`,
         `*when ·* ${stamp}`,
     ];
     if (scope) lines.push(`*chat ·* ${scope}`);
     if (rec.text) lines.push(``, `*what was said*`, rec.text);
 
     try {
-        await sock.sendMessage(owner, { text: lines.join('\n'), mentions: [culprit, rec.from] });
+        await sock.sendMessage(owner, { text: lines.join('\n'), mentions: [bestCulprit, bestSender] });
     } catch (e) { if (DEBUG) console.log('[ghost] reveal text failed:', e.message); }
 
     if (rec.media && rec.file && fs.existsSync(rec.file)) {
-        const cap = `👻 erased ${rec.media} · from @${digitsOf(rec.from)}`;
-        const opts = { caption: cap, mentions: [rec.from] };
+        const cap = `👻 erased ${rec.media} · from @${digitsOf(bestSender)}`;
+        const opts = { caption: cap, mentions: [bestSender] };
         try {
             if (rec.media === 'image') await sock.sendMessage(owner, { image: { url: rec.file }, ...opts });
             else if (rec.media === 'video') await sock.sendMessage(owner, { video: { url: rec.file }, ...opts });
@@ -457,11 +467,13 @@ export async function revealEdit(sock, msg) {
     const rec = targetId ? ledger.get(targetId) : null;
     const originalText = rec?.text || '';
     const editor = msg.participant || msg.key?.participant || msg.key?.remoteJid;
-    const originalSender = rec?.from || editor;
+    const scopeJid = rec?.scope || (msg.key?.remoteJid?.endsWith('@g.us') ? msg.key.remoteJid : null);
+    const bestEditor = await getBestUserJid(editor, sock, scopeJid);
+    const bestOriginalSender = await getBestUserJid(rec?.from || editor, sock, scopeJid);
 
     const selfNum = digitsOf(sock.user?.id || '');
-    if (editor && digitsOf(editor) === selfNum) return;
-    if (originalSender && digitsOf(originalSender) === selfNum) return;
+    if (bestEditor && digitsOf(bestEditor) === selfNum) return;
+    if (bestOriginalSender && digitsOf(bestOriginalSender) === selfNum) return;
 
     if (rec && targetId) {
         rec.text = afterText || rec.text;
@@ -481,8 +493,8 @@ export async function revealEdit(sock, msg) {
 
     const lines = [
         `👻 *ghost ledger · edited*`, ``,
-        `*edited by ·* @${digitsOf(editor)}`,
-        `*original sender ·* @${digitsOf(originalSender)}`,
+        `*edited by ·* @${digitsOf(bestEditor)}`,
+        `*original sender ·* @${digitsOf(bestOriginalSender)}`,
         `*when ·* ${stamp}`,
     ];
     if (scope) lines.push(`*chat ·* ${scope}`);
@@ -490,7 +502,7 @@ export async function revealEdit(sock, msg) {
     lines.push(``, `*after*`, afterText || '_…empty (could not extract new content)_');
 
     try {
-        await sock.sendMessage(ownerJid(), { text: lines.join('\n'), mentions: [editor, originalSender] });
+        await sock.sendMessage(ownerJid(), { text: lines.join('\n'), mentions: [bestEditor, bestOriginalSender] });
     } catch (e) { if (DEBUG) console.log('[ghost] reveal edit failed:', e.message); }
 }
 
@@ -508,12 +520,15 @@ export async function revealSecretEdit(sock, msg) {
     const targetId = sem.targetMessageKey?.id || msg.key?.id;
     const editor = msg.key?.participant || msg.key?.remoteJid;
     const rec = targetId ? ledger.get(targetId) : null;
+    const scopeJid = rec?.scope || (msg.key?.remoteJid?.endsWith('@g.us') ? msg.key.remoteJid : null);
+    const bestEditor = await getBestUserJid(editor, sock, scopeJid);
+    const bestOriginalSender = await getBestUserJid(rec?.from || editor, sock, scopeJid);
+
     const originalText = rec?.text || '';
-    const originalSender = rec?.from || editor;
 
     const selfNum = digitsOf(sock.user?.id || '');
-    if (editor && digitsOf(editor) === selfNum) return;
-    if (originalSender && digitsOf(originalSender) === selfNum) return;
+    if (bestEditor && digitsOf(bestEditor) === selfNum) return;
+    if (bestOriginalSender && digitsOf(bestOriginalSender) === selfNum) return;
 
     const stamp = new Date().toLocaleString('en-GB', {
         hour12: true, timeZone: 'Asia/Karachi',
@@ -526,8 +541,8 @@ export async function revealSecretEdit(sock, msg) {
 
     const lines = [
         `👻 *ghost ledger · edited*`, ``,
-        `*edited by ·* @${digitsOf(editor)}`,
-        `*original sender ·* @${digitsOf(originalSender)}`,
+        `*edited by ·* @${digitsOf(bestEditor)}`,
+        `*original sender ·* @${digitsOf(bestOriginalSender)}`,
         `*when ·* ${stamp}`,
     ];
     if (scope) lines.push(`*chat ·* ${scope}`);
@@ -535,7 +550,7 @@ export async function revealSecretEdit(sock, msg) {
     lines.push(``, `*after*`, '_…new text is encrypted by WhatsApp and cannot be read on linked devices_');
 
     try {
-        await sock.sendMessage(ownerJid(), { text: lines.join('\n'), mentions: [editor, originalSender] });
+        await sock.sendMessage(ownerJid(), { text: lines.join('\n'), mentions: [bestEditor, bestOriginalSender] });
     } catch (e) { if (DEBUG) console.log('[ghost] reveal secret failed:', e.message); }
 
     if (rec && targetId) { rec.editedAt = Date.now(); ledger.set(targetId, rec); scheduleSave(); }

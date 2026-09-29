@@ -3,7 +3,7 @@
 // .forward <custom text / JID> — Forwards text, quoted media, or quoted message to specified recipient JID/LID/phone
 // ─────────────────────────────────────────────
 import fs from 'fs';
-import { resolveJid } from '../core/jid-resolver.js';
+import { resolveJid, getBestUserJid } from '../core/jid-resolver.js';
 import { sendWithCta } from '../lib/buttons.js';
 import { vaultPath, vaultMediaName, dropFromVault } from '../core/vault.js';
 import { downloadContentFromMessage } from '@whiskeysockets/baileys';
@@ -28,6 +28,11 @@ export async function forwardCommand(sock, chat, msg, args) {
   let customText = tokens.length > 1 ? tokens.slice(0, -1).join(' ') : '';
 
   let targetJid = resolveJid(targetRaw, sock);
+
+  if (targetJid && targetJid.endsWith('@lid')) {
+    const best = await getBestUserJid(targetJid, sock);
+    if (best) targetJid = best;
+  }
 
   if (!targetJid || (!targetJid.endsWith('@s.whatsapp.net') && !targetJid.endsWith('@g.us') && !targetJid.endsWith('@lid'))) {
     // If last token was not a valid target, maybe whole input is target
