@@ -282,7 +282,7 @@ export async function getstatusCommand(sock, chat, msg, args) {
         let targetJid = ctx?.participant || (Array.isArray(ctx?.mentionedJid) && ctx.mentionedJid[0]);
 
         if (!targetJid && args?.[0]) {
-            const raw = args[0].trim();
+            const raw = args.join(' ').trim();
             if (raw.endsWith('@s.whatsapp.net') || raw.endsWith('@lid')) {
                 targetJid = raw;
             } else {
@@ -295,16 +295,45 @@ export async function getstatusCommand(sock, chat, msg, args) {
             return sock.sendMessage(chat, { text: '❌ Reply to a message, @mention someone, or provide a phone number/JID.' }, { quoted: msg });
         }
 
-        let aboutText = null;
-        try {
-            const res = await sock.fetchStatus(targetJid);
-            if (res) {
-                if (typeof res === 'string') aboutText = res;
-                else if (res.status) aboutText = res.status;
+        function extractAboutText(res) {
+            if (!res) return null;
+            if (typeof res === 'string') return res;
+            if (Array.isArray(res) && res.length > 0) return extractAboutText(res[0]);
+            if (typeof res === 'object') {
+                if (typeof res.status === 'string') return res.status;
+                if (typeof res.status === 'object' && res.status !== null) {
+                    if (typeof res.status.text === 'string') return res.status.text;
+                    if (typeof res.status.status === 'string') return res.status.status;
+                }
+                if (typeof res.text === 'string') return res.text;
             }
-        } catch {}
+            return null;
+        }
 
-        const num = targetJid.split('@')[0];
+        let aboutText = null;
+        const candidates = [targetJid];
+
+        const digits = targetJid.replace(/\D/g, '');
+        if (digits.length >= 7) {
+            const pnJid = `${digits}@s.whatsapp.net`;
+            if (!candidates.includes(pnJid)) candidates.push(pnJid);
+            try {
+                const onWa = await sock.onWhatsApp(digits);
+                if (onWa?.[0]?.jid && !candidates.includes(onWa[0].jid)) {
+                    candidates.unshift(onWa[0].jid);
+                }
+            } catch {}
+        }
+
+        for (const candidate of candidates) {
+            try {
+                const res = await sock.fetchStatus(candidate);
+                aboutText = extractAboutText(res);
+                if (aboutText) break;
+            } catch {}
+        }
+
+        const num = digits || targetJid.split('@')[0];
         if (aboutText) {
             await sock.sendMessage(chat, { text: `💬 *Status/About for @${num}:*\n\n"${aboutText}"`, mentions: [targetJid] }, { quoted: msg });
         } else {
