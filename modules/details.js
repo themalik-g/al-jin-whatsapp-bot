@@ -785,6 +785,51 @@ const BASE_COMMAND_DETAILS = {
       'Reply to text or media with .forward <custom caption> <JID / Phone>',
     ],
   },
+  noaction: {
+    title: '🛡️ NoAction Command',
+    description: 'Keeps specified users protected in groups. Automatically re-promotes demoted members and re-adds/promotes kicked members.',
+    usage: ['.noaction @user', '.noaction @user all', '.noaction off @user', '.noaction list'],
+  },
+  statusalert: {
+    title: '📣 Status Alert Command',
+    description: 'Sends live alerts and forwards posted media whenever specified contacts publish a status story.',
+    usage: ['.statusalert <number>', '.statusalert off <number>', '.statusalert list'],
+  },
+  watch: {
+    title: '👀 Profile Watch Command',
+    description: 'Monitors specified contacts and sends alerts when they change their profile picture, About, or display name.',
+    usage: ['.watch <number>', '.watch off <number>', '.watch list'],
+  },
+  ginfo: {
+    title: '🔎 Group Info Command',
+    description: 'Inspects detailed WhatsApp group metadata from an invite link without joining.',
+    usage: ['.ginfo <chat.whatsapp.com/link>'],
+  },
+  sticker: {
+    title: '🎨 Sticker Command',
+    description: 'Converts images, videos, or GIFs into WebP WhatsApp stickers.',
+    usage: ['.sticker', '.s (reply to media)'],
+  },
+  toimg: {
+    title: '🖼️ ToImage Command',
+    description: 'Converts a quoted WebP sticker into a JPEG image or MP4 video.',
+    usage: ['.toimg', '.tovid (reply to sticker)'],
+  },
+  fancy: {
+    title: '✨ Fancy Text Command',
+    description: 'Converts text into styled Unicode fonts.',
+    usage: ['.fancy <text>', '.fancy 4 <text>'],
+  },
+  dice: {
+    title: '🎲 Dice Command',
+    description: 'Rolls virtual dice with standard RPG or custom specifications.',
+    usage: ['.dice', '.dice 2d6', '.dice 3d8+2'],
+  },
+  coin: {
+    title: '🪙 Coin Flip Command',
+    description: 'Flips one or multiple virtual coins.',
+    usage: ['.coin', '.coin 10'],
+  },
 };
 
 // Map Command Aliases so .details works for all synonym command names
@@ -792,6 +837,8 @@ const COMMAND_DETAILS = {
   ...BASE_COMMAND_DETAILS,
   // Aliases
   menu: BASE_COMMAND_DETAILS.help,
+  s: BASE_COMMAND_DETAILS.sticker,
+  tovid: BASE_COMMAND_DETAILS.toimg,
   repo: BASE_COMMAND_DETAILS.script,
   relocation: BASE_COMMAND_DETAILS.reqlocation,
   tinyurl: BASE_COMMAND_DETAILS.shorten,

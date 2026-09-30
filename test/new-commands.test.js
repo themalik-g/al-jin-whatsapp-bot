@@ -77,3 +77,31 @@ test('VCard format test', () => {
   assert.ok(vcard.includes('BEGIN:VCARD'));
   assert.ok(vcard.includes('waid=923257853673'));
 });
+
+test('Fun commands (fancy, dice, coin) test', async () => {
+  const { fancyCommand, diceCommand, coinCommand } = await import('../modules/fun.js');
+
+  let sentMessage = null;
+  const mockSock = {
+    sendMessage: async (chat, content) => {
+      sentMessage = content.text;
+    },
+  };
+  const mockMsg = { key: { remoteJid: '123@s.whatsapp.net' } };
+
+  // Test fancyCommand
+  await fancyCommand(mockSock, '123@s.whatsapp.net', mockMsg, ['hello']);
+  assert.ok(sentMessage.includes('✨ *fancy*'));
+  assert.ok(sentMessage.includes('1. 𝐡𝐞𝐥𝐥𝐨'));
+
+  await fancyCommand(mockSock, '123@s.whatsapp.net', mockMsg, ['1', 'hello']);
+  assert.ok(!sentMessage.includes('✨ *fancy*')); // single line result
+
+  // Test diceCommand
+  await diceCommand(mockSock, '123@s.whatsapp.net', mockMsg, ['2d6+1']);
+  assert.ok(sentMessage.includes('🎲 *2d6+1*'));
+
+  // Test coinCommand
+  await coinCommand(mockSock, '123@s.whatsapp.net', mockMsg, ['5']);
+  assert.ok(sentMessage.includes('🪙 *5 flips*'));
+});
