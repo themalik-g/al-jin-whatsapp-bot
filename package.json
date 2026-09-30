@@ -25,6 +25,7 @@
     "ffmpeg-static": "^5.2.0",
     "ffprobe-static": "^3.1.0",
     "file-type": "^19.6.0",
+    "jimp": "^1.6.1",
     "mumaker": "^2.0.0",
     "p-queue": "^9.0.0",
     "pino": "^9.0.0",
