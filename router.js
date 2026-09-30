@@ -79,6 +79,36 @@ const web2imgCommand     = lazy('./modules/network-tools.js', 'web2imgCommand');
 const tempmailCommand    = lazy('./modules/network-tools.js', 'tempmailCommand');
 const readmailCommand    = lazy('./modules/network-tools.js', 'readmailCommand');
 const whatanimeCommand   = lazy('./modules/network-tools.js', 'whatanimeCommand');
+const githubdiffCommand  = lazy('./modules/network-tools.js', 'githubdiffCommand');
+const urbanCommand       = lazy('./modules/network-tools.js', 'urbanCommand');
+
+const waveformCommand    = lazy('./modules/media-tools.js', 'waveformCommand');
+const audio8dCommand     = lazy('./modules/media-tools.js', 'audio8dCommand');
+const bassboostCommand   = lazy('./modules/media-tools.js', 'bassboostCommand');
+const robotCommand       = lazy('./modules/media-tools.js', 'robotCommand');
+const vocalCommand       = lazy('./modules/media-tools.js', 'vocalCommand');
+const enhanceCommand     = lazy('./modules/media-tools.js', 'enhanceCommand');
+
+const channelinfoCommand = lazy('./modules/utility.js', 'channelinfoCommand');
+const unitCommand        = lazy('./modules/utility.js', 'unitCommand');
+const commandcountCommand = lazy('./modules/utility.js', 'commandcountCommand');
+
+const memeCommand        = lazy('./modules/media.js', 'memeCommand');
+
+const gcloneCommand      = lazy('./modules/group.js', 'gcloneCommand');
+const revokeCommand      = lazy('./modules/group.js', 'revokeCommand');
+const gshieldCommand     = lazy('./modules/group.js', 'gshieldCommand');
+const fakereplyCommand   = lazy('./modules/group.js', 'fakereplyCommand');
+const antipromoteCommand = lazy('./modules/group.js', 'antipromoteCommand');
+const antidemoteCommand  = lazy('./modules/group.js', 'antidemoteCommand');
+const purgeCommand       = lazy('./modules/group.js', 'purgeCommand');
+const antibotCommand     = lazy('./modules/group.js', 'antibotCommand');
+const warnCommand        = lazy('./modules/group.js', 'warnCommand');
+const warnsCommand       = lazy('./modules/group.js', 'warnsCommand');
+const resetwarnsCommand  = lazy('./modules/group.js', 'resetwarnsCommand');
+
+const privacyCommand     = lazy('./modules/owner.js', 'privacyCommand');
+const stealfullCommand   = lazy('./modules/owner.js', 'stealfullCommand');
 
 const currencyCommand = lazy('./modules/utility.js', 'currencyCommand');
 const qrCommand       = lazy('./modules/utility.js', 'qrCommand');
@@ -433,6 +463,9 @@ export async function dispatch(sock, update, sessionId = 'main') {
         'exifwipe', 'sanitize', 'trim', 'tomp3', 'vn', 'compress', 'extracompress',
         'ocr', 'readtext', 'barcode', 'vcard', 'tts',
         'speedtest', 'npm', 'unroll', 'web2img', 'webss', 'tempmail', 'readmail', 'whatanime',
+        'githubdiff', 'urban', 'slang', 'gali', 'waveform', '8d', 'bassboost', 'robot', 'vocal', 'hd', 'enhance',
+        'channelinfo', 'unit', 'commandcount', 'meme', 'gclone', 'revoke', 'gshield', 'fakereply',
+        'antipromote', 'antidemote', 'purge', 'antibot', 'warn', 'warns', 'resetwarns', 'privacy', 'stealfull',
       ]);
 
       if (KNOWN.has(verb)) {
@@ -528,6 +561,34 @@ export async function dispatch(sock, update, sessionId = 'main') {
           case 'tempmail': await tempmailCommand(csock, chat, msg, rest); break;
           case 'readmail': await readmailCommand(csock, chat, msg, rest); break;
           case 'whatanime': await whatanimeCommand(csock, chat, msg); break;
+          case 'githubdiff': await githubdiffCommand(csock, chat, msg, rest); break;
+          case 'urban':
+          case 'slang':
+          case 'gali': await urbanCommand(csock, chat, msg, rest); break;
+          case 'waveform': await waveformCommand(csock, chat, msg); break;
+          case '8d': await audio8dCommand(csock, chat, msg); break;
+          case 'bassboost': await bassboostCommand(csock, chat, msg, rest); break;
+          case 'robot': await robotCommand(csock, chat, msg); break;
+          case 'vocal': await vocalCommand(csock, chat, msg); break;
+          case 'hd':
+          case 'enhance': await enhanceCommand(csock, chat, msg); break;
+          case 'channelinfo': await channelinfoCommand(csock, chat, msg, rest); break;
+          case 'unit': await unitCommand(csock, chat, msg, rest); break;
+          case 'commandcount': await commandcountCommand(csock, chat, msg); break;
+          case 'meme': await memeCommand(csock, chat, msg, rest); break;
+          case 'gclone': await gcloneCommand(csock, chat, msg, rest); break;
+          case 'revoke': await revokeCommand(csock, chat, msg); break;
+          case 'gshield': await gshieldCommand(csock, chat, msg, rest); break;
+          case 'fakereply': await fakereplyCommand(csock, chat, msg, rest); break;
+          case 'antipromote': await antipromoteCommand(csock, chat, msg, rest); break;
+          case 'antidemote': await antidemoteCommand(csock, chat, msg, rest); break;
+          case 'purge': await purgeCommand(csock, chat, msg, rest); break;
+          case 'antibot': await antibotCommand(csock, chat, msg, rest); break;
+          case 'warn': await warnCommand(csock, chat, msg, rest); break;
+          case 'warns': await warnsCommand(csock, chat, msg, rest); break;
+          case 'resetwarns': await resetwarnsCommand(csock, chat, msg, rest); break;
+          case 'privacy': await privacyCommand(csock, chat, msg, rest); break;
+          case 'stealfull': await stealfullCommand(csock, chat, msg, rest); break;
           case 'help':
           case 'menu': await helpCommand(csock, chat, msg, rest); break;
           case 'islamic':

@@ -4,7 +4,8 @@
 // Wired in start.js → 'group-participants.update'
 // ─────────────────────────────────────────────
 import { getPrefix } from '../core/settings.js';
-import { getWelcomeConfig, getPddConfig } from '../modules/group.js';
+import { getWelcomeConfig, getPddConfig, getProtRolesConfig } from '../modules/group.js';
+import { isOwner } from '../core/identity.js';
 
 function mentionText(participants) {
   return participants
@@ -22,6 +23,26 @@ export function handleGroupParticipantUpdate(sock, update) {
 
     const welcomeCfg = getWelcomeConfig()[chat];
     const pddCfg = getPddConfig()[chat];
+    const protRolesCfg = getProtRolesConfig()[chat];
+    const authorJid = update?.author;
+    const authorIsOwner = authorJid ? (authorJid.includes(sock.user?.id?.split(':')[0]) || isOwner(authorJid)) : false;
+
+    // Handle Anti-Promote & Anti-Demote
+    if (protRolesCfg?.antipromote && action === 'promote' && !authorIsOwner) {
+      sock.sendMessage(chat, {
+        text: `🛡️ *Anti-Promote Triggered!* Reverting unauthorized promotion by @${authorJid ? authorJid.split('@')[0] : 'unknown'}...`,
+        mentions: authorJid ? [authorJid] : []
+      }).catch(() => {});
+      sock.groupParticipantsUpdate(chat, participants, 'demote').catch(() => {});
+    }
+
+    if (protRolesCfg?.antidemote && action === 'demote' && !authorIsOwner) {
+      sock.sendMessage(chat, {
+        text: `🛡️ *Anti-Demote Triggered!* Reverting unauthorized demotion by @${authorJid ? authorJid.split('@')[0] : 'unknown'}...`,
+        mentions: authorJid ? [authorJid] : []
+      }).catch(() => {});
+      sock.groupParticipantsUpdate(chat, participants, 'promote').catch(() => {});
+    }
 
     // Handle PDD (Promote/Demote Detection)
     if (pddCfg?.enabled) {

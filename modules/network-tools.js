@@ -200,15 +200,27 @@ export async function web2imgCommand(sock, chat, msg, args) {
   }
 }
 
-// ── .tempmail & .readmail [address] ─────────────────────────────────────────
+// ── .tempmail & .readmail ───────────────────────────────────────────────────
+let activeTempMailSession = null;
+
 export async function tempmailCommand(sock, chat, msg, args) {
   try {
-    const res = await fetch('https://www.1secmail.com/api/v1/?action=genRandomMailbox&count=1');
-    if (!res.ok) throw new Error('1secmail API error');
-    const [mail] = await res.json();
+    const res = await fetch('https://api.guerrillamail.com/ajax.php?f=get_email_address');
+    if (!res.ok) throw new Error(`Guerrilla Mail API status ${res.status}`);
+    const data = await res.json();
+
+    if (!data?.email_addr || !data?.sid_token) {
+      throw new Error('Invalid response from Guerrilla Mail server');
+    }
+
+    activeTempMailSession = {
+      email: data.email_addr,
+      sid_token: data.sid_token,
+      created: Date.now()
+    };
 
     await sock.sendMessage(chat, {
-      text: `📧 *Temporary Email Generated*\n\n\`${mail}\`\n\nTo check inbox for this address:\n\`.readmail ${mail}\`\n\nProvided by 𝗪𝗥𝗔𝗜𝗧🇭`,
+      text: `📧 *Temporary Email Generated (Guerrilla Mail)*\n\n\`${data.email_addr}\`\n\nTo check inbox:\n\`.readmail\` (or \`.readmail ${data.sid_token}\`)\n\nProvided by 𝗪𝗥𝗔𝗜𝗧🇭`,
     }, { quoted: msg });
   } catch (e) {
     await sock.sendMessage(chat, { text: `⚠️ tempmail failed: ${e.message}` }, { quoted: msg }).catch(() => {});
@@ -217,36 +229,33 @@ export async function tempmailCommand(sock, chat, msg, args) {
 
 export async function readmailCommand(sock, chat, msg, args) {
   try {
-    const fullAddr = (args || []).join(' ').trim();
-    if (!fullAddr || !fullAddr.includes('@')) {
-      return sock.sendMessage(chat, { text: '📧 *readmail*\n\nUsage: `.readmail <address@1secmail.com>`' }, { quoted: msg });
+    let sidToken = (args || []).join(' ').trim();
+    if (!sidToken && activeTempMailSession?.sid_token) {
+      sidToken = activeTempMailSession.sid_token;
     }
 
-    const [login, domain] = fullAddr.split('@');
-    const listRes = await fetch(`https://www.1secmail.com/api/v1/?action=getMessages&login=${login}&domain=${domain}`);
-    if (!listRes.ok) throw new Error('Failed to fetch messages');
-    const messages = await listRes.json();
-
-    if (!messages || !messages.length) {
-      return sock.sendMessage(chat, { text: `📬 Inbox is empty for *${fullAddr}*.` }, { quoted: msg });
+    if (!sidToken) {
+      return sock.sendMessage(chat, { text: '📧 *readmail*\n\nUsage: `.readmail` (checks active address) or `.readmail <session_id>`' }, { quoted: msg });
     }
 
-    // Read details of top 3 messages
-    const lines = [`📬 *Inbox for ${fullAddr}* (${messages.length} message(s))`, ''];
+    const listRes = await fetch(`https://api.guerrillamail.com/ajax.php?f=get_email_list&offset=0&sid_token=${encodeURIComponent(sidToken)}`);
+    if (!listRes.ok) throw new Error('Failed to connect to Guerrilla Mail server');
+    const data = await listRes.json();
 
-    for (const m of messages.slice(0, 3)) {
-      try {
-        const msgRes = await fetch(`https://www.1secmail.com/api/v1/?action=readMessage&login=${login}&domain=${domain}&id=${m.id}`);
-        if (msgRes.ok) {
-          const mData = await msgRes.json();
-          lines.push(`📩 *From:* ${mData.from}`);
-          lines.push(`📌 *Subject:* ${mData.subject || '(no subject)'}`);
-          lines.push(`📅 *Date:* ${mData.date}`);
-          lines.push(`💬 *Body:*\n${(mData.textBody || mData.body || '').trim().slice(0, 800)}`);
-          lines.push('----------------------------------------');
-        }
-      } catch {}
+    const emailAddr = data.email_addr || activeTempMailSession?.email || 'Active Address';
+
+    if (!data.list || data.list.length === 0) {
+      return sock.sendMessage(chat, { text: `📬 Inbox is empty for *${emailAddr}*.` }, { quoted: msg });
     }
+
+    const lines = [`📬 *Inbox for ${emailAddr}* (${data.list.length} message(s))`, ''];
+
+    data.list.slice(0, 5).forEach((mail, i) => {
+      lines.push(`📩 *${i + 1}. From:* ${mail.mail_from}`);
+      lines.push(`📌 *Subject:* ${mail.mail_subject || '(no subject)'}`);
+      lines.push(`💬 *Excerpt:* ${(mail.mail_excerpt || '').trim()}`);
+      lines.push('----------------------------------------');
+    });
 
     lines.push('');
     lines.push('Provided by 𝗪𝗥𝗔𝗜𝗧🇭');
@@ -314,5 +323,115 @@ export async function whatanimeCommand(sock, chat, msg) {
     await sock.sendMessage(chat, { text: caption }, { quoted: msg });
   } catch (e) {
     await sock.sendMessage(chat, { text: `⚠️ whatanime failed: ${e.message}` }, { quoted: msg }).catch(() => {});
+  }
+}
+
+// ── .githubdiff [github_pr_or_commit_url] ────────────────────────────────────
+export async function githubdiffCommand(sock, chat, msg, args) {
+  try {
+    let url = (args || []).join(' ').trim();
+    if (!url) {
+      const ctx = msg.message?.extendedTextMessage?.contextInfo;
+      const quoted = ctx?.quotedMessage;
+      const quotedText = quoted?.conversation || quoted?.extendedTextMessage?.text || '';
+      const match = quotedText.match(/https?:\/\/github\.com\/[^\s]+/i);
+      if (match) url = match[0];
+    }
+
+    if (!url || !url.toLowerCase().includes('github.com')) {
+      return sock.sendMessage(chat, { text: '🐙 *githubdiff*\n\nUsage: `.githubdiff <github_pr_or_commit_url>`' }, { quoted: msg });
+    }
+
+    let cleanUrl = url.replace(/\.(diff|patch)$/i, '');
+    const diffUrl = `${cleanUrl}.diff`;
+
+    const res = await fetch(diffUrl, {
+      headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)' }
+    });
+
+    if (!res.ok) {
+      return sock.sendMessage(chat, { text: `❌ Failed to fetch diff from GitHub (HTTP ${res.status}). Ensure the URL points to a valid public PR or commit.` }, { quoted: msg });
+    }
+
+    const diffText = await res.text();
+    if (!diffText.trim()) {
+      return sock.sendMessage(chat, { text: '❌ Empty diff received from GitHub.' }, { quoted: msg });
+    }
+
+    const lines = diffText.split('\n');
+    let filesChanged = 0;
+    let additions = 0;
+    let deletions = 0;
+
+    for (const line of lines) {
+      if (line.startsWith('diff --git ')) filesChanged++;
+      else if (line.startsWith('+') && !line.startsWith('+++')) additions++;
+      else if (line.startsWith('-') && !line.startsWith('---')) deletions++;
+    }
+
+    const header = [
+      '🐙 *GitHub Diff Summary*',
+      '',
+      `🔗 *URL:* ${cleanUrl}`,
+      `📁 *Files Changed:* ${filesChanged}`,
+      `➕ *Additions:* +${additions}`,
+      `➖ *Deletions:* -${deletions}`,
+      ''
+    ].join('\n');
+
+    if (diffText.length <= 3000) {
+      const fullText = `${header}\`\`\`diff\n${diffText.slice(0, 2800)}\n\`\`\`\n\nProvided by 𝗪𝗥𝗔𝗜𝗧🇭`;
+      return await sock.sendMessage(chat, { text: fullText }, { quoted: msg });
+    } else {
+      const snippet = diffText.slice(0, 1500);
+      const docBuf = Buffer.from(diffText, 'utf-8');
+      const fileName = `diff_${Date.now()}.diff`;
+      await sock.sendMessage(chat, {
+        document: docBuf,
+        mimetype: 'text/x-diff',
+        fileName,
+        caption: `${header}\`\`\`diff\n${snippet}\n...\n[Truncated - full diff attached above]\n\`\`\`\n\nProvided by 𝗪𝗥𝗔𝗜𝗧🇭`
+      }, { quoted: msg });
+    }
+  } catch (e) {
+    await sock.sendMessage(chat, { text: `⚠️ githubdiff failed: ${e.message}` }, { quoted: msg }).catch(() => {});
+  }
+}
+
+// ── .urban / .slang / .gali [slang] ─────────────────────────────────────────
+export async function urbanCommand(sock, chat, msg, args) {
+  try {
+    const term = (args || []).join(' ').trim();
+    if (!term) {
+      return sock.sendMessage(chat, { text: '🗣️ *urban / slang*\n\nUsage: `.urban <slang_term>` or `.slang <term>` or `.gali <term>`' }, { quoted: msg });
+    }
+
+    const res = await fetch(`https://api.urbandictionary.com/v0/define?term=${encodeURIComponent(term)}`);
+    if (!res.ok) throw new Error(`Urban Dictionary API returned ${res.status}`);
+
+    const data = await res.json();
+    if (!data.list || data.list.length === 0) {
+      return sock.sendMessage(chat, { text: `❌ No definition found on Urban Dictionary for *${term}*.` }, { quoted: msg });
+    }
+
+    const item = data.list[0];
+    const cleanDef = (item.definition || '').replace(/\[|\]/g, '').trim();
+    const cleanExample = (item.example || '').replace(/\[|\]/g, '').trim();
+
+    const report = [
+      `🗣️ *Urban Dictionary: ${item.word}*`,
+      '',
+      `📖 *Definition:*`,
+      cleanDef,
+      '',
+      cleanExample ? `💬 *Example:*\n_${cleanExample}_\n` : '',
+      `👍 *Upvotes:* ${item.thumbs_up || 0}  |  👎 *Downvotes:* ${item.thumbs_down || 0}`,
+      '',
+      'Provided by 𝗪𝗥𝗔𝗜𝗧🇭'
+    ].filter(Boolean).join('\n');
+
+    await sock.sendMessage(chat, { text: report }, { quoted: msg });
+  } catch (e) {
+    await sock.sendMessage(chat, { text: `⚠️ urban lookup failed: ${e.message}` }, { quoted: msg }).catch(() => {});
   }
 }

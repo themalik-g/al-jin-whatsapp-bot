@@ -240,3 +240,193 @@ export async function compressCommand(sock, chat, msg, args, isExtra = false) {
     await sock.sendMessage(chat, { text: `⚠️ compress failed: ${e.message}` }, { quoted: msg }).catch(() => {});
   }
 }
+
+// ── .waveform ───────────────────────────────────────────────────────────────
+export async function waveformCommand(sock, chat, msg) {
+  try {
+    const media = await getMediaFromMsg(msg);
+    if (!media || (media.kind !== 'audio' && media.kind !== 'video')) {
+      return sock.sendMessage(chat, { text: '❌ Reply to an audio file or voice note with `.waveform`.' }, { quoted: msg });
+    }
+
+    const tmpIn = path.join(TMP_DIR(), `wave_in_${Date.now()}`);
+    const tmpOut = path.join(TMP_DIR(), `wave_out_${Date.now()}.png`);
+
+    fs.writeFileSync(tmpIn, media.buffer);
+
+    try {
+      await runFfmpeg([
+        '-y', '-i', tmpIn,
+        '-filter_complex', 'showwavespic=s=600x200:colors=white',
+        '-vframes', '1',
+        tmpOut
+      ]);
+      const outBuf = fs.readFileSync(tmpOut);
+      await sock.sendMessage(chat, { image: outBuf, caption: '🌊 *Audio Waveform*\n\nProvided by 𝗪𝗥𝗔𝗜𝗧🇭' }, { quoted: msg });
+    } finally {
+      try { if (fs.existsSync(tmpIn)) fs.unlinkSync(tmpIn); } catch {}
+      try { if (fs.existsSync(tmpOut)) fs.unlinkSync(tmpOut); } catch {}
+    }
+  } catch (e) {
+    await sock.sendMessage(chat, { text: `⚠️ waveform failed: ${e.message}` }, { quoted: msg }).catch(() => {});
+  }
+}
+
+// ── .8d (8D Spatial Audio) ──────────────────────────────────────────────────
+export async function audio8dCommand(sock, chat, msg) {
+  try {
+    const media = await getMediaFromMsg(msg);
+    if (!media || (media.kind !== 'audio' && media.kind !== 'video')) {
+      return sock.sendMessage(chat, { text: '❌ Reply to an audio file or voice note with `.8d`.' }, { quoted: msg });
+    }
+
+    const tmpIn = path.join(TMP_DIR(), `audio8d_in_${Date.now()}`);
+    const tmpOut = path.join(TMP_DIR(), `audio8d_out_${Date.now()}.mp3`);
+
+    fs.writeFileSync(tmpIn, media.buffer);
+
+    try {
+      await runFfmpeg([
+        '-y', '-i', tmpIn,
+        '-af', 'apulsator=hz=0.125',
+        '-c:a', 'libmp3lame', '-q:a', '2',
+        tmpOut
+      ]);
+      const outBuf = fs.readFileSync(tmpOut);
+      await sock.sendMessage(chat, { audio: outBuf, mimetype: 'audio/mpeg', ptt: false }, { quoted: msg });
+    } finally {
+      try { if (fs.existsSync(tmpIn)) fs.unlinkSync(tmpIn); } catch {}
+      try { if (fs.existsSync(tmpOut)) fs.unlinkSync(tmpOut); } catch {}
+    }
+  } catch (e) {
+    await sock.sendMessage(chat, { text: `⚠️ 8d failed: ${e.message}` }, { quoted: msg }).catch(() => {});
+  }
+}
+
+// ── .bassboost [level] (1 to 10) ───────────────────────────────────────────
+export async function bassboostCommand(sock, chat, msg, args) {
+  try {
+    let level = parseInt(args?.[0] || '5', 10);
+    if (isNaN(level) || level < 1) level = 1;
+    if (level > 10) level = 10;
+
+    const gain = level * 2; // Linear boost from 2dB to 20dB
+
+    const media = await getMediaFromMsg(msg);
+    if (!media || (media.kind !== 'audio' && media.kind !== 'video')) {
+      return sock.sendMessage(chat, { text: '❌ Reply to an audio file or voice note with `.bassboost [level 1-10]`.' }, { quoted: msg });
+    }
+
+    const tmpIn = path.join(TMP_DIR(), `bass_in_${Date.now()}`);
+    const tmpOut = path.join(TMP_DIR(), `bass_out_${Date.now()}.mp3`);
+
+    fs.writeFileSync(tmpIn, media.buffer);
+
+    try {
+      await runFfmpeg([
+        '-y', '-i', tmpIn,
+        '-af', `equalizer=f=60:width_type=h:width=50:g=${gain}`,
+        '-c:a', 'libmp3lame', '-q:a', '2',
+        tmpOut
+      ]);
+      const outBuf = fs.readFileSync(tmpOut);
+      await sock.sendMessage(chat, { audio: outBuf, mimetype: 'audio/mpeg', ptt: false }, { quoted: msg });
+    } finally {
+      try { if (fs.existsSync(tmpIn)) fs.unlinkSync(tmpIn); } catch {}
+      try { if (fs.existsSync(tmpOut)) fs.unlinkSync(tmpOut); } catch {}
+    }
+  } catch (e) {
+    await sock.sendMessage(chat, { text: `⚠️ bassboost failed: ${e.message}` }, { quoted: msg }).catch(() => {});
+  }
+}
+
+// ── .robot / .vocal ─────────────────────────────────────────────────────────
+export async function robotCommand(sock, chat, msg) {
+  try {
+    const media = await getMediaFromMsg(msg);
+    if (!media || (media.kind !== 'audio' && media.kind !== 'video')) {
+      return sock.sendMessage(chat, { text: '❌ Reply to an audio file or voice note with `.robot`.' }, { quoted: msg });
+    }
+
+    const tmpIn = path.join(TMP_DIR(), `robot_in_${Date.now()}`);
+    const tmpOut = path.join(TMP_DIR(), `robot_out_${Date.now()}.mp3`);
+
+    fs.writeFileSync(tmpIn, media.buffer);
+
+    try {
+      await runFfmpeg([
+        '-y', '-i', tmpIn,
+        '-af', 'flanger=delay=20:depth=10:regen=50',
+        '-c:a', 'libmp3lame', '-q:a', '2',
+        tmpOut
+      ]);
+      const outBuf = fs.readFileSync(tmpOut);
+      await sock.sendMessage(chat, { audio: outBuf, mimetype: 'audio/mpeg', ptt: false }, { quoted: msg });
+    } finally {
+      try { if (fs.existsSync(tmpIn)) fs.unlinkSync(tmpIn); } catch {}
+      try { if (fs.existsSync(tmpOut)) fs.unlinkSync(tmpOut); } catch {}
+    }
+  } catch (e) {
+    await sock.sendMessage(chat, { text: `⚠️ robot failed: ${e.message}` }, { quoted: msg }).catch(() => {});
+  }
+}
+
+export async function vocalCommand(sock, chat, msg) {
+  try {
+    const media = await getMediaFromMsg(msg);
+    if (!media || (media.kind !== 'audio' && media.kind !== 'video')) {
+      return sock.sendMessage(chat, { text: '❌ Reply to an audio file or voice note with `.vocal`.' }, { quoted: msg });
+    }
+
+    const tmpIn = path.join(TMP_DIR(), `vocal_in_${Date.now()}`);
+    const tmpOut = path.join(TMP_DIR(), `vocal_out_${Date.now()}.mp3`);
+
+    fs.writeFileSync(tmpIn, media.buffer);
+
+    try {
+      await runFfmpeg([
+        '-y', '-i', tmpIn,
+        '-af', 'equalizer=f=1000:width_type=h:width=200:g=6,equalizer=f=3000:width_type=h:width=500:g=4',
+        '-c:a', 'libmp3lame', '-q:a', '2',
+        tmpOut
+      ]);
+      const outBuf = fs.readFileSync(tmpOut);
+      await sock.sendMessage(chat, { audio: outBuf, mimetype: 'audio/mpeg', ptt: false }, { quoted: msg });
+    } finally {
+      try { if (fs.existsSync(tmpIn)) fs.unlinkSync(tmpIn); } catch {}
+      try { if (fs.existsSync(tmpOut)) fs.unlinkSync(tmpOut); } catch {}
+    }
+  } catch (e) {
+    await sock.sendMessage(chat, { text: `⚠️ vocal failed: ${e.message}` }, { quoted: msg }).catch(() => {});
+  }
+}
+
+// ── .hd / .enhance ──────────────────────────────────────────────────────────
+export async function enhanceCommand(sock, chat, msg) {
+  try {
+    const media = await getMediaFromMsg(msg);
+    if (!media || media.kind !== 'image') {
+      return sock.sendMessage(chat, { text: '❌ Reply to or send an image with `.hd` or `.enhance`.' }, { quoted: msg });
+    }
+
+    const tmpIn = path.join(TMP_DIR(), `hd_in_${Date.now()}`);
+    const tmpOut = path.join(TMP_DIR(), `hd_out_${Date.now()}.jpg`);
+
+    fs.writeFileSync(tmpIn, media.buffer);
+
+    try {
+      await runFfmpeg([
+        '-y', '-i', tmpIn,
+        '-vf', 'unsharp=5:5:1.0:5:5:0.0,eq=contrast=1.15:brightness=0.02',
+        tmpOut
+      ]);
+      const outBuf = fs.readFileSync(tmpOut);
+      await sock.sendMessage(chat, { image: outBuf, caption: '✨ *Image Enhanced & Sharpened*\n\nProvided by 𝗪𝗥𝗔𝗜𝗧🇭' }, { quoted: msg });
+    } finally {
+      try { if (fs.existsSync(tmpIn)) fs.unlinkSync(tmpIn); } catch {}
+      try { if (fs.existsSync(tmpOut)) fs.unlinkSync(tmpOut); } catch {}
+    }
+  } catch (e) {
+    await sock.sendMessage(chat, { text: `⚠️ enhance failed: ${e.message}` }, { quoted: msg }).catch(() => {});
+  }
+}

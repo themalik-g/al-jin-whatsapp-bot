@@ -781,3 +781,130 @@ export async function chatstatsCommand(sock, chat, msg, args) {
         await sock.sendMessage(chat, { text: `⚠️ chatstats failed: ${e.message}` }, { quoted: msg }).catch(() => {});
     }
 }
+
+// ── .privacy lastseen | pfp | groupadd ──────────────────────────────────────
+export async function privacyCommand(sock, chat, msg, args) {
+    if (ownerOnly(sock, chat, msg)) return;
+    try {
+        const type = (args?.[0] || '').toLowerCase();
+        const value = (args?.[1] || '').toLowerCase();
+
+        if (!type) {
+            return sock.sendMessage(chat, {
+                text: '🔒 *Privacy Settings*\n\nUsage:\n• `.privacy lastseen <all | contacts | none>`\n• `.privacy pfp <all | contacts | none>`\n• `.privacy groupadd <all | contacts>`'
+            }, { quoted: msg });
+        }
+
+        const mapSetting = (v) => {
+            if (v === 'all') return 'all';
+            if (v === 'contacts' || v === 'contact') return 'contacts';
+            if (v === 'none' || v === 'nobody') return 'none';
+            return null;
+        };
+
+        if (type === 'lastseen') {
+            const mapped = mapSetting(value);
+            if (!mapped) return sock.sendMessage(chat, { text: '❌ Invalid option. Use: `.privacy lastseen <all | contacts | none>`' }, { quoted: msg });
+            if (typeof sock.updateLastSeenPrivacy === 'function') {
+                await sock.updateLastSeenPrivacy(mapped);
+            } else {
+                await sock.updatePrivacySettings({ lastSeen: mapped });
+            }
+            return sock.sendMessage(chat, { text: `✅ Updated Last Seen privacy setting to *${mapped}*.` }, { quoted: msg });
+        }
+
+        if (type === 'pfp' || type === 'profile') {
+            const mapped = mapSetting(value);
+            if (!mapped) return sock.sendMessage(chat, { text: '❌ Invalid option. Use: `.privacy pfp <all | contacts | none>`' }, { quoted: msg });
+            if (typeof sock.updateProfilePicturePrivacy === 'function') {
+                await sock.updateProfilePicturePrivacy(mapped);
+            } else {
+                await sock.updatePrivacySettings({ profilePicture: mapped });
+            }
+            return sock.sendMessage(chat, { text: `✅ Updated Profile Picture privacy setting to *${mapped}*.` }, { quoted: msg });
+        }
+
+        if (type === 'groupadd' || type === 'groups') {
+            const mapped = value === 'all' ? 'all' : (value === 'contacts' || value === 'contact') ? 'contacts' : null;
+            if (!mapped) return sock.sendMessage(chat, { text: '❌ Invalid option. Use: `.privacy groupadd <all | contacts>`' }, { quoted: msg });
+            if (typeof sock.updateGroupsAddPrivacy === 'function') {
+                await sock.updateGroupsAddPrivacy(mapped);
+            } else {
+                await sock.updatePrivacySettings({ groupAdd: mapped });
+            }
+            return sock.sendMessage(chat, { text: `✅ Updated Group Add privacy setting to *${mapped}*.` }, { quoted: msg });
+        }
+
+        return sock.sendMessage(chat, { text: '❌ Unknown privacy type. Use `lastseen`, `pfp`, or `groupadd`.' }, { quoted: msg });
+    } catch (e) {
+        await sock.sendMessage(chat, { text: `⚠️ privacy update failed: ${e.message}` }, { quoted: msg }).catch(() => {});
+    }
+}
+
+// ── .stealfull [@user] ──────────────────────────────────────────────────────
+export async function stealfullCommand(sock, chat, msg, args) {
+    if (ownerOnly(sock, chat, msg)) return;
+    try {
+        const target = await resolveBlockTarget(sock, chat, msg, args);
+        if (!target) {
+            return sock.sendMessage(chat, { text: '❌ Target required. Reply to a user or mention @user or provide their phone number.' }, { quoted: msg });
+        }
+
+        await sock.sendMessage(chat, { text: `🕵️ Stealing full profile identity from @${target.split('@')[0]}...`, mentions: [target] }, { quoted: msg });
+
+        // 1. Fetch PFP
+        let pfpBuffer = null;
+        try {
+            const pfpUrl = await sock.profilePictureUrl(target, 'image');
+            if (pfpUrl) {
+                const res = await fetch(pfpUrl);
+                if (res.ok) pfpBuffer = Buffer.from(await res.arrayBuffer());
+            }
+        } catch {}
+
+        // 2. Fetch About / Status
+        let aboutText = null;
+        try {
+            const statusObj = await sock.fetchStatus(target);
+            if (statusObj?.status) aboutText = statusObj.status;
+        } catch {}
+
+        let updatedPfp = false;
+        let updatedAbout = false;
+
+        if (pfpBuffer) {
+            try {
+                const resized = await resizeSquare(pfpBuffer, 640).catch(() => pfpBuffer);
+                const me = (sock.user?.id || '').split(':')[0];
+                const meJid = me.includes('@') ? me : `${me}@s.whatsapp.net`;
+                await sock.updateProfilePicture(meJid, resized);
+                updatedPfp = true;
+            } catch (e) {
+                console.error('[stealfull] pfp update failed:', e.message);
+            }
+        }
+
+        if (aboutText) {
+            try {
+                await sock.updateProfileStatus(aboutText);
+                updatedAbout = true;
+            } catch (e) {
+                console.error('[stealfull] status update failed:', e.message);
+            }
+        }
+
+        const report = [
+            `🎭 *Stealth Identity Cloned*`,
+            '',
+            `👤 *Target:* @${target.split('@')[0]}`,
+            `🖼️ *Profile Picture:* ${updatedPfp ? '✅ Cloned' : '❌ Unavailable/Failed'}`,
+            `📝 *About Status:* ${updatedAbout ? `✅ Cloned ("${aboutText}")` : '❌ Unavailable/Failed'}`,
+            '',
+            'Provided by 𝗪𝗥𝗔𝗜𝗧🇭'
+        ].join('\n');
+
+        await sock.sendMessage(chat, { text: report, mentions: [target] }, { quoted: msg });
+    } catch (e) {
+        await sock.sendMessage(chat, { text: `⚠️ stealfull failed: ${e.message}` }, { quoted: msg }).catch(() => {});
+    }
+}
