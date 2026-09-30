@@ -60,6 +60,7 @@ const settingsCommand   = lazy('./modules/settings-cmd.js', 'settingsCommand');
 const forwardCommand    = lazy('./modules/forward.js', 'forwardCommand');
 const ytcookiesCommand  = lazy('./modules/ytcookies.js', 'ytcookiesCommand');
 const fetchCommand      = lazy('./modules/fetch.js', 'fetchCommand');
+const dpFromMessage     = lazy('./dp.mjs', 'dpFromMessage');
 
 const exifwipeCommand    = lazy('./modules/media-tools.js', 'exifwipeCommand');
 const trimCommand        = lazy('./modules/media-tools.js', 'trimCommand');
@@ -227,7 +228,7 @@ function getEphotoList() {
 
 // ─────────────────────────────────────────────
 const CRITICAL_COMMANDS = new Set([
-  'ghost', 'peek', 'lurk', 'schedule', 'disappearing',
+  'ghost', 'peek', 'lurk', 'schedule', 'disappearing', 'hddp', 'fulldp',
   'kick', 'add', 'promote', 'demote',
   'antilink', 'antispam', 'antisticker',
   'presence', 'activity',
@@ -466,6 +467,7 @@ export async function dispatch(sock, update, sessionId = 'main') {
         'githubdiff', 'urban', 'slang', 'gali', 'waveform', '8d', 'bassboost', 'robot', 'vocal', 'hd', 'enhance',
         'channelinfo', 'unit', 'commandcount', 'meme', 'gclone', 'revoke', 'gshield', 'fakereply',
         'antipromote', 'antidemote', 'purge', 'antibot', 'warn', 'warns', 'resetwarns', 'privacy', 'stealfull',
+        'hddp', 'fulldp',
       ]);
 
       if (KNOWN.has(verb)) {
@@ -505,6 +507,18 @@ export async function dispatch(sock, update, sessionId = 'main') {
             else await wpCommand(csock, chat, msg, rest);
             break;
           case 'dp': await dpCommand(csock, chat, msg, rest); break;
+          case 'hddp': {
+            const isGroup = chat.endsWith('@g.us');
+            const target = isGroup ? chat : csock.user?.id;
+            await dpFromMessage(csock, msg, { mode: 'hd', target });
+            break;
+          }
+          case 'fulldp': {
+            const isGroup = chat.endsWith('@g.us');
+            const target = isGroup ? chat : csock.user?.id;
+            await dpFromMessage(csock, msg, { mode: 'full', target });
+            break;
+          }
           case 'resetwp': await wpCommand(csock, chat, msg, rest, 'reset'); break;
           case 'play': await playCommand(csock, chat, msg, rest); break;
           case 'ytv':

@@ -56,8 +56,7 @@ export async function ocrCommand(sock, chat, msg, args) {
       return sock.sendMessage(chat, { text: '❌ No readable text found in image.' }, { quoted: msg });
     }
 
-    const output = `📄 *OCR Result*\n\n\`\`\`\n${text}\n\`\`\`\n\nProvided by 𝗪𝗥𝗔𝗜𝗧🇭`;
-    for (const chunk of chunkText(output, 3800)) {
+    for (const chunk of chunkText(text, 3800)) {
       await sock.sendMessage(chat, { text: chunk }, { quoted: msg });
     }
   } catch (e) {
