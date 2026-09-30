@@ -10,7 +10,7 @@ import { fetchBuffer } from '../lib/net.js';
 import { sendWithCta } from '../lib/buttons.js';
 import { getVar } from '../core/vars.js';
 
-const TEXT_MODELS = ['gemini-2.5-flash', 'gemini-2.5-flash-lite', 'gemini-2.0-flash'];
+const TEXT_MODELS = ['gemini-3.5-flash', 'gemini-3.5-flash-lite', 'gemini-3.6-flash'];
 const MAX_IMAGE_BYTES = 15 * 1024 * 1024;
 
 // Unwrap ephemeral / view-once wrappers so we can see the real message node.
