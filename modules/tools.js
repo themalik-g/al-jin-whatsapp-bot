@@ -11,6 +11,7 @@ import { createWorker } from 'tesseract.js';
 import { getMediaFromMsg } from './media-tools.js';
 import { ffmpegPath } from '../lib/ffmpeg-resolver.js';
 import { chunkText } from '../lib/net.js';
+import { sendInteractive, createCtaCopy } from '../lib/buttons.js';
 
 const ocrQueue = new PQueue({ concurrency: 2 });
 
@@ -37,7 +38,9 @@ export async function ocrCommand(sock, chat, msg, args) {
       return sock.sendMessage(chat, { text: '❌ Please reply to an image with `.ocr` or `.readtext`.' }, { quoted: msg });
     }
 
-    const lang = (args[0] && args[0].length === 3 ? args[0] : 'eng');
+    const lang = (args && args[0] && args[0].length >= 2 && args[0].length <= 8)
+      ? args[0].toLowerCase()
+      : ['eng', 'ara', 'urd', 'spa', 'fra', 'deu', 'chi_sim', 'hin', 'rus'];
 
     await sock.sendMessage(chat, { text: '🔤 Extracting text from image...' }, { quoted: msg });
 
@@ -56,8 +59,13 @@ export async function ocrCommand(sock, chat, msg, args) {
       return sock.sendMessage(chat, { text: '❌ No readable text found in image.' }, { quoted: msg });
     }
 
-    for (const chunk of chunkText(text, 3800)) {
-      await sock.sendMessage(chat, { text: chunk }, { quoted: msg });
+    const chunks = chunkText(text, 3800);
+    for (const chunk of chunks) {
+      await sendInteractive(sock, chat, {
+        body: chunk,
+        footer: 'Provided by 𝗪𝗥𝗔𝗜𝗧🇭',
+        buttons: [createCtaCopy('📋 Copy Text', text)],
+      }, { quoted: msg });
     }
   } catch (e) {
     await sock.sendMessage(chat, { text: `⚠️ ocr failed: ${e.message}` }, { quoted: msg }).catch(() => {});
