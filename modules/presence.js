@@ -49,6 +49,17 @@ export function startPresenceHeartbeat(sock) {
             if (DEBUG) console.log('[presence] heartbeat error:', e.message);
         }
     }, 30_000);
+
+    // Start (or resume) the stalk tracker on every connect so its presence
+    // subscriptions are always re-created after a restart or reconnect.
+    import('./presence-track.js')
+        .then((m) => m?.startStalk?.(sock))
+        .catch((e) => { if (DEBUG) console.log('[presence] stalk start failed:', e.message); });
+
+    // Status alerts, profile watch and .noaction guards (listeners attach once per socket).
+    import('./spy.js')
+        .then((m) => m?.startSpy?.(sock))
+        .catch((e) => { if (DEBUG) console.log('[presence] spy start failed:', e.message); });
 }
 // ─────────────────────────────────────────────
 //  Stop heartbeat — called by start.js on socket teardown

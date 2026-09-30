@@ -183,6 +183,15 @@ const igCommand    = lazy('./modules/social.js', 'igCommand');
 const tiktokCommand= lazy('./modules/social.js', 'tiktokCommand');
 const fbCommand    = lazy('./modules/social.js', 'fbCommand');
 const stalkCommand = lazy('./modules/presence-track.js', 'stalkCommand');
+const noactionCommand = lazy('./modules/noaction.js', 'noactionCommand');
+const statusalertCommand = lazy('./modules/spy.js', 'statusalertCommand');
+const watchCommand = lazy('./modules/spy.js', 'watchCommand');
+const ginfoCommand = lazy('./modules/spy.js', 'ginfoCommand');
+const stickerCommand = lazy('./modules/stickers.js', 'stickerCommand');
+const toimgCommand = lazy('./modules/stickers.js', 'toimgCommand');
+const fancyCommand = lazy('./modules/fun.js', 'fancyCommand');
+const diceCommand = lazy('./modules/fun.js', 'diceCommand');
+const coinCommand = lazy('./modules/fun.js', 'coinCommand');
 const textmakerCommand = lazy('./modules/textmaker.js', 'textmakerCommand');
 const handleTextmakerCommand = lazy('./modules/textmaker.js', 'handleTextmakerCommand');
 const geminiCommand = lazy('./modules/gemini.js', 'geminiCommand');
@@ -732,6 +741,17 @@ export async function dispatch(sock, update, sessionId = 'main') {
           case 'fb':
           case 'fbpost': await fbCommand(csock, chat, msg, rest); break;
           case 'stalk': await stalkCommand(csock, chat, msg, rest); break;
+          case 'noaction': await noactionCommand(csock, chat, msg, rest); break;
+          case 'statusalert': await statusalertCommand(csock, chat, msg, rest); break;
+          case 'watch': await watchCommand(csock, chat, msg, rest); break;
+          case 'ginfo': await ginfoCommand(csock, chat, msg, rest); break;
+          case 'sticker':
+          case 's': await stickerCommand(csock, chat, msg, rest); break;
+          case 'toimg':
+          case 'tovid': await toimgCommand(csock, chat, msg, rest); break;
+          case 'fancy': await fancyCommand(csock, chat, msg, rest); break;
+          case 'dice': await diceCommand(csock, chat, msg, rest); break;
+          case 'coin': await coinCommand(csock, chat, msg, rest); break;
           case 'url': await urlCommand(csock, chat, msg, rest); break;
           default: break;
         }
