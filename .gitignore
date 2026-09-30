@@ -19,6 +19,7 @@ vault/
 logs/
 pids/
 .pm2/
+data/
 
 # ─────────────────────────────────────────────
 #  Secrets — NEVER commit
