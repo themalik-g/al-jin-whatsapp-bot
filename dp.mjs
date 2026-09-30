@@ -1,29 +1,27 @@
 /**
- * dp.mjs - Standalone full-size / HD profile picture plugin for upstream Baileys.
+ * dp.mjs (v2) - Standalone HD / full-size profile picture plugin for upstream Baileys.
  *
- * No forked Baileys needed. It talks to WhatsApp through sock.query(), the same
- * request Baileys itself uses, but skips the forced 640x640 crop.
+ * What changed from v1: WhatsApp rejected the very large uploads (1080px and 4096px),
+ * so v2 uses sizes it is more likely to accept and walks down a size ladder.
+ * It also reports WHY an upload was refused instead of hiding the error.
  *
  * Modes
- *   full : keeps the original shape, nothing cropped, downscaled only above 4096px
- *   hd   : square 1080x1080 canvas, whole image visible (padded, never cropped)
+ *   hd   : square picture, whole image visible (padded, never cropped)
+ *          tries 720px, then 640px
+ *   full : keeps the original shape, no crop and no padding
+ *          longest side 720px, then 640px
+ *
+ * If every custom upload is refused, it falls back to the normal Baileys
+ * updateProfilePicture() with an uncropped 640px square.
  *
  * Image library (uses whichever is installed, sharp first, then jimp):
- *   npm i sharp        (fast)      or      npm i jimp       (pure JS, lighter)
+ *   npm i sharp        or        npm i jimp
  *
- * Exports
- *   setDp(sock, jid, imageBuffer, { mode, background })  -> { ok, method, note?, error? }
- *   dpFromMessage(sock, msg, { mode, target, background }) -> handles a chat command
+ * Exports (same as v1, so your command code does not change)
+ *   setDp(sock, jid, imageBuffer, { mode, background })
+ *   dpFromMessage(sock, msg, { mode, target, background })
  *
- * Example (inside your message handler, ESM):
- *   import { dpFromMessage } from './dp.mjs'
- *   // .hddp  -> await dpFromMessage(sock, msg, { mode: 'hd' })
- *   // .fulldp -> await dpFromMessage(sock, msg, { mode: 'full' })
- *   // group dp -> await dpFromMessage(sock, msg, { mode: 'hd', target: msg.key.remoteJid })
- *
- * CommonJS project? Load it with:  const { dpFromMessage } = await import('./dp.mjs')
- *
- * Every function catches its own errors and never throws, so the bot keeps running.
+ * Every function catches its own errors and never throws.
  * Images are handled in memory only, so there are no temp files to clean up.
  */
 
@@ -31,8 +29,8 @@ const S_WHATSAPP_NET = '@s.whatsapp.net'
 const MAX_INPUT_BYTES = 10 * 1024 * 1024 // refuse source images above 10 MB
 
 const MODES = {
-  full: { label: 'Full size', maxSide: 4096, quality: 95 },
-  hd: { label: 'HD', size: 1080, quality: 92 }
+  hd: { label: 'HD', square: true, sizes: [720, 640], quality: 92 },
+  full: { label: 'Full size', square: false, sizes: [720, 640], quality: 92 }
 }
 
 /* ------------------------------ image library ----------------------------- */
@@ -109,6 +107,12 @@ function toNumber(value) {
   return Number(value.toString()) || 0 // handles protobuf Long values
 }
 
+function errText(err) {
+  const base = err?.message || String(err || 'unknown error')
+  const code = err?.output?.statusCode || err?.data?.attrs?.code
+  return code ? `${base} (${code})` : base
+}
+
 /** Sends the picture to WhatsApp without Baileys' forced 640x640 crop. */
 async function uploadPicture(sock, jid, buffer) {
   const attrs = { to: S_WHATSAPP_NET, type: 'set', xmlns: 'w:profile:picture' }
@@ -128,6 +132,7 @@ async function uploadPicture(sock, jid, buffer) {
  * @param jid    own JID (bot picture) or a group JID
  * @param image  Buffer with the source image
  * @param opts   { mode: 'hd' | 'full', background: 'black' | 'white' }
+ * @returns      { ok, method, note?, details?, error? }
  */
 export async function setDp(sock, jid, image, { mode = 'hd', background = 'black' } = {}) {
   try {
@@ -140,16 +145,24 @@ export async function setDp(sock, jid, image, { mode = 'hd', background = 'black
     const proc = await getProcessor()
     if (!proc) return fail('No image library found. Run: npm i sharp   (or: npm i jimp)')
 
-    // Attempt 1: full / HD upload
-    let firstError = null
-    try {
-      const buffer = cfg.size
-        ? await proc.square(image, cfg.size, background, cfg.quality)
-        : await proc.fit(image, cfg.maxSide, cfg.quality)
-      await uploadPicture(sock, jid, buffer)
-      return { ok: true, method: mode }
-    } catch (err) {
-      firstError = err
+    const problems = [] // what went wrong, size by size
+
+    // Attempt 1: custom upload, walking down the size ladder
+    for (const size of cfg.sizes) {
+      try {
+        const buffer = cfg.square
+          ? await proc.square(image, size, background, cfg.quality)
+          : await proc.fit(image, size, cfg.quality)
+        await uploadPicture(sock, jid, buffer)
+        return {
+          ok: true,
+          method: `${mode}-${size}`,
+          note: problems.length ? `${cfg.label} ${cfg.sizes[0]}px was refused, so ${size}px was used.` : undefined,
+          details: problems
+        }
+      } catch (err) {
+        problems.push(`${size}px: ${errText(err)}`)
+      }
     }
 
     // Attempt 2 (fallback): standard Baileys call with an uncropped 640px square
@@ -159,13 +172,15 @@ export async function setDp(sock, jid, image, { mode = 'hd', background = 'black
       return {
         ok: true,
         method: 'standard-640',
-        note: `${cfg.label} upload was rejected, so the standard 640px picture was used.`
+        note: `${cfg.label} upload was refused (${problems.join('; ')}), so the standard 640px picture was used.`,
+        details: problems
       }
     } catch (err) {
-      return fail(`Could not update the picture: ${err?.message || firstError?.message || 'unknown error'}`)
+      problems.push(`standard: ${errText(err)}`)
+      return fail(`Could not update the picture. ${problems.join('; ')}`)
     }
   } catch (err) {
-    return fail(`Unexpected error: ${err?.message || err}`)
+    return fail(`Unexpected error: ${errText(err)}`)
   }
 }
 
@@ -238,13 +253,13 @@ export async function dpFromMessage(sock, msg, { mode = 'hd', target, background
 
     if (result.ok) {
       const label = MODES[mode]?.label || mode
-      await reply(result.note ? `⚠️ ${result.note}` : `✅ Profile picture updated (${label}).`)
+      await reply(result.note ? `⚠️ ${result.note}` : `✅ Profile picture updated (${label}, ${result.method.split('-')[1]}px).`)
     } else {
       await reply(`❌ ${result.error}`)
     }
     return result
   } catch (err) {
-    await reply(`❌ Could not update the picture: ${err?.message || err}`)
-    return fail(err?.message || 'unexpected error')
+    await reply(`❌ Could not update the picture: ${errText(err)}`)
+    return fail(errText(err))
   }
 }
