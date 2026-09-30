@@ -12,6 +12,8 @@ import { getMediaFromMsg } from './media-tools.js';
 import { ffmpegPath } from '../lib/ffmpeg-resolver.js';
 import { chunkText } from '../lib/net.js';
 import { sendInteractive, createCtaCopy } from '../lib/buttons.js';
+import { getKey } from '../core/keys.js';
+import { getVar } from '../core/vars.js';
 
 const ocrQueue = new PQueue({ concurrency: 2 });
 
@@ -31,6 +33,50 @@ function runFfmpeg(args, timeoutMs = 30000) {
 }
 
 // ── .ocr / .readtext ────────────────────────────────────────────────────────
+async function extractTextWithGemini(imageBuffer, mimeType, apiKey) {
+  const base64Data = imageBuffer.toString('base64');
+  const actualMime = mimeType && mimeType.startsWith('image/') ? mimeType : 'image/jpeg';
+
+  const prompt = 'Perform exact optical character recognition (OCR) on this image. Transcribe all visible text verbatim exactly as written, including handwriting, preserving line breaks where appropriate. Do not add intro, explanations, or commentary—output ONLY the transcribed text.';
+
+  const models = [
+    'gemini-2.0-flash',
+    'gemini-1.5-flash',
+    'gemini-2.5-flash',
+    'gemini-3.5-flash-lite',
+    'gemini-3.8-flash'
+  ];
+
+  for (const model of models) {
+    try {
+      const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+      const res = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [{
+            parts: [
+              { inlineData: { mimeType: actualMime, data: base64Data } },
+              { text: prompt }
+            ]
+          }]
+        })
+      });
+
+      if (res.ok) {
+        const json = await res.json();
+        const text = json?.candidates?.[0]?.content?.parts?.[0]?.text;
+        if (text && text.trim()) {
+          return text.trim();
+        }
+      }
+    } catch (err) {
+      console.warn(`[ocrCommand] Gemini Vision ${model} error:`, err.message);
+    }
+  }
+  return '';
+}
+
 export async function ocrCommand(sock, chat, msg, args) {
   try {
     const media = await getMediaFromMsg(msg);
@@ -38,23 +84,37 @@ export async function ocrCommand(sock, chat, msg, args) {
       return sock.sendMessage(chat, { text: '❌ Please reply to an image with `.ocr` or `.readtext`.' }, { quoted: msg });
     }
 
-    const lang = (args && args[0] && args[0].length >= 2 && args[0].length <= 8)
+    const userLang = (args && args[0] && args[0].length >= 2 && args[0].length <= 8)
       ? args[0].toLowerCase()
-      : ['eng', 'ara', 'urd', 'spa', 'fra', 'deu', 'chi_sim', 'hin', 'rus'];
+      : null;
 
     await sock.sendMessage(chat, { text: '🔤 Extracting text from image...' }, { quoted: msg });
 
-    const recognizedText = await ocrQueue.add(async () => {
-      const worker = await createWorker(lang);
-      try {
-        const ret = await worker.recognize(media.buffer);
-        return ret.data.text;
-      } finally {
-        await worker.terminate();
-      }
-    });
+    let text = '';
+    const apiKey = getVar('GEMINI_API_KEY') || process.env.GEMINI_API_KEY || getKey('GEMINI_API_KEY');
 
-    const text = recognizedText?.trim();
+    if (apiKey) {
+      try {
+        text = await extractTextWithGemini(media.buffer, media.mimetype || 'image/jpeg', apiKey);
+      } catch (geminiErr) {
+        console.warn('[ocrCommand] Gemini Vision failed, falling back to Tesseract:', geminiErr.message);
+      }
+    }
+
+    if (!text) {
+      const lang = userLang || 'eng';
+      const recognizedText = await ocrQueue.add(async () => {
+        const worker = await createWorker(lang);
+        try {
+          const ret = await worker.recognize(media.buffer);
+          return ret.data.text;
+        } finally {
+          await worker.terminate();
+        }
+      });
+      text = recognizedText?.trim();
+    }
+
     if (!text) {
       return sock.sendMessage(chat, { text: '❌ No readable text found in image.' }, { quoted: msg });
     }
@@ -63,7 +123,7 @@ export async function ocrCommand(sock, chat, msg, args) {
     for (const chunk of chunks) {
       await sendInteractive(sock, chat, {
         body: chunk,
-        footer: 'Provided by 𝗪𝗥𝗔𝗜𝗧🇭',
+        footer: 'Provided by 𝗪𝗥𝗔Ｉ𝗧🇭',
         buttons: [createCtaCopy('📋 Copy Text', text)],
       }, { quoted: msg });
     }
