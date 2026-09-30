@@ -61,6 +61,25 @@ const forwardCommand    = lazy('./modules/forward.js', 'forwardCommand');
 const ytcookiesCommand  = lazy('./modules/ytcookies.js', 'ytcookiesCommand');
 const fetchCommand      = lazy('./modules/fetch.js', 'fetchCommand');
 
+const exifwipeCommand    = lazy('./modules/media-tools.js', 'exifwipeCommand');
+const trimCommand        = lazy('./modules/media-tools.js', 'trimCommand');
+const tomp3Command       = lazy('./modules/media-tools.js', 'tomp3Command');
+const vnCommand          = lazy('./modules/media-tools.js', 'vnCommand');
+const compressCommand    = lazy('./modules/media-tools.js', 'compressCommand');
+
+const ocrCommand         = lazy('./modules/tools.js', 'ocrCommand');
+const barcodeCommand     = lazy('./modules/tools.js', 'barcodeCommand');
+const vcardCommand       = lazy('./modules/tools.js', 'vcardCommand');
+const ttsCommand         = lazy('./modules/tools.js', 'ttsCommand');
+
+const speedtestCommand   = lazy('./modules/network-tools.js', 'speedtestCommand');
+const npmCommand         = lazy('./modules/network-tools.js', 'npmCommand');
+const unrollCommand      = lazy('./modules/network-tools.js', 'unrollCommand');
+const web2imgCommand     = lazy('./modules/network-tools.js', 'web2imgCommand');
+const tempmailCommand    = lazy('./modules/network-tools.js', 'tempmailCommand');
+const readmailCommand    = lazy('./modules/network-tools.js', 'readmailCommand');
+const whatanimeCommand   = lazy('./modules/network-tools.js', 'whatanimeCommand');
+
 const currencyCommand = lazy('./modules/utility.js', 'currencyCommand');
 const qrCommand       = lazy('./modules/utility.js', 'qrCommand');
 const defineCommand   = lazy('./modules/utility.js', 'defineCommand');
@@ -411,6 +430,9 @@ export async function dispatch(sock, update, sessionId = 'main') {
         'prayertimes', 'pts', 'quran', 'sora', 'para', 'muslim', 'bukhari', 'search',
         'islamic', 'hadith', 'quransearch', 'hadeessearch', 'islamsearch', 'qs', 'hs', 'is',
         'relocation', 'details', 'settings', 'forward', 'ytcookies', 'fetch',
+        'exifwipe', 'sanitize', 'trim', 'tomp3', 'vn', 'compress', 'extracompress',
+        'ocr', 'readtext', 'barcode', 'vcard', 'tts',
+        'speedtest', 'npm', 'unroll', 'web2img', 'webss', 'tempmail', 'readmail', 'whatanime',
       ]);
 
       if (KNOWN.has(verb)) {
@@ -486,6 +508,26 @@ export async function dispatch(sock, update, sessionId = 'main') {
           case 'forward': await forwardCommand(csock, chat, msg, rest); break;
           case 'ytcookies': await ytcookiesCommand(csock, chat, msg, rest); break;
           case 'fetch': await fetchCommand(csock, chat, msg, rest); break;
+          case 'exifwipe':
+          case 'sanitize': await exifwipeCommand(csock, chat, msg); break;
+          case 'trim': await trimCommand(csock, chat, msg, rest); break;
+          case 'tomp3': await tomp3Command(csock, chat, msg); break;
+          case 'vn': await vnCommand(csock, chat, msg); break;
+          case 'compress': await compressCommand(csock, chat, msg, rest, false); break;
+          case 'extracompress': await compressCommand(csock, chat, msg, rest, true); break;
+          case 'ocr':
+          case 'readtext': await ocrCommand(csock, chat, msg, rest); break;
+          case 'barcode': await barcodeCommand(csock, chat, msg, rest); break;
+          case 'vcard': await vcardCommand(csock, chat, msg, rest); break;
+          case 'tts': await ttsCommand(csock, chat, msg, rest); break;
+          case 'speedtest': await speedtestCommand(csock, chat, msg); break;
+          case 'npm': await npmCommand(csock, chat, msg, rest); break;
+          case 'unroll': await unrollCommand(csock, chat, msg, rest); break;
+          case 'web2img':
+          case 'webss': await web2imgCommand(csock, chat, msg, rest); break;
+          case 'tempmail': await tempmailCommand(csock, chat, msg, rest); break;
+          case 'readmail': await readmailCommand(csock, chat, msg, rest); break;
+          case 'whatanime': await whatanimeCommand(csock, chat, msg); break;
           case 'help':
           case 'menu': await helpCommand(csock, chat, msg, rest); break;
           case 'islamic':

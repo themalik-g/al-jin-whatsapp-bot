@@ -20,6 +20,7 @@
     "@qadeerxtech/qadeer-btns": "^1.0.2",
     "@whiskeysockets/baileys": "^7.0.0-rc.14",
     "awesome-phonenumber": "^7.8.0",
+    "bwip-js": "^4.11.4",
     "dotenv": "^16.4.7",
     "ffmpeg-static": "^5.2.0",
     "ffprobe-static": "^3.1.0",
@@ -28,6 +29,7 @@
     "p-queue": "^9.0.0",
     "pino": "^9.0.0",
     "pptxgenjs": "^3.12.0",
+    "tesseract.js": "^7.0.0",
     "ytdlp-nodejs": "^3.4.5"
   }
 }
