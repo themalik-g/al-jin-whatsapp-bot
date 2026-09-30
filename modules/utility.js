@@ -492,3 +492,158 @@ export async function factCommand(sock, chat, msg) {
     await sock.sendMessage(chat, { text: `⚠️ fact failed: ${e.message}` }, { quoted: msg }).catch(() => {});
   }
 }
+
+// ── .channelinfo [channel_link] ─────────────────────────────────────────────
+export async function channelinfoCommand(sock, chat, msg, args) {
+  try {
+    let input = (args || []).join(' ').trim();
+    if (!input) {
+      const ctx = msg.message?.extendedTextMessage?.contextInfo;
+      const quoted = ctx?.quotedMessage;
+      const quotedText = quoted?.conversation || quoted?.extendedTextMessage?.text || '';
+      const match = quotedText.match(/(?:https?:\/\/)?(?:www\.)?whatsapp\.com\/channel\/([a-zA-Z0-9]+)/i);
+      if (match) input = match[1];
+    }
+
+    if (!input) {
+      return sock.sendMessage(chat, { text: '📢 *channelinfo*\n\nUsage: `.channelinfo <whatsapp_channel_link_or_code_or_jid>`' }, { quoted: msg });
+    }
+
+    let code = input;
+    if (input.includes('whatsapp.com/channel/')) {
+      code = input.split('whatsapp.com/channel/')[1].split(/[?#]/)[0];
+    }
+
+    if (typeof sock.newsletterMetadata !== 'function') {
+      return sock.sendMessage(chat, { text: '❌ Newsletter socket methods are not supported by this Baileys instance.' }, { quoted: msg });
+    }
+
+    let meta = null;
+    if (code.endsWith('@newsletter')) {
+      meta = await sock.newsletterMetadata('jid', code);
+    } else {
+      meta = await sock.newsletterMetadata('invite', code);
+    }
+
+    if (!meta) {
+      return sock.sendMessage(chat, { text: `❌ Could not retrieve WhatsApp Channel metadata for \`${input}\`.` }, { quoted: msg });
+    }
+
+    const title = meta.name || meta.thread_metadata?.name?.text || 'Untitled Channel';
+    const description = meta.description || meta.thread_metadata?.description?.text || 'No description';
+    const subscribers = meta.subscribers || meta.thread_metadata?.subscribers_count || 'N/A';
+    const verification = meta.verification || meta.thread_metadata?.verification || 'PLAIN';
+    const isVerified = verification !== 'PLAIN' && verification !== 'NONE' ? '✅ Verified' : '❌ Standard';
+    const createdDate = meta.creation_time ? new Date(meta.creation_time * 1000).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : 'N/A';
+    const jid = meta.id || meta.thread_metadata?.id || 'N/A';
+
+    const report = [
+      `📢 *WhatsApp Channel Information*`,
+      '',
+      `🏷️ *Name:* ${title}`,
+      `🆔 *Channel JID:* \`${jid}\``,
+      `👥 *Subscribers:* ${typeof subscribers === 'number' ? subscribers.toLocaleString() : subscribers}`,
+      `🛡️ *Verification:* ${isVerified}`,
+      `📅 *Created:* ${createdDate}`,
+      '',
+      `📝 *Description:*\n_${description.slice(0, 500)}_`,
+      '',
+      'Provided by 𝗪𝗥𝗔𝗜𝗧🇭'
+    ].join('\n');
+
+    await sock.sendMessage(chat, { text: report }, { quoted: msg });
+  } catch (e) {
+    await sock.sendMessage(chat, { text: `⚠️ channelinfo failed: ${e.message}` }, { quoted: msg }).catch(() => {});
+  }
+}
+
+// ── .unit [value] [unit1] to [unit2] ────────────────────────────────────────
+export async function unitCommand(sock, chat, msg, args) {
+  try {
+    const raw = (args || []).join(' ').trim();
+    const match = raw.match(/^([\d\.]+)\s*([a-zA-Z°]+)\s+(?:to|in|=)\s+([a-zA-Z°]+)$/i);
+
+    if (!match) {
+      return sock.sendMessage(chat, { text: '📐 *unit conversion*\n\nUsage:\n• `.unit 180 C to F`\n• `.unit 5 kg to lbs`\n• `.unit 250 ml to cups`\n• `.unit 10 km to miles`' }, { quoted: msg });
+    }
+
+    const val = parseFloat(match[1]);
+    const u1 = match[2].toLowerCase().replace('°', '');
+    const u2 = match[3].toLowerCase().replace('°', '');
+
+    if (isNaN(val)) return sock.sendMessage(chat, { text: '❌ Invalid number value.' }, { quoted: msg });
+
+    let result = null;
+    let label = '';
+
+    // Temperature
+    if (['c', 'celsius', 'f', 'fahrenheit', 'k', 'kelvin'].includes(u1) && ['c', 'celsius', 'f', 'fahrenheit', 'k', 'kelvin'].includes(u2)) {
+      let celsius = val;
+      if (u1 === 'f' || u1 === 'fahrenheit') celsius = (val - 32) * (5 / 9);
+      else if (u1 === 'k' || u1 === 'kelvin') celsius = val - 273.15;
+
+      if (u2 === 'c' || u2 === 'celsius') result = celsius;
+      else if (u2 === 'f' || u2 === 'fahrenheit') result = (celsius * 9 / 5) + 32;
+      else if (u2 === 'k' || u2 === 'kelvin') result = celsius + 273.15;
+      label = 'Temperature';
+    }
+    // Mass / Weight (base: kg)
+    else {
+      const massMap = { kg: 1, g: 0.001, mg: 0.000001, lbs: 0.45359237, lb: 0.45359237, oz: 0.028349523125 };
+      const volMap = { l: 1, ml: 0.001, cups: 0.236588, cup: 0.236588, gal: 3.78541, floz: 0.0295735 };
+      const lenMap = { km: 1000, m: 1, cm: 0.01, mm: 0.001, miles: 1609.344, mile: 1609.344, feet: 0.3048, ft: 0.3048, inches: 0.0254, in: 0.0254 };
+
+      if (massMap[u1] && massMap[u2]) {
+        result = (val * massMap[u1]) / massMap[u2];
+        label = 'Mass/Weight';
+      } else if (volMap[u1] && volMap[u2]) {
+        result = (val * volMap[u1]) / volMap[u2];
+        label = 'Volume';
+      } else if (lenMap[u1] && lenMap[u2]) {
+        result = (val * lenMap[u1]) / lenMap[u2];
+        label = 'Length/Distance';
+      }
+    }
+
+    if (result === null) {
+      return sock.sendMessage(chat, { text: `❌ Unsupported conversion from *${u1}* to *${u2}*.` }, { quoted: msg });
+    }
+
+    const report = `📐 *Unit Conversion (${label})*\n\n*${val} ${u1.toUpperCase()}* = *${result.toFixed(4)} ${u2.toUpperCase()}*\n\nProvided by 𝗪𝗥𝗔𝗜𝗧🇭`;
+    await sock.sendMessage(chat, { text: report }, { quoted: msg });
+  } catch (e) {
+    await sock.sendMessage(chat, { text: `⚠️ unit conversion failed: ${e.message}` }, { quoted: msg }).catch(() => {});
+  }
+}
+
+// ── .commandcount ───────────────────────────────────────────────────────────
+export async function commandcountCommand(sock, chat, msg) {
+  try {
+    const { REGISTRY } = await import('./help.js');
+    let totalInHelp = 0;
+    const countSet = new Set();
+
+    REGISTRY.forEach(cat => {
+      cat.commands.forEach(cmdObj => {
+        const rawCmd = cmdObj.cmd.split(' ')[0].replace(/^\./, '');
+        if (rawCmd) {
+          totalInHelp++;
+          countSet.add(rawCmd);
+        }
+      });
+    });
+
+    const report = [
+      '📊 *WRAITH Command Count*',
+      '',
+      `⚙️ *Total Help Menu Entries:* ${totalInHelp}`,
+      `🎯 *Unique Command Verbs:* ${countSet.size}`,
+      '',
+      'Provided by 𝗪𝗥𝗔𝗜𝗧🇭'
+    ].join('\n');
+
+    await sock.sendMessage(chat, { text: report }, { quoted: msg });
+  } catch (e) {
+    await sock.sendMessage(chat, { text: `⚠️ commandcount failed: ${e.message}` }, { quoted: msg }).catch(() => {});
+  }
+}

@@ -8,6 +8,7 @@ import { CONFIG } from '../config.js';
 import { isOwner, ownerJid, digitsOf } from '../core/identity.js';
 import { stripDevice, jidType } from '../core/jid-resolver.js';
 import { inState, statePath } from '../core/paths.js';
+import { getAntibotConfig } from './group.js';
 
 const STATE = () => inState('admin.json');
 const DEBUG = process.env.WRAITH_DEBUG === '1';
@@ -368,6 +369,18 @@ export async function handleProtection(sock, chat, msg, text) {
                     text: `🎨 Stickers not allowed here, @${senderPn.split('@')[0]}.`,
                     mentions: [senderPn]
                 });
+            } catch {}
+            return true;
+        }
+    }
+
+    // Antibot check
+    const antibotCfg = getAntibotConfig()[chat];
+    if (antibotCfg?.enabled) {
+        const isBotMessage = msg.key.id?.startsWith('BAE5') || msg.key.id?.startsWith('3EB0') || msg.key.id?.length === 20 || /^[!/.]\w+/i.test(text);
+        if (isBotMessage && !isOwner(from)) {
+            try {
+                await sock.sendMessage(chat, { delete: msg.key });
             } catch {}
             return true;
         }

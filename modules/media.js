@@ -394,3 +394,86 @@ export async function coupleppCommand(sock, chat, msg, args) {
     await sock.sendMessage(chat, { text: `⚠️ couplepp failed: ${e.message}` }, { quoted: msg }).catch(() => {});
   }
 }
+
+// ── .meme "Top Text" | "Bottom Text" ─────────────────────────────────────────
+export async function memeCommand(sock, chat, msg, args) {
+  try {
+    const raw = (args || []).join(' ').trim();
+    let topText = '';
+    let bottomText = '';
+
+    if (raw.includes('|')) {
+      const parts = raw.split('|');
+      topText = parts[0].replace(/^["']|["']$/g, '').trim();
+      bottomText = parts[1].replace(/^["']|["']$/g, '').trim();
+    } else if (raw) {
+      topText = raw.replace(/^["']|["']$/g, '').trim();
+    }
+
+    // Get media from quoted message or direct message
+    const { getMediaFromMsg } = await import('./media-tools.js');
+    const media = await getMediaFromMsg(msg);
+
+    if (!media || media.kind !== 'image') {
+      return sock.sendMessage(chat, { text: '🎭 *meme*\n\nUsage: Reply to an image with:\n`.meme "Top Text" | "Bottom Text"` or `.meme Top Text | Bottom Text`' }, { quoted: msg });
+    }
+
+    await sock.sendMessage(chat, { text: '🎭 Generating custom meme...' }, { quoted: msg });
+
+    // Sanitize text for Memegen URL scheme
+    const cleanStr = (s) => encodeURIComponent(
+      s.replace(/_/g, '__')
+       .replace(/-/g, '--')
+       .replace(/\?/g, '~q')
+       .replace(/%/g, '~p')
+       .replace(/#/g, '~h')
+       .replace(/\//g, '~s')
+       || '_'
+    );
+
+    const top = cleanStr(topText || '_');
+    const bottom = cleanStr(bottomText || '_');
+
+    // Upload image to temporary host or use MemeGen custom image parameter
+    // MemeGen accepts custom image via ?background=URL or custom POST
+    const uploadRes = await fetch('https://tmpfiles.org/api/v1/upload', {
+      method: 'POST',
+      body: (() => {
+        const FormData = globalThis.FormData;
+        if (!FormData) return null;
+        const fd = new FormData();
+        const blob = new Blob([media.buffer], { type: media.mimetype });
+        fd.append('file', blob, 'meme.jpg');
+        return fd;
+      })()
+    }).catch(() => null);
+
+    let imageUrl = null;
+    if (uploadRes && uploadRes.ok) {
+      const upJson = await uploadRes.json();
+      if (upJson?.data?.url) {
+        imageUrl = upJson.data.url.replace('tmpfiles.org/', 'tmpfiles.org/dl/');
+      }
+    }
+
+    if (!imageUrl) {
+      return sock.sendMessage(chat, { text: '❌ Could not upload image for meme generation.' }, { quoted: msg });
+    }
+
+    const memeUrl = `https://api.memegen.link/images/custom/${top}/${bottom}.png?background=${encodeURIComponent(imageUrl)}`;
+    const memeRes = await fetch(memeUrl);
+
+    if (!memeRes.ok) {
+      throw new Error(`MemeGen API status ${memeRes.status}`);
+    }
+
+    const memeBuf = Buffer.from(await memeRes.arrayBuffer());
+
+    await sock.sendMessage(chat, {
+      image: memeBuf,
+      caption: `🎭 *Custom Meme*\n\nProvided by 𝗪𝗥𝗔𝗜𝗧🇭`
+    }, { quoted: msg });
+  } catch (e) {
+    await sock.sendMessage(chat, { text: `⚠️ meme failed: ${e.message}` }, { quoted: msg }).catch(() => {});
+  }
+}

@@ -433,6 +433,348 @@ export async function clearchatCommand(sock, chat, msg) {
 export function getCallsConfig() { return readJson(CALLS_FILE(), { reject: false }); }
 export function setCallsConfig(patch) { writeJsonAtomic(CALLS_FILE(), { ...getCallsConfig(), ...patch }); }
 
+const WARNS_FILE = () => inState('warns.json');
+const ANTIBOT_FILE = () => inState('antibot.json');
+const PROT_ROLES_FILE = () => inState('group_roles_prot.json');
+
+export function getWarnsConfig() { return readJson(WARNS_FILE(), {}); }
+export function setWarnsConfig(chat, userJid, count) {
+  const cfg = getWarnsConfig();
+  if (!cfg[chat]) cfg[chat] = {};
+  cfg[chat][userJid] = count;
+  writeJsonAtomic(WARNS_FILE(), cfg);
+}
+
+export function getAntibotConfig() { return readJson(ANTIBOT_FILE(), {}); }
+export function setAntibotConfig(chat, enabled) {
+  const cfg = getAntibotConfig();
+  cfg[chat] = { enabled };
+  writeJsonAtomic(ANTIBOT_FILE(), cfg);
+}
+
+export function getProtRolesConfig() { return readJson(PROT_ROLES_FILE(), {}); }
+export function setProtRolesConfig(chat, patch) {
+  const cfg = getProtRolesConfig();
+  cfg[chat] = { ...(cfg[chat] || {}), ...patch };
+  writeJsonAtomic(PROT_ROLES_FILE(), cfg);
+}
+
+// ── .gclone ─────────────────────────────────────────────────────────────────
+export async function gcloneCommand(sock, chat, msg, args) {
+  if (!isGroup(chat)) return sock.sendMessage(chat, { text: '❌ Group only.' }, { quoted: msg });
+  if (ownerOnly(sock, chat, msg)) return;
+
+  try {
+    await sock.sendMessage(chat, { text: '👥 Scraping group details and cloning group...' }, { quoted: msg });
+
+    const meta = await sock.groupMetadata(chat);
+    const title = meta.subject || 'Cloned Group';
+    const description = meta.desc || '';
+
+    // Download current group picture
+    let pfpBuf = null;
+    try {
+      const pfpUrl = await sock.profilePictureUrl(chat, 'image');
+      if (pfpUrl) {
+        const res = await fetch(pfpUrl);
+        if (res.ok) pfpBuf = Buffer.from(await res.arrayBuffer());
+      }
+    } catch {}
+
+    const fromUser = msg.key.participant || msg.key.remoteJid;
+    const cleanNum = fromUser.split('@')[0].split(':')[0].replace(/\D/g, '');
+    const callerJid = cleanNum + '@s.whatsapp.net';
+
+    // Create new group with caller
+    const newGroup = await sock.groupCreate(title, [callerJid]);
+    const newJid = newGroup.id;
+
+    if (description && typeof sock.groupUpdateDescription === 'function') {
+      await sock.groupUpdateDescription(newJid, description).catch(() => {});
+    }
+
+    if (pfpBuf) {
+      await sock.updateProfilePicture(newJid, pfpBuf).catch(() => {});
+    }
+
+    await sock.sendMessage(chat, { text: `✅ *Group Cloned Successfully!*\n\n📌 *New Group:* ${title}\n🆔 *JID:* \`${newJid}\`\n👑 *Admin:* @${callerJid.split('@')[0]}`, mentions: [callerJid] }, { quoted: msg });
+  } catch (e) {
+    await sock.sendMessage(chat, { text: `⚠️ gclone failed: ${e.message}` }, { quoted: msg }).catch(() => {});
+  }
+}
+
+// ── .revoke ─────────────────────────────────────────────────────────────────
+export async function revokeCommand(sock, chat, msg) {
+  if (!isGroup(chat)) return sock.sendMessage(chat, { text: '❌ Group only.' }, { quoted: msg });
+  if (!(await canManageGroup(sock, chat, msg))) {
+    return sock.sendMessage(chat, { text: '⛔ Group admins or owner only.' }, { quoted: msg });
+  }
+
+  try {
+    const code = await sock.groupRevokeInvite(chat);
+    const newLink = `https://chat.whatsapp.com/${code}`;
+    await sock.sendMessage(chat, { text: `🔄 *Group Invite Link Reset!*\n\nOld link is now revoked.\nNew Link: ${newLink}` }, { quoted: msg });
+  } catch (e) {
+    await sock.sendMessage(chat, { text: `⚠️ revoke failed: ${e.message}` }, { quoted: msg }).catch(() => {});
+  }
+}
+
+// ── .gshield [on / off] ─────────────────────────────────────────────────────
+export async function gshieldCommand(sock, chat, msg, args) {
+  if (!isGroup(chat)) return sock.sendMessage(chat, { text: '❌ Group only.' }, { quoted: msg });
+  if (!(await canManageGroup(sock, chat, msg))) {
+    return sock.sendMessage(chat, { text: '⛔ Group admins or owner only.' }, { quoted: msg });
+  }
+
+  const arg = (args?.[0] || '').toLowerCase();
+  if (arg === 'on') {
+    await sock.groupSettingUpdate(chat, 'locked');
+    return sock.sendMessage(chat, { text: '🛡️ *Group Shield Activated!*\nOnly admins can edit group info (Name, PFP, Description).' }, { quoted: msg });
+  } else if (arg === 'off') {
+    await sock.groupSettingUpdate(chat, 'unlocked');
+    return sock.sendMessage(chat, { text: '🔓 *Group Shield Deactivated!*\nAll members can edit group info.' }, { quoted: msg });
+  }
+
+  return sock.sendMessage(chat, { text: '🛡️ *gshield*\n\nUsage:\n• `.gshield on`\n• `.gshield off`' }, { quoted: msg });
+}
+
+// ── .fakereply [@user] [their_text] | [your_reply] ──────────────────────────
+export async function fakereplyCommand(sock, chat, msg, args) {
+  try {
+    const raw = (args || []).join(' ').trim();
+    if (!raw.includes('|')) {
+      return sock.sendMessage(chat, { text: '🎭 *fakereply*\n\nUsage: `.fakereply @user specified quoted text | your response text`' }, { quoted: msg });
+    }
+
+    const [quotedPart, replyPart] = raw.split('|').map(s => s.trim());
+    const ctx = msg.message?.extendedTextMessage?.contextInfo;
+    let targetJid = ctx?.participant || (Array.isArray(ctx?.mentionedJid) && ctx.mentionedJid[0]);
+
+    let targetText = quotedPart;
+    if (quotedPart.startsWith('@')) {
+      const spaceIdx = quotedPart.indexOf(' ');
+      if (spaceIdx !== -1) {
+        targetText = quotedPart.slice(spaceIdx + 1).trim();
+      }
+    }
+
+    if (!targetJid) {
+      targetJid = msg.key.participant || msg.key.remoteJid;
+    }
+
+    const fakeQuoted = {
+      key: {
+        remoteJid: chat,
+        fromMe: false,
+        id: 'FAKE' + Date.now(),
+        participant: targetJid
+      },
+      message: {
+        conversation: targetText
+      }
+    };
+
+    await sock.sendMessage(chat, { text: replyPart }, { quoted: fakeQuoted });
+  } catch (e) {
+    await sock.sendMessage(chat, { text: `⚠️ fakereply failed: ${e.message}` }, { quoted: msg }).catch(() => {});
+  }
+}
+
+// ── .antipromote & .antidemote ──────────────────────────────────────────────
+export async function antipromoteCommand(sock, chat, msg, args) {
+  if (!isGroup(chat)) return sock.sendMessage(chat, { text: '❌ Group only.' }, { quoted: msg });
+  if (ownerOnly(sock, chat, msg)) return;
+
+  const arg = (args?.[0] || '').toLowerCase();
+  if (arg === 'on') {
+    setProtRolesConfig(chat, { antipromote: true });
+    return sock.sendMessage(chat, { text: '🛡️ *Anti-Promote Enabled!* Any unauthorized promotions will be automatically reverted.' }, { quoted: msg });
+  } else if (arg === 'off') {
+    setProtRolesConfig(chat, { antipromote: false });
+    return sock.sendMessage(chat, { text: '🔓 *Anti-Promote Disabled!*' }, { quoted: msg });
+  }
+
+  const cfg = getProtRolesConfig()[chat] || {};
+  return sock.sendMessage(chat, { text: `🛡️ *antipromote*\nStatus: *${cfg.antipromote ? 'ON' : 'OFF'}*\n\nUsage:\n• \`.antipromote on\`\n• \`.antipromote off\`` }, { quoted: msg });
+}
+
+export async function antidemoteCommand(sock, chat, msg, args) {
+  if (!isGroup(chat)) return sock.sendMessage(chat, { text: '❌ Group only.' }, { quoted: msg });
+  if (ownerOnly(sock, chat, msg)) return;
+
+  const arg = (args?.[0] || '').toLowerCase();
+  if (arg === 'on') {
+    setProtRolesConfig(chat, { antidemote: true });
+    return sock.sendMessage(chat, { text: '🛡️ *Anti-Demote Enabled!* Any unauthorized demotions will be automatically reverted.' }, { quoted: msg });
+  } else if (arg === 'off') {
+    setProtRolesConfig(chat, { antidemote: false });
+    return sock.sendMessage(chat, { text: '🔓 *Anti-Demote Disabled!*' }, { quoted: msg });
+  }
+
+  const cfg = getProtRolesConfig()[chat] || {};
+  return sock.sendMessage(chat, { text: `🛡️ *antidemote*\nStatus: *${cfg.antidemote ? 'ON' : 'OFF'}*\n\nUsage:\n• \`.antidemote on\`\n• \`.antidemote off\`` }, { quoted: msg });
+}
+
+// ── .purge [count] ──────────────────────────────────────────────────────────
+export async function purgeCommand(sock, chat, msg, args) {
+  try {
+    let count = parseInt(args?.[0] || '10', 10);
+    if (isNaN(count) || count < 1) count = 10;
+    if (count > 50) count = 50;
+
+    const ctx = msg.message?.extendedTextMessage?.contextInfo;
+    const quotedMsgId = ctx?.stanzaId || ctx?.quotedMessage?.key?.id;
+
+    let targetMsgIds = [];
+    if (quotedMsgId) {
+      targetMsgIds.push(quotedMsgId);
+    }
+
+    // Attempt to delete calling message
+    try {
+      await sock.sendMessage(chat, { delete: msg.key });
+    } catch {}
+
+    let deleted = 0;
+    for (const id of targetMsgIds.slice(0, count)) {
+      try {
+        await sock.sendMessage(chat, { delete: { remoteJid: chat, fromMe: true, id } });
+        deleted++;
+      } catch {}
+    }
+
+    const report = await sock.sendMessage(chat, { text: `✅ Purge complete. Deleted ${deleted} message(s).` });
+    setTimeout(async () => {
+      try { await sock.sendMessage(chat, { delete: report.key }); } catch {}
+    }, 5000);
+  } catch (e) {
+    await sock.sendMessage(chat, { text: `⚠️ purge failed: ${e.message}` }, { quoted: msg }).catch(() => {});
+  }
+}
+
+// ── .antibot [on / off] ─────────────────────────────────────────────────────
+export async function antibotCommand(sock, chat, msg, args) {
+  if (!isGroup(chat)) return sock.sendMessage(chat, { text: '❌ Group only.' }, { quoted: msg });
+  if (!(await canManageGroup(sock, chat, msg))) {
+    return sock.sendMessage(chat, { text: '⛔ Group admins or owner only.' }, { quoted: msg });
+  }
+
+  const arg = (args?.[0] || '').toLowerCase();
+  if (arg === 'on') {
+    setAntibotConfig(chat, true);
+    return sock.sendMessage(chat, { text: '🤖 *Anti-Bot Shield Enabled!* Unauthorized third-party bot messages will be deleted.' }, { quoted: msg });
+  } else if (arg === 'off') {
+    setAntibotConfig(chat, false);
+    return sock.sendMessage(chat, { text: '🔓 *Anti-Bot Shield Disabled!*' }, { quoted: msg });
+  }
+
+  const cfg = getAntibotConfig()[chat];
+  return sock.sendMessage(chat, { text: `🤖 *antibot*\nStatus: *${cfg?.enabled ? 'ON' : 'OFF'}*\n\nUsage:\n• \`.antibot on\`\n• \`.antibot off\`` }, { quoted: msg });
+}
+
+// ── .warn / .warns / .resetwarns ───────────────────────────────────────────
+export async function warnCommand(sock, chat, msg, args) {
+  if (!isGroup(chat)) return sock.sendMessage(chat, { text: '❌ Group only.' }, { quoted: msg });
+  if (!(await canManageGroup(sock, chat, msg))) {
+    return sock.sendMessage(chat, { text: '⛔ Group admins or owner only.' }, { quoted: msg });
+  }
+
+  try {
+    const ctx = msg.message?.extendedTextMessage?.contextInfo;
+    let targetJid = ctx?.participant || (Array.isArray(ctx?.mentionedJid) && ctx.mentionedJid[0]);
+
+    if (!targetJid && args?.[0]) {
+      const raw = args[0].replace(/\D/g, '');
+      if (raw.length >= 7) targetJid = `${raw}@s.whatsapp.net`;
+    }
+
+    if (!targetJid) {
+      return sock.sendMessage(chat, { text: '❌ Target required. Reply to a user or mention @user.' }, { quoted: msg });
+    }
+
+    const reason = args.slice(1).join(' ').trim() || 'No reason specified';
+    const cfg = getWarnsConfig();
+    const current = (cfg[chat]?.[targetJid] || 0) + 1;
+
+    setWarnsConfig(chat, targetJid, current);
+
+    const targetNum = targetJid.split('@')[0];
+
+    if (current >= 3) {
+      await sock.sendMessage(chat, {
+        text: `⚠️ *3rd Strike Reached for @${targetNum}!*\nReason: ${reason}\n\n🚨 Kicking user from group...`,
+        mentions: [targetJid]
+      });
+      await sock.groupParticipantsUpdate(chat, [targetJid], 'remove').catch(() => {});
+      setWarnsConfig(chat, targetJid, 0);
+    } else {
+      await sock.sendMessage(chat, {
+        text: `⚠️ *Warning Issued to @${targetNum}* (${current}/3 strikes)\nReason: _${reason}_\n\n3 strikes will result in an automatic kick.`,
+        mentions: [targetJid]
+      });
+    }
+  } catch (e) {
+    await sock.sendMessage(chat, { text: `⚠️ warn failed: ${e.message}` }, { quoted: msg }).catch(() => {});
+  }
+}
+
+export async function warnsCommand(sock, chat, msg, args) {
+  if (!isGroup(chat)) return sock.sendMessage(chat, { text: '❌ Group only.' }, { quoted: msg });
+  try {
+    const ctx = msg.message?.extendedTextMessage?.contextInfo;
+    let targetJid = ctx?.participant || (Array.isArray(ctx?.mentionedJid) && ctx.mentionedJid[0]);
+
+    if (!targetJid && args?.[0]) {
+      const raw = args[0].replace(/\D/g, '');
+      if (raw.length >= 7) targetJid = `${raw}@s.whatsapp.net`;
+    }
+
+    if (!targetJid) targetJid = msg.key.participant || msg.key.remoteJid;
+
+    const cfg = getWarnsConfig();
+    const count = cfg[chat]?.[targetJid] || 0;
+    const targetNum = targetJid.split('@')[0];
+
+    await sock.sendMessage(chat, {
+      text: `📋 *Warnings for @${targetNum}:* ${count}/3 strikes`,
+      mentions: [targetJid]
+    }, { quoted: msg });
+  } catch (e) {
+    await sock.sendMessage(chat, { text: `⚠️ warns failed: ${e.message}` }, { quoted: msg }).catch(() => {});
+  }
+}
+
+export async function resetwarnsCommand(sock, chat, msg, args) {
+  if (!isGroup(chat)) return sock.sendMessage(chat, { text: '❌ Group only.' }, { quoted: msg });
+  if (!(await canManageGroup(sock, chat, msg))) {
+    return sock.sendMessage(chat, { text: '⛔ Group admins or owner only.' }, { quoted: msg });
+  }
+
+  try {
+    const ctx = msg.message?.extendedTextMessage?.contextInfo;
+    let targetJid = ctx?.participant || (Array.isArray(ctx?.mentionedJid) && ctx.mentionedJid[0]);
+
+    if (!targetJid && args?.[0]) {
+      const raw = args[0].replace(/\D/g, '');
+      if (raw.length >= 7) targetJid = `${raw}@s.whatsapp.net`;
+    }
+
+    if (!targetJid) {
+      return sock.sendMessage(chat, { text: '❌ Target required. Reply to a user or mention @user.' }, { quoted: msg });
+    }
+
+    setWarnsConfig(chat, targetJid, 0);
+    const targetNum = targetJid.split('@')[0];
+
+    await sock.sendMessage(chat, {
+      text: `✅ Warnings reset for @${targetNum}.`,
+      mentions: [targetJid]
+    }, { quoted: msg });
+  } catch (e) {
+    await sock.sendMessage(chat, { text: `⚠️ resetwarns failed: ${e.message}` }, { quoted: msg }).catch(() => {});
+  }
+}
+
 export function attachCallRejector(sock) {
   sock.ev.on('call', async (calls) => {
     try {
