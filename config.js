@@ -6,7 +6,7 @@ const BASE = {
   owner: "",
   codename: "𝗪𝗥𝗔𝗜𝗧🇭",
   botName: "𝗪𝗥𝗔𝗜𝗧🇭",
-  version: "1.3.2",
+  version: "1.3.3",
   timezone: "Asia/Karachi",
   memoryTTL: 24 * 60 * 60 * 1000,
   vaultDir: "vault",

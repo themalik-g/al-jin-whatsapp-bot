@@ -1,7 +1,7 @@
 {
   "name": "wraith",
-  "version": "1.3.2",
-  "description": "WRAITH — a silent watcher for WhatsApp",
+  "version": "1.3.3",
+  "description": "WRAITH \u2014 a silent watcher for WhatsApp",
   "type": "module",
   "main": "start.js",
   "scripts": {
@@ -32,5 +32,12 @@
     "pptxgenjs": "^3.12.0",
     "tesseract.js": "^7.0.0",
     "ytdlp-nodejs": "^3.4.5"
+  },
+  "allowScripts": {
+    "@whiskeysockets/baileys": true,
+    "ffmpeg-static": true,
+    "protobufjs": true,
+    "tesseract.js": true,
+    "ytdlp-nodejs": true
   }
 }

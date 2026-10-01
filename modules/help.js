@@ -6,6 +6,36 @@ import { isOwner } from '../core/identity.js';
 import { getPrefix } from '../core/settings.js';
 import { NEWSLETTER_CONTEXT, sendWithCta } from '../lib/buttons.js';
 
+const MENU_IMAGE = process.env.WRAITH_MENU_IMAGE || 'https://i.picrd.com/images/YZUezOztDow.jpg';
+const CAPTION_MAX = 3000;
+
+// Sends the menu with the banner image. Falls back to the plain text menu
+// if the image cannot be fetched/sent, so .menu always answers.
+async function sendMenu(sock, chat, text, msg) {
+  try {
+    if (text.length <= CAPTION_MAX) {
+      return await sock.sendMessage(
+        chat,
+        { image: { url: MENU_IMAGE }, caption: text, contextInfo: NEWSLETTER_CONTEXT },
+        { quoted: msg }
+      );
+    }
+    const cut = text.lastIndexOf('\n', CAPTION_MAX);
+    const head = text.slice(0, cut > 0 ? cut : CAPTION_MAX);
+    const tail = text.slice(head.length).trim();
+    const sent = await sock.sendMessage(
+      chat,
+      { image: { url: MENU_IMAGE }, caption: head, contextInfo: NEWSLETTER_CONTEXT },
+      { quoted: msg }
+    );
+    if (tail) await sock.sendMessage(chat, { text: tail, contextInfo: NEWSLETTER_CONTEXT }, { quoted: msg });
+    return sent;
+  } catch (e) {
+    try { console.error('[menu:image]', e?.message); } catch {}
+    return sendWithCta(sock, chat, text, { quoted: msg });
+  }
+}
+
 const c = (cmd, ownerOnly = false) => ({ cmd, ownerOnly });
 
 const SMALL_CAPS = {
@@ -500,7 +530,7 @@ export async function helpCommand(sock, chat, msg, args) {
 
     if (!target) {
       const text = renderAllPlainText(prefix, isOwnerUser);
-      return await sendWithCta(sock, chat, text, { quoted: msg });
+      return await sendMenu(sock, chat, text, msg);
     }
 
     const group = findGroup(target);
@@ -530,12 +560,7 @@ export async function helpCommand(sock, chat, msg, args) {
 
     const text = [renderHeaderBox(prefix, isOwnerUser), box].join('\n');
 
-    return await sendWithCta(
-      sock,
-      chat,
-      text,
-      { quoted: msg }
-    );
+    return await sendMenu(sock, chat, text, msg);
   } catch (e) {
     try {
       await sock.sendMessage(
