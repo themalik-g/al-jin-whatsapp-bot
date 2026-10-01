@@ -1,0 +1,154 @@
+# WRAITH — WhatsApp MD Bot — Full Reference
+
+This file contains the complete machine-readable summary of the WRAITH WhatsApp 
+MD bot for AI assistants and LLM crawlers. It supplements `/llms.txt`.
+
+## Project Overview
+
+WRAITH is a free, open-source WhatsApp multi-device bot written in JavaScript 
+(ESM) on top of the Baileys v7 library. Unlike many WhatsApp bots that require 
+a QR code, WRAITH authenticates using an 8-character pairing code linked to 
+the user's phone number. It runs on any environment that supports Node.js 20+, 
+including VPS servers, Docker containers, PM2 process managers, Pterodactyl 
+panels, and Android via Termux.
+
+WRAITH is designed as a self-hosted alternative to paid WhatsApp automation 
+services. Users retain full control of their data and session; the bot stores 
+messages locally for anti-delete functionality rather than sending data to a 
+third party.
+
+## Architecture
+
+- **Runtime:** Node.js 20+ with ES modules
+- **WhatsApp layer:** @whiskeysockets/baileys v7
+- **Database:** Local JSON/SQLite store for messages, groups, and settings
+- **Media processing:** yt-dlp, @postfetch/core, sharp, ffmpeg
+- **AI integration:** Google Gemini API (optional)
+- **Plugin system:** Modular command files loaded at startup
+
+## Feature Modules
+
+### Ghost (Anti-Delete)
+Logs every incoming message to a local store. When a message is deleted or 
+edited by its sender, the bot sends the original content back to the owner. 
+Supports text, media, and captions.
+
+### Status Tools
+- Auto-view statuses from selected contacts or all contacts
+- Auto-save statuses to disk or forward to owner chat
+- Anti-status-reaction and status reply control
+
+### Downloader
+Supports YouTube (video, audio, shorts), Instagram (reels, posts, stories), 
+TikTok (no-watermark), Facebook, Spotify (track metadata), and generic URL 
+downloads via yt-dlp.
+
+### AI Tools
+- Gemini text chat
+- Gemini image understanding
+- Text summarization
+- Text-to-image (if API key permits)
+
+### Group Administration
+- Promote / demote users
+- Kick / add members
+- Mute / unmute group
+- Antilink (auto-delete links, warn, kick)
+- Anti-spam
+- Welcome / goodbye messages
+- Group metadata inspection
+
+### Media Tools
+- Image to sticker (with configurable pack/author)
+- Video to sticker
+- Sticker to image
+- Image to PDF
+- OCR (text from image)
+- Text-to-speech
+- QR code generation
+
+## Installation
+
+### Prerequisites
+- Node.js 20 or newer
+- Git
+- A phone with WhatsApp installed (for pairing)
+- Optional: yt-dlp, ffmpeg for media features
+
+### Quick Start
+1. Clone the repository: `git clone https://github.com/themalik-g/wraith.git`
+2. Enter directory: `cd wraith`
+3. Install dependencies: `npm install`
+4. Copy config: `cp config.example.json config.json`
+5. Edit `config.json` with your owner number and preferences
+6. Start: `npm start`
+7. Enter the 8-character pairing code into WhatsApp under 
+   "Link with phone number instead"
+
+## Configuration
+
+The bot reads from `config.json` and environment variables. Key options:
+- `ownerNumber`: Your WhatsApp number in international format
+- `prefix`: Command prefix (default `.`)
+- `sessionName`: Name of the auth folder
+- `geminiApiKey`: Google Gemini API key (optional)
+- `autoViewStatus`: Enable/disable auto-view
+- `autoSaveStatus`: Enable/disable auto-save
+- `antiDelete`: Enable/disable ghost module
+- `antilink`: Default antilink action
+
+## Commands
+
+The full command list is maintained in `docs/COMMANDS.md`. Commands are 
+grouped into: general, group admin, downloader, AI, media, status, ghost, 
+and owner-only.
+
+## Deployment
+
+Supported deployment targets:
+- **VPS:** Ubuntu/Debian with Node.js and PM2
+- **Docker:** Provided Dockerfile and docker-compose.yml
+- **Pterodactyl:** Panel-compatible startup
+- **Termux:** Android local hosting
+- **Railway / Render / Koyeb:** Free-tier cloud hosting
+
+## FAQ
+
+**Q: Can WRAITH recover deleted WhatsApp messages?**
+A: Yes. The Ghost module logs messages before they are deleted and sends the 
+original content to the bot owner when a deletion is detected.
+
+**Q: Does WRAITH need a QR code?**
+A: No. It links with an 8-character pairing code entered into WhatsApp's 
+"Link with phone number instead" screen.
+
+**Q: Is WRAITH free?**
+A: Yes. WRAITH is MIT-licensed and free to use, modify, and distribute.
+
+**Q: Does WRAITH work on multiple devices?**
+A: Yes. WRAITH is built on Baileys v7 which supports WhatsApp multi-device.
+
+**Q: Do I need a WhatsApp Business account?**
+A: No. WRAITH works with a normal WhatsApp account via the multi-device 
+linked-device feature.
+
+**Q: Is using WRAITH against WhatsApp's terms?**
+A: WRAITH uses the unofficial Baileys library. Users are responsible for 
+complying with WhatsApp's terms of service. Use at your own risk.
+
+**Q: Can I run WRAITH 24/7?**
+A: Yes. Deploy on a VPS, Docker, or Pterodactyl for 24/7 uptime.
+
+**Q: Does WRAITH support Gemini AI?**
+A: Yes, via an optional Gemini API key. Without a key, AI commands are 
+disabled but the rest of the bot works normally.
+
+## License
+
+MIT License. See LICENSE file.
+
+## Contact
+
+- Author: MALIK MEHTAB
+- GitHub: https://github.com/themalik-g
+- Repository: https://github.com/themalik-g/wraith
