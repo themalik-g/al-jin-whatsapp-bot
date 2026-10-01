@@ -15,7 +15,7 @@
 
 </div>
 
-**WRAITH is a free, open-source WhatsApp multi-device (MD) bot** written in JavaScript for **Node.js 20+** and built on **`@whiskeysockets/baileys` v7.0.0-rc.14**. It gives you **native interactive buttons**, **in-WhatsApp multi-session pairing**, **FullDP / HDDP profile pictures**, a **cookie-free YouTube downloader**, **anti-delete / anti-edit / view-once recovery**, **Gemini AI**, an **Islamic toolset** and complete **WhatsApp group management** — with **no browser, no QR scan, no WhatsApp Business API and no custom Baileys fork**.
+**WRAITH is a free, open-source WhatsApp multi-device (MD) bot** written in JavaScript for **Node.js 20+** and built on **`@whiskeysockets/baileys` v7.0.0-rc.14**. It gives you **native interactive buttons**, **downloaders**, **anti-delete / anti-edit / view-once recovery**, **Gemini AI**, an **Islamic toolset** and complete **WhatsApp group management** — with **no browser, no QR scan, no WhatsApp Business API and no custom Baileys fork**.
 
 > **Looking for a WhatsApp bot you can self-host?** WRAITH runs on a VPS, Docker, PM2, Pterodactyl panels or Termux and keeps all data on your own machine.
 
