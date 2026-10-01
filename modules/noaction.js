@@ -26,8 +26,8 @@ import { getTarget, ownerOnly, notifyOwner } from '../lib/targets.js';
 const DEBUG = process.env.WRAITH_DEBUG === '1';
 const FILE = () => inState('noaction.json');
 const ACT_DELAY_MS = 0;
-const WINDOW_MS = 10 * 60_000;
-const MAX_RESTORES = 3;
+const WINDOW_MS = 500;
+const MAX_RESTORES = 30;
 
 // Guard records live in state/noaction.json and are keyed by phone number:
 //   { "<digits>": { all, groups: [chatJid], lids: [lidJid], pending: [chatJid] } }
