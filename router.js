@@ -10,7 +10,7 @@ import { activityCommand, trackActivity } from './modules/activity.js';
 import { scheduleCommand } from './modules/schedule.js';
 import { cacheChannelFromMessage } from './core/jid-resolver.js';
 import { getPrefix, getReplyMode, setReplyMode } from './core/settings.js';
-import { isOwner } from './core/identity.js';
+import { isOwner, primeSenderIdentity } from './core/identity.js';
 import { CONFIG } from './config.js';
 import { reqlocationCommand, handleIncomingLocation } from './modules/location.js';
 import { WAMessageStubType } from '@whiskeysockets/baileys';
@@ -364,6 +364,9 @@ export async function dispatch(sock, update, sessionId = 'main') {
     try {
       const chat = msg.key.remoteJid;
       if (!chat) continue;
+
+      // Resolve LID senders (owners / secondary owners / developer) first
+      await primeSenderIdentity(sock, msg);
 
       try { trackActivity(chat, msg, plainText(msg)); } catch (e) { console.error('[router] trackActivity', e.message); }
       try { cacheChannelFromMessage(msg); } catch (e) { console.error('[router] cacheChannelFromMessage', e.message); }

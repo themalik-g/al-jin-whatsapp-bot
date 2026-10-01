@@ -1,5 +1,28 @@
 # Troubleshooting
 
+## "Waiting for this message. This may take a while."
+
+**Symptom:** Recipients (or your own phone) see this placeholder instead of the bot's message, sometimes forever.
+
+**Cause:** The receiving device failed to decrypt the message and asked the bot to re-send it. That only works if the bot can still find the original message (`getMessage`). Older builds kept just 100 messages for 5 minutes in RAM, never stored button/interactive messages, and lost everything on restart. Native-flow buttons sent from a non-business account are also rendered as "Waiting…" by many WhatsApp clients.
+
+**Fixed in v1.3.3:**
+- Persistent message store (`state/msgstore.json`, 3000 messages / 24 h, survives restarts)
+- Relayed (interactive) messages are now stored too, so retries can be answered
+- Retry counter cache extended to 10 min with `maxMsgRetryCount: 5`
+- Group metadata cache so sender keys reach every participant
+- `react`, `delete`, `edit`, `forward`, `poll` no longer get a newsletter `contextInfo`
+- Default reply mode is now plain text. Enable buttons with `.replymode buttons` or `WRAITH_REPLY_MODE=buttons`
+
+**If it still happens (stale encryption sessions):**
+1. Stop the bot
+2. Delete only `instances/<id>/session/session-*.json` and `sender-key-*.json` (keep `creds.json`)
+3. Start the bot, then send one message from the recipient's side to rebuild the session
+
+Tunables: `WRAITH_MSG_STORE_MAX` (default 3000), `WRAITH_MSG_STORE_TTL_H` (default 24).
+
+---
+
 ## Bot won't pair
 
 **Symptom:** Pairing code shown but phone rejects it, or no code appears.

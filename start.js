@@ -19,6 +19,7 @@ import makeWASocket, {
   fetchLatestBaileysVersion,
   DisconnectReason,
   Browsers,
+  BufferJSON,
   delay
 } from '@whiskeysockets/baileys';
 import { Boom } from '@hapi/boom';
@@ -94,17 +95,41 @@ const bold   = s => dye(1, s);
 
 const tag = grey(`[${sessionId}]`);
 
-// ── Outgoing & Incoming Message Cache (Retry receipts) ──
+// ── Persistent Message Store (fixes "Waiting for this message…") ──
+// WhatsApp asks us to re-send a message when a device fails to decrypt it.
+// getMessage() must be able to return that message, otherwise the recipient
+// is stuck on "Waiting for this message. This may take a while."
+// The store survives restarts (JSON on disk) and holds far more history.
 const MESSAGE_STORE = new Map();
-const MESSAGE_STORE_MAX = 100;
-const MESSAGE_STORE_TTL_MS = 5 * 60 * 1000;
+const MESSAGE_STORE_MAX = Number(process.env.WRAITH_MSG_STORE_MAX || 3000);
+const MESSAGE_STORE_TTL_MS = Number(process.env.WRAITH_MSG_STORE_TTL_H || 24) * 60 * 60 * 1000;
+const STORE_FILE = path.join(STATE_DIR, 'msgstore.json');
+let storeDirty = false;
 
-function rememberMessage(msg) {
-  if (!msg?.key?.id || !msg?.message) return;
-  MESSAGE_STORE.set(msg.key.id, { msg: msg.message, at: Date.now() });
+try {
+  if (fs.existsSync(STORE_FILE)) {
+    const saved = JSON.parse(fs.readFileSync(STORE_FILE, 'utf8'), BufferJSON.reviver);
+    const cutoff = Date.now() - MESSAGE_STORE_TTL_MS;
+    for (const [id, rec] of Object.entries(saved || {})) {
+      if (rec?.msg && rec.at > cutoff) MESSAGE_STORE.set(id, rec);
+    }
+  }
+} catch (e) {
+  try { console.error('[msgstore:load]', e?.message); } catch {}
+}
+
+function rememberById(id, message) {
+  if (!id || !message) return;
+  MESSAGE_STORE.set(id, { msg: message, at: Date.now() });
+  storeDirty = true;
   while (MESSAGE_STORE.size > MESSAGE_STORE_MAX) {
     MESSAGE_STORE.delete(MESSAGE_STORE.keys().next().value);
   }
+}
+
+function rememberMessage(msg) {
+  if (!msg?.key?.id || !msg?.message) return;
+  rememberById(msg.key.id, msg.message);
 }
 
 function getRememberedMessage(id) {
@@ -117,17 +142,35 @@ function getRememberedMessage(id) {
   return rec.msg;
 }
 
+function flushStore() {
+  if (!storeDirty) return;
+  try {
+    fs.mkdirSync(STATE_DIR, { recursive: true });
+    const tmp = STORE_FILE + '.tmp';
+    fs.writeFileSync(tmp, JSON.stringify(Object.fromEntries(MESSAGE_STORE), BufferJSON.replacer));
+    fs.renameSync(tmp, STORE_FILE);
+    storeDirty = false;
+  } catch (e) {
+    try { console.error('[msgstore:flush]', e?.message); } catch {}
+  }
+}
+
 setInterval(() => {
   try {
     const cutoff = Date.now() - MESSAGE_STORE_TTL_MS;
     for (const [id, rec] of MESSAGE_STORE) {
       if (rec.at < cutoff) MESSAGE_STORE.delete(id);
     }
+    flushStore();
     if (global.gc) global.gc();
   } catch {}
-}, 60 * 1000).unref?.();
+}, 30 * 1000).unref?.();
 
-const msgRetryCounterCache = new NodeCache({ stdTTL: 60, checkperiod: 60, maxKeys: 100 });
+// Retry counters must outlive a full retry cycle (no tiny maxKeys / 60s TTL).
+const msgRetryCounterCache = new NodeCache({ stdTTL: 10 * 60, checkperiod: 120, useClones: false });
+// Group metadata cache: avoids re-fetching on every send and keeps the
+// participant list (sender-key distribution) accurate in groups.
+const groupCache = new NodeCache({ stdTTL: 5 * 60, checkperiod: 120, useClones: false });
 
 function printPairBanner(code, number) {
   console.log();
@@ -237,24 +280,39 @@ async function ignite() {
       creds: state.creds,
       keys: makeCacheableSignalKeyStore(state.keys, log)
     },
-    getMessage: async (key) => {
-      return getRememberedMessage(key.id);
-    },
+    getMessage: async (key) => getRememberedMessage(key?.id),
+    cachedGroupMetadata: async (jid) => groupCache.get(jid),
     markOnlineOnConnect: false,
     generateHighQualityLinkPreview: false,
     syncFullHistory: false,
     msgRetryCounterCache,
+    maxMsgRetryCount: 5,
+    retryRequestDelayMs: 350,
     defaultQueryTimeoutMs: 60000,
     connectTimeoutMs: 60000,
-    keepAliveIntervalMs: 60000
+    keepAliveIntervalMs: 30000
   });
 
   currentSock = sock;
 
+  // Remember every relayed message (interactive/button messages go through
+  // relayMessage and would otherwise never be re-sendable on retry).
+  const _origRelay = sock.relayMessage.bind(sock);
+  sock.relayMessage = async (jid, message, opts = {}) => {
+    const id = await _origRelay(jid, message, opts);
+    try { rememberById(opts?.messageId || id, message); } catch {}
+    return id;
+  };
+
+  // Message kinds that must NOT carry a newsletter contextInfo.
+  const NO_CTX = ['react', 'delete', 'edit', 'forward', 'poll', 'pin', 'disappearingMessagesInChat', 'groupInvite', 'listReply', 'buttonReply'];
   const _origSend = sock.sendMessage.bind(sock);
   sock.sendMessage = async (jid, content, options) => {
     let payload = content;
-    if (typeof payload === 'object' && payload !== null && !payload.contextInfo) {
+    if (
+      typeof payload === 'object' && payload !== null &&
+      !payload.contextInfo && !NO_CTX.some(k => k in payload)
+    ) {
       payload = { ...payload, contextInfo: NEWSLETTER_CONTEXT };
     }
     const sent = await _origSend(jid, payload, options);
@@ -347,6 +405,29 @@ async function ignite() {
 
   sock.ev.on('creds.update', saveCreds);
 
+  sock.ev.on('groups.upsert', (groups) => {
+    for (const g of groups || []) if (g?.id) groupCache.set(g.id, g);
+  });
+  sock.ev.on('groups.update', async (updates) => {
+    for (const u of updates || []) {
+      if (!u?.id) continue;
+      try {
+        groupCache.del(u.id);
+        groupCache.set(u.id, await sock.groupMetadata(u.id));
+      } catch {
+        groupCache.del(u.id);
+      }
+    }
+  });
+  const _origGroupMeta = sock.groupMetadata.bind(sock);
+  sock.groupMetadata = async (jid) => {
+    const cached = groupCache.get(jid);
+    if (cached) return cached;
+    const meta = await _origGroupMeta(jid);
+    if (meta?.id) groupCache.set(jid, meta);
+    return meta;
+  };
+
   sock.ev.on('messages.upsert', async (u) => {
     trace('messages.upsert', { session: sessionId, type: u.type, count: u.messages?.length });
     for (const m of u.messages || []) rememberMessage(m);
@@ -376,6 +457,7 @@ async function ignite() {
   });
 
   sock.ev.on('group-participants.update', async (update) => {
+    try { groupCache.del(update.id); } catch {}
     const mod = await import('./core/groupEvents.js').catch(() => null);
     if (mod?.handleGroupParticipantUpdate) mod.handleGroupParticipantUpdate(sock, update);
   });
@@ -415,6 +497,7 @@ process.on('uncaughtException', (err) => {
 
 function quiet(sig) {
   console.log(tag, grey(`${sig} — shutting down`));
+  flushStore();
   teardownSock();
   setTimeout(() => process.exit(0), 400);
 }

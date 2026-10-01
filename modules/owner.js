@@ -5,7 +5,8 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { downloadContentFromMessage } from '@whiskeysockets/baileys';
-import { isOwner, isPrimaryOwner, addSecondaryOwner, delSecondaryOwner, getOwnerDetails } from '../core/identity.js';
+import { isOwner, isPrimaryOwner, addSecondaryOwner, delSecondaryOwner, getOwnerDetails, registerOwnerLid } from '../core/identity.js';
+import { getBestUserJid } from '../core/jid-resolver.js';
 import { readJson } from '../core/state-io.js';
 import { CONFIG } from '../config.js';
 import { getVar, setVar, delVar, getAllVars } from '../core/vars.js';
@@ -681,8 +682,15 @@ export async function addownerCommand(sock, chat, msg, args) {
         if (!target) {
             return sock.sendMessage(chat, { text: '❌ Provide a target by reply, @mention, phone number, or JID.' }, { quoted: msg });
         }
-        const digits = target.replace(/\D/g, '');
+        // Targets can be LIDs (reply/mention in groups). Owners are stored by
+        // phone number, so resolve to a PN first.
+        const pnJid = await getBestUserJid(target, sock, chat.endsWith('@g.us') ? chat : null);
+        if (String(pnJid).endsWith('@lid')) {
+            return sock.sendMessage(chat, { text: '❌ Could not resolve that user\'s phone number. Use: .addowner 923001234567' }, { quoted: msg });
+        }
+        const digits = String(pnJid).split('@')[0].replace(/\D/g, '');
         const res = addSecondaryOwner(digits);
+        if (res.ok && String(target).endsWith('@lid')) registerOwnerLid(target, digits);
         if (!res.ok) {
             return sock.sendMessage(chat, { text: `❌ ${res.reason}` }, { quoted: msg });
         }
@@ -699,7 +707,11 @@ export async function delownerCommand(sock, chat, msg, args) {
         if (!target) {
             return sock.sendMessage(chat, { text: '❌ Provide a target by reply, @mention, phone number, or JID.' }, { quoted: msg });
         }
-        const digits = target.replace(/\D/g, '');
+        const pnJid = await getBestUserJid(target, sock, chat.endsWith('@g.us') ? chat : null);
+        if (String(pnJid).endsWith('@lid')) {
+            return sock.sendMessage(chat, { text: '❌ Could not resolve that user\'s phone number. Use: .delowner 923001234567' }, { quoted: msg });
+        }
+        const digits = String(pnJid).split('@')[0].replace(/\D/g, '');
         const res = delSecondaryOwner(digits);
         if (!res.ok) {
             return sock.sendMessage(chat, { text: `❌ ${res.reason}` }, { quoted: msg });
