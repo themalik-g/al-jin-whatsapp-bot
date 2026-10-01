@@ -1,4 +1,4 @@
-# WRAITH — Free Open-Source WhatsApp Bot (Baileys v7, Multi-Device, Node.js)
+# WRAITH — Multi-Device WhatsApp Bot (Baileys v7.0.0-rc.14)
 
 <div align="center">
 
