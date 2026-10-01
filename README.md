@@ -8,30 +8,18 @@
   "applicationCategory": "CommunicationApplication",
   "applicationSubCategory": "WhatsApp Bot",
   "operatingSystem": "Node.js 20+",
-  "description": "WRAITH is a free, open-source WhatsApp multi-device bot built on Baileys v7.0.0.14rc. Features interactive buttons, in-WhatsApp multi-session pairing, FullDP/HDDP profile picture support, anti-delete recovery, view-once reveal, cookie-free YouTube downloader, Gemini AI, and full group administration.",
+  "description": "WRAITH is a free, open-source WhatsApp multi-device bot built on Baileys v7.0.0.14rc. Ships interactive buttons, in-WhatsApp multi-session pairing, FullDP/HDDP profile pictures, anti-delete recovery, view-once reveal, cookie-free YouTube downloader, Gemini AI, Islamic tools, and full group administration.",
   "url": "https://github.com/themalik-g/wraith",
   "downloadUrl": "https://github.com/themalik-g/wraith/archive/refs/heads/main.zip",
   "codeRepository": "https://github.com/themalik-g/wraith",
-  "author": {
-    "@type": "Person",
-    "name": "MALIK MEHTAB",
-    "url": "https://github.com/themalik-g"
-  },
-  "publisher": {
-    "@type": "Organization",
-    "name": "WRAITH",
-    "url": "https://github.com/themalik-g/wraith"
-  },
+  "author": {"@type": "Person", "name": "MALIK MEHTAB", "url": "https://github.com/themalik-g"},
+  "publisher": {"@type": "Organization", "name": "WRAITH", "url": "https://github.com/themalik-g/wraith"},
   "license": "https://opensource.org/licenses/MIT",
   "softwareVersion": "1.3.3",
   "programmingLanguage": "JavaScript",
   "runtimePlatform": "Node.js",
-  "keywords": "whatsapp bot, whatsapp md bot, baileys bot, baileys v7, interactive buttons whatsapp, anti-delete whatsapp, view-once reveal, status saver, whatsapp downloader, youtube downloader without cookies, fulldp whatsapp, hddp profile picture, gemini whatsapp bot, multi-session whatsapp, self-hosted whatsapp bot",
-  "offers": {
-    "@type": "Offer",
-    "price": "0",
-    "priceCurrency": "USD"
-  }
+  "keywords": "whatsapp bot, whatsapp md bot, baileys bot, baileys v7, interactive buttons whatsapp, anti-delete whatsapp, view-once reveal, status saver, youtube downloader without cookies, fulldp whatsapp, hddp profile picture, gemini whatsapp bot, multi-session whatsapp, self-hosted whatsapp bot",
+  "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}
 }
 </script>
 -->
@@ -42,62 +30,13 @@
   "@context": "https://schema.org",
   "@type": "FAQPage",
   "mainEntity": [
-    {
-      "@type": "Question",
-      "name": "Does WRAITH support interactive WhatsApp buttons?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "Yes. WRAITH supports native interactive buttons (quick-reply, single-select, URL, call) via the latest Baileys protocol, without requiring a custom fork."
-      }
-    },
-    {
-      "@type": "Question",
-      "name": "Can I pair a new WhatsApp session without leaving the chat?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "Yes. Unlike other bots that require you to run terminal commands, WRAITH lets you pair additional numbers directly inside WhatsApp using a bot command. No terminal or dashboard needed."
-      }
-    },
-    {
-      "@type": "Question",
-      "name": "Does WRAITH support FullDP and HDDP profile pictures?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "Yes. WRAITH fetches full-resolution and HD profile pictures on the standard Baileys library without any custom fork or patched build."
-      }
-    },
-    {
-      "@type": "Question",
-      "name": "Does the YouTube downloader require cookies or a Google account?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "No. WRAITH's YouTube downloader works without cookies, without a Google account, and without any authentication — unlike most bots that broke after YouTube's 2024 restrictions."
-      }
-    },
-    {
-      "@type": "Question",
-      "name": "Can WRAITH recover deleted WhatsApp messages?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "Yes. The Ghost module logs messages before deletion and sends the original content back to the bot owner when a deletion is detected."
-      }
-    },
-    {
-      "@type": "Question",
-      "name": "Which Baileys version does WRAITH use?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "WRAITH runs on Baileys v7.0.0.14rc, the latest release-candidate line of the multi-device library."
-      }
-    },
-    {
-      "@type": "Question",
-      "name": "Is WRAITH free?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "Yes. WRAITH is MIT-licensed and free to use, modify, and distribute."
-      }
-    }
+    {"@type": "Question", "name": "Does WRAITH support interactive WhatsApp buttons?", "acceptedAnswer": {"@type": "Answer", "text": "Yes. Quick-reply, single-select, URL, and call buttons work natively on the latest Baileys protocol, without a custom fork."}},
+    {"@type": "Question", "name": "Can I add a new WhatsApp session without leaving the chat?", "acceptedAnswer": {"@type": "Answer", "text": "Yes. Use the .addsession command inside WhatsApp to pair additional numbers. No terminal, SSH, or web dashboard needed."}},
+    {"@type": "Question", "name": "Does WRAITH support FullDP and HDDP profile pictures?", "acceptedAnswer": {"@type": "Answer", "text": "Yes. Full-resolution and HD profile pictures are fetched on the standard Baileys library, no custom fork required."}},
+    {"@type": "Question", "name": "Does the YouTube downloader require cookies or a Google account?", "acceptedAnswer": {"@type": "Answer", "text": "No. WRAITH's YouTube downloader works without cookies, without a Google account, and without any authentication."}},
+    {"@type": "Question", "name": "Which Baileys version does WRAITH use?", "acceptedAnswer": {"@type": "Answer", "text": "WRAITH runs on @whiskeysockets/baileys v7.0.0.14rc, the latest release-candidate line."}},
+    {"@type": "Question", "name": "Can WRAITH recover deleted WhatsApp messages?", "acceptedAnswer": {"@type": "Answer", "text": "Yes. The Ghost module logs messages and sends deleted or edited ones back to the owner."}},
+    {"@type": "Question", "name": "Is WRAITH free?", "acceptedAnswer": {"@type": "Answer", "text": "Yes. WRAITH is MIT-licensed and free to use, modify, and distribute."}}
   ]
 }
 </script>
@@ -105,13 +44,13 @@
 
 # WRAITH — WhatsApp MD Bot (Baileys v7.0.0.14rc)
 
-**WRAITH is a free, open-source WhatsApp multi-device (MD) bot** built on the 
-latest **Baileys v7.0.0.14rc** and Node.js 20+. It ships **interactive 
+**WRAITH is a free, open-source WhatsApp multi-device (MD) bot** built on 
+**Baileys v7.0.0.14rc** and Node.js 20+. It ships **native interactive 
 buttons**, **in-WhatsApp multi-session pairing**, **FullDP / HDDP profile 
-pictures** on a standard (non-forked) Baileys build, **anti-delete message 
-recovery**, **view-once reveal**, **cookie-free YouTube downloader**, 
-**Google Gemini AI**, and full **group administration** — all without needing 
-a browser, QR scan, or WhatsApp Business API.
+pictures** on stock Baileys, a **cookie-free YouTube downloader**, 
+**anti-delete / anti-edit / view-once recovery**, **Gemini AI**, a full 
+**Islamic toolset**, and complete **group administration** — no browser, no 
+QR scan, no WhatsApp Business API, no custom fork required.
 
 <div align="center">
 
@@ -130,95 +69,332 @@ fulldp hddp · gemini bot · multi-session whatsapp · self-hosted
 
 ## 📖 Table of Contents
 
-- [What is WRAITH?](#what-is-wraith)
-- [Standout Features (Why WRAITH?)](#-standout-features-why-wraith)
-- [Full Feature List](#-full-feature-list)
+- [What is WRAITH?](#-what-is-wraith)
+- [Standout Features](#-standout-features)
+- [Command Reference](#-command-reference)
+  - [System & General](#system--general)
+  - [Ghost — Anti-Delete / Anti-Edit](#-ghost--anti-delete--anti-edit)
+  - [Lurk — Status Watcher](#-lurk--status-watcher)
+  - [Peek — View-Once Revealer](#-peek--view-once-revealer)
+  - [AI Tools](#-ai-tools)
+  - [Islamic Tools](#-islamic-tools)
+  - [Downloaders](#-downloaders)
+  - [Media Tools](#-media-tools)
+  - [Group Administration](#-group-administration)
+  - [Owner & Session](#-owner--session)
+  - [Privacy & Presence](#-privacy--presence)
+  - [Monitoring & Tracking](#-monitoring--tracking)
+  - [Utilities & Fun](#-utilities--fun)
 - [Quick Start](#-quick-start)
 - [Documentation](#-documentation)
 - [FAQ](#-faq)
-- [Quick Troubleshooting](#-quick-troubleshooting)
+- [Troubleshooting](#-troubleshooting)
 - [Security](#-security)
 - [License](#-license)
 - [Credits](#-credits)
 
 ---
 
-## What is WRAITH?
+## 🌟 What is WRAITH?
 
-**WRAITH** is a free, open-source **WhatsApp bot** for Node.js built on the 
-latest **[Baileys v7.0.0.14rc](https://github.com/WhiskeySockets/Baileys)** 
-(multi-device, no browser needed). It quietly watches your account and gives 
-you **anti-delete / anti-edit message recovery**, **view-once media reveal**, 
-**status auto-view & download**, **scheduled messages**, a **cookie-free 
-YouTube / Instagram / TikTok downloader**, **interactive button replies**, 
-**AI (Gemini) tools**, and full **group administration** — all with LID-aware 
-JID resolution.
+**WRAITH** is a self-hosted **WhatsApp MD bot** that links to your WhatsApp 
+account via an 8-character **pairing code** — no QR scan. It runs on your own 
+server (VPS, Docker, PM2, Pterodactyl, or Termux), stores all data locally, 
+and gives you a full command suite for **recovering deleted messages**, 
+**saving statuses**, **downloading social media**, **chatting with Gemini AI**, 
+**Islamic tools**, and **managing groups**.
 
-> **Keywords:** WhatsApp bot · WhatsApp anti-delete · view-once downloader · 
-> WhatsApp status saver · YouTube downloader without cookies · Baileys v7 bot · 
-> interactive buttons WhatsApp · FullDP HDDP bot · multi-session WhatsApp bot · 
-> Gemini WhatsApp bot · self-hosted WhatsApp automation
+Built on the latest **Baileys v7.0.0.14rc** with LID-aware JID resolution.
 
 ---
 
-## 🌟 Standout Features (Why WRAITH?)
-
-These are the things you **won't easily find** in other Baileys bots.
+## ⭐ Standout Features
 
 ### 🔘 Native Interactive Buttons
 Quick-reply, single-select, URL, and call buttons — supported natively on the 
-latest Baileys protocol. No custom fork, no hacks, no broken listeners.
+latest Baileys protocol. **No custom fork, no broken listeners.** Switch 
+between button UI and text UI anytime with `.replymode`.
 
 ### 🧩 In-WhatsApp Multi-Session Pairing
-Add another WhatsApp number **without ever leaving the chat**. Just send a 
-command inside WhatsApp and follow the pairing code — no SSH, no terminal, 
-no dashboard, no "add session" web panel. Run several numbers from one 
-install, each with its own isolated session folder.
+Add another WhatsApp number **without ever leaving the chat**. Just send 
+`.addsession <number>` inside WhatsApp and follow the pairing code — no SSH, 
+no terminal, no dashboard. Run several numbers from one install, each with 
+its own isolated session.
 
 ### 🖼️ FullDP & HDDP Profile Pictures
 Fetch **full-resolution** and **HD** profile pictures of any user or group — 
-on the **standard Baileys library**, not a patched fork. Most bots that 
-support HDDP rely on custom builds; WRAITH doesn't need one.
+on the **standard Baileys library**, not a patched fork.
 
-### 🎬 YouTube Downloader With **Zero** Authentication
+### 🎬 YouTube Downloader With Zero Authentication
 Download YouTube video and audio **without cookies**, **without a Google 
-account**, and **without any OAuth flow**. This is the biggest pain point 
-for most bots after Google's 2024 anti-bot changes — WRAITH simply works.
+account**, and **without any OAuth flow**. Optional `.ytcookies` support 
+exists for edge cases, but normal downloads just work.
 
-### 📡 Always on the Latest Baileys
-Built on **`@whiskeysockets/baileys v7.0.0.14rc`** — the newest release-candidate 
-line. New protocol fixes, button support, and multi-device improvements land 
-in WRAITH fast.
+### 📡 Latest Baileys
+Built on **`@whiskeysockets/baileys v7.0.0.14rc`**. New protocol fixes, button 
+support, and multi-device improvements land in WRAITH fast.
 
 ---
 
-## ✨ Full Feature List
+## 📚 Command Reference
 
-| Module | What it does |
+> Default prefix: `.` — change it with `.prefix <new>`
+
+### System & General
+
+| Command | Description |
 |---|---|
-| **Ghost** | Anti-delete, anti-edit and secret-edit tracking. Deleted or edited messages (with media) are sent back to the owner. |
-| **Peek** | Reveals view-once images, videos and audio, with auto-peek and quoted-message detection. |
-| **Lurk** | Auto-view statuses, auto-react with custom or random emojis, silently save status media to your DM. |
-| **Schedule** | Schedule any message, or group open/close, for a future time, with retries and owner notices. |
-| **⬇️ Downloader** | `.dl` `.play` `.ytv` `.video` `.ytdl` `.mp3` `.pdl` `.pdlzip`: YouTube video/audio (up to 400 MB, **no cookies required**) and image carousels from Instagram, TikTok, Pinterest, Twitter and Facebook via `@postfetch/core` + `yt-dlp`. |
-| **File & Social** | GitHub repo (`.gitdl`), MediaFire (`.mfdl`), profile search and media (`.ig` `.tiktok` `.fb`), songs (`.song`). |
-| **AI & Media** | Gemini assistant (`.gemini`), AI photos (`.photo`), PowerPoint generator (`.ppt`), 54 Ephoto360 text effects (`.textmaker`), book search, stock images, lyrics, movies, couple PPs. |
-| **Interactive UI** | Native reply buttons on menus, confirmations, and command outputs. |
-| **Admin & Group** | `.open` `.close` `.kick` `.add` `.promote` `.demote` `.approveall` `.kickall` `.tagall` `.hidetag` `.welcome` `.goodbye` plus `.antilink` `.antispam` `.antisticker` `.rejectcalls`. |
-| **Multi-Session** | Add, list, and manage additional WhatsApp numbers from inside WhatsApp with a command — no terminal needed. |
-| **Profile Tools** | FullDP / HDDP fetcher, `.setpp`, `.setabout`, `.setstatus`, `.stalk`, `.getpair`. |
-| **Owner & Profile** | Multi-owner, block list, `.setsession`, `.mode public/private`, `.prefix`. |
-| **Utilities** | Weather, currency, dictionary, QR generate/decode, URL upload/shorten, news, Wikipedia, password-breach check, jokes, facts. |
-| **JID tools** | PN ⇄ LID resolver, channel list, group roster with admin roles, profile picture fetcher. |
-| **⚙️ Presence** | Always online, auto-typing, auto-recording, read-receipt control. |
-| **Activity & Ping** | Chat activity dashboard and latency/memory probe. |
-| **User Manual** | `.usermanual` sends the full manual as a WhatsApp PDF. |
+| `.alive` | Check bot is responsive with runtime stats |
+| `.ping` | Measure bot response latency |
+| `.uptime` | Show total active running time |
+| `.restart` | Restart the current session worker |
+| `.help` / `.menu` | Show full command list (`.help <category>` supported) |
+| `.usermanual` | Send the official WRAITH PDF user manual |
+| `.prefix` | View or change the command prefix |
+| `.mode public\|private` | Toggle public / owner-only mode |
+| `.replymode buttons\|text` | Switch between button UI and text UI |
+| `.settings` | Overview of all toggles and modes |
+| `.update` | Pull latest code from the repository |
+| `.script` / `.repo` | Show repository details |
+| `.owner` | Show bot owner contact card |
 
 ---
 
-## Quick Start
+### 👻 Ghost — Anti-Delete / Anti-Edit
 
-**Requirements:** Node.js 20+, a WhatsApp account to link, optional PM2 for 24/7 uptime.
+Silently captures deleted and edited messages, media, and view-once content, 
+then forwards to owner chat.
+
+| Command | Description |
+|---|---|
+| `.ghost` | Show current status and menu |
+| `.ghost on\|off` | Toggle anti-delete watcher |
+| `.ghost edit on\|off` | Toggle anti-edit watcher |
+
+*Ghost ignores your own messages and uses bounded memory queues.*
+
+---
+
+### 🌒 Lurk — Status Watcher
+
+Auto-view, react, and download WhatsApp statuses without marking them seen.
+
+| Command | Description |
+|---|---|
+| `.lurk` | Status watcher menu |
+| `.lurk on\|off` | Toggle status auto-view |
+| `.lurk react on\|off` | Toggle status auto-reaction |
+| `.lurk download on\|off` | Toggle status media download |
+| `.lurk emoji <emoji\|random\|none>` | Set reaction emoji |
+
+---
+
+### 👁️ Peek — View-Once Revealer
+
+| Command | Description |
+|---|---|
+| `.peek` | View peek settings |
+| `.peek auto on\|off` | Auto view-once capture |
+| `.peek watch on\|off` | Quoted view-once watcher |
+| `.peek dest <owner\|same\|both>` | Set reveal destination |
+
+---
+
+### 🤖 AI Tools
+
+| Command | Description |
+|---|---|
+| `.gemini <prompt>` | Google Gemini chat (reply to quoted msg for context) |
+| `.photo <prompt>` / `.imagine` | Generate AI image via Gemini photo models |
+| `.scholar` / `.scholor <topic>` | University-professor style explanations |
+| `.ppt <topic>` | AI-generated PowerPoint (.pptx) |
+| `.quransearch <question>` | AI Quran verse search + explanation |
+| `.hadeessearch <question>` | AI Hadith search + explanation |
+| `.islamsearch <question>` | AI Quran + Hadith combined search |
+
+---
+
+### 🕌 Islamic Tools
+
+| Command | Description |
+|---|---|
+| `.prayertimes <city>` / `.pts` | Daily prayer times worldwide |
+| `.quran <surah:ayah>` | Verse lookup (Arabic + English) |
+| `.search quran <topic>` | Keyword search in Quran translation |
+| `.sora <surah>` | Full Surah PDF (1–114) |
+| `.para <1-30>` | Juz / Para PDF |
+| `.bukhari <number>` | Sahih Bukhari Hadith |
+| `.muslim <number>` | Sahih Muslim Hadith |
+
+---
+
+### ⬇️ Downloaders
+
+| Command | Description |
+|---|---|
+| `.play <song\|URL>` | YouTube / SoundCloud audio as MP3 |
+| `.ytv <video\|URL>` / `.video` | YouTube video optimized for WhatsApp |
+| `.ytdl <url>` | YouTube video via yt-dlp |
+| `.youtube <url>` / `.yt` | YouTube video or audio |
+| `.mp3 <url>` | Audio as MP3 |
+| `.dl <url>` / `.dl audio\|mp3 <url>` | Universal downloader |
+| `.pdl <url>` | Social post (IG, TikTok, FB) multi-media |
+| `.pdlzip <url>` | Same as `.pdl`, bundled as ZIP |
+| `.ig <username\|url>` | Instagram profile / post |
+| `.tiktok <username\|url>` | TikTok video (no watermark) or stalk |
+| `.fb <url>` | Facebook video |
+| `.twitter <url>` / `.tw` | Twitter / X media |
+| `.pinterest <url>` / `.pin` | Pinterest pin |
+| `.threads <url>` | Threads media |
+| `.reddit <url>` | Reddit media |
+| `.gitdl <repo_url>` | GitHub repo as ZIP |
+| `.mfdl <url>` | MediaFire file |
+| `.ytcookies` | Manage YouTube cookies (status / clear / paste / reply-file) |
+
+---
+
+### 🎨 Media Tools
+
+| Command | Description |
+|---|---|
+| `.sticker` / `.s` | Image / video / GIF to WebP sticker |
+| `.toimg` / `.tovid` | Sticker to image / video |
+| `.tomp3` | Video / audio to MP3 |
+| `.vn` | Audio / video to WhatsApp voice note |
+| `.trim <start> <end>` | Trim video / audio without re-encoding |
+| `.compress` | Video < 10MB or image < 400KB |
+| `.extracompress` | Image < 200KB |
+| `.sanitize` / `.exifwipe` | Strip EXIF metadata |
+| `.ocr` / `.readtext` | Extract text from image |
+| `.tts <text>` | Text-to-speech voice note (multi-language) |
+| `.vcard @user\|<number>` | Generate WhatsApp contact card |
+| `.qr <text>` / `.qr read` | Generate or read QR code |
+| `.barcode <text>` | Barcode (CODE128, EAN13, UPC, QR) |
+| `.whatanime` | Identify anime scene from screenshot |
+| `.url` | Upload media, get public link |
+| `.web2img <url>` / `.webss` | Full-page screenshot |
+| `.wp1`–`.wp10` / `.wp` / `.reset wp` | Wallpapers |
+
+---
+
+### 🛡️ Group Administration
+
+| Command | Description |
+|---|---|
+| `.open` / `.close` | Open or close group (admins only) |
+| `.kick` | Remove participant (reply or mention) |
+| `.add <number>` | Add participant |
+| `.promote` / `.demote` | Promote / demote admin |
+| `.tagall [msg]` / `.tag` | Mention everyone |
+| `.hidetag [msg]` | Silent mention everyone |
+| `.kickall` | Kick all non-admins |
+| `.kickcc <code>` | Kick members from country code |
+| `.approveall` / `.declineall` | Approve / decline all join requests |
+| `.leave` | Bot leaves group |
+| `.join <link>` | Join group via invite link |
+| `.ginfo <link>` | Inspect group metadata without joining |
+| `.setgdesc <text>` | Set group description |
+| `.setgpp` | Set group picture (reply to image) |
+| `.welcome on\|off` | Welcome messages |
+| `.goodbye on\|off` | Goodbye messages |
+| `.antilink on\|off` | Antilink protection |
+| `.antispam on\|off` | Antispam protection |
+| `.antisticker on\|off` | Antisticker protection |
+| `.pdd on\|off` | Promote/demote detection alerts |
+| `.noaction @user [all]` / `.noaction off @user` / `.noaction list` | Protect users from demote/kick |
+| `.pinchat` / `.unpinchat` | Pin / unpin chat |
+| `.mute 8h\|1d\|forever` / `.unmute` | Mute / unmute notifications |
+| `.archive` / `.unarchive` | Archive / unarchive chat |
+| `.clearchat` | Clear chat window |
+| `.disappearing 0s\|24h\|7d\|90d` | Disappearing messages timer |
+
+---
+
+### 👑 Owner & Session
+
+| Command | Description |
+|---|---|
+| `.setpp` | Set bot profile picture (reply to photo) |
+| `.setabout <text>` | Set bot about / status text |
+| `.setstatus <text>` / `.setstatus` (reply media) | Post WhatsApp status |
+| `.getstatus <number\|@mention>` | Fetch contact status story |
+| `.getpair <number>` | Generate pairing code for new session |
+| `.setsession <number>` | Set primary session owner |
+| `.addsession <number>` | **Spawn a new session from inside WhatsApp** |
+| `.delsession <id>` | Delete a session instance |
+| `.addowner <number>` / `.delowner <number>` | Add / remove bot owner |
+| `.ownerlist` | List all owners |
+| `.setvar <KEY> <VALUE>` / `.getvar <KEY\|all>` / `.delvar <KEY>` | Manage persistent variables |
+| `.forward <text\|reply> <JID\|Phone>` | Forward text / media to any target |
+| `.getjid` | Show JID / LID for current or quoted chat |
+| `.getpp [number\|jid]` | Fetch HD profile picture |
+| `.chatstats <number\|jid>` | Message count stats |
+| `.activity` | User activity dashboard |
+| `.block` / `.unblock` | Block / unblock contact |
+| `.blocklist` / `.unblockall` | Manage block list |
+| `.rejectcalls on\|off` | Auto-reject voice / video calls |
+
+---
+
+### 🔒 Privacy & Presence
+
+| Command | Description |
+|---|---|
+| `.presence` | Show presence settings |
+| `.presence alwaysonline on\|off` | Always appear online |
+| `.presence autotyping on\|off` | Auto-typing indicator |
+| `.presence autorecording on\|off` | Auto-recording indicator |
+| `.presence readreceipts on\|off` | Send / hide read receipts |
+
+---
+
+### 📡 Monitoring & Tracking
+
+| Command | Description |
+|---|---|
+| `.stalk <number>` / `.stalk list` / `.stalk stop <number>` | Online/offline presence tracker |
+| `.statusalert <number>` / `.statusalert off <number>` / `.statusalert list` | Alert when contact posts status |
+| `.watch <number>` / `.watch off <number>` / `.watch list` | Alert on PP / about / name change |
+| `.schedule <text> <YYYY-MM-DD> <HH:MM>` | Schedule message |
+| `.schedule list` / `.schedule cancel <id>` | Manage scheduled tasks |
+
+---
+
+### 🧰 Utilities & Fun
+
+| Command | Description |
+|---|---|
+| `.currency <amt> <from> <to>` | Currency conversion |
+| `.define <word>` | Dictionary lookup |
+| `.weather <city>` | Weather forecast |
+| `.pwned <password>` | Password breach check |
+| `.shorten <url>` | Shorten URL |
+| `.unroll <url>` | Reveal final URL behind redirects |
+| `.speedtest` | Network speed test |
+| `.npm <package>` | NPM package info |
+| `.tempmail` / `.readmail <addr>` | Temporary email + inbox |
+| `.reqlocation` / `.relocation` | Request / share location |
+| `.news [topic]` | Google News RSS |
+| `.hackernews` / `.hn` | HackerNews top stories |
+| `.wiki <topic>` | Wikipedia summary |
+| `.joke` / `.advice` / `.fact` | Random fun content |
+| `.book <title\|author>` / `.book dl <n>` | Book search & download |
+| `.img <query> [count]` | Image search |
+| `.couplepp` | Couple profile pictures |
+| `.movie <title>` | Movie info |
+| `.songinfo <title> [artist]` | Song metadata |
+| `.lyrics <artist> - <title>` | Song lyrics |
+| `.textmaker <effect> <text>` | Ephoto360 text effects (`.neon`, `.glitch`, `.marvel`, +50 more) |
+| `.fancy <text>` / `.fancy 4 <text>` | Fancy Unicode text |
+| `.dice [2d6\|3d8+2]` | Roll dice |
+| `.coin [n]` | Flip coins |
+
+---
+
+## 🚀 Quick Start
+
+**Requirements:** Node.js 20+, a WhatsApp account to link, optional PM2 for 
+24/7 uptime.
 
 ```bash
 git clone https://github.com/themalik-g/wraith.git
@@ -230,81 +406,89 @@ npm start
 On first run, WRAITH prints an 8-character pairing code. Enter it in 
 WhatsApp → **Linked Devices → Link with phone number instead**.
 
-### Adding another number — without leaving WhatsApp
-Once the bot is running, just send the multi-session command inside any 
-WhatsApp chat. WRAITH walks you through pairing the new number with an 
-8-character code. No terminal, no re-deploy.
+### Add another number (from inside WhatsApp)
+Once running, just send:
+
+```
+.addsession <phone_number>
+```
+
+WRAITH generates a pairing code, and you link the new number — no terminal 
+needed.
 
 ---
 
-## Documentation
+## 📖 Documentation
 
 | File | Topic |
 |---|---|
-| [whatsapp-bot-commands.md](https://github.com/themalik-g/wraith/blob/main/docs/whatsapp-bot-commands.md) | Every command with examples |
+| [whatsapp-bot-commands.md](https://github.com/themalik-g/wraith/blob/main/docs/whatsapp-bot-commands.md) | Detailed command reference |
 | [whatsapp-bot-configuration.md](https://github.com/themalik-g/wraith/blob/main/docs/whatsapp-bot-configuration.md) | Settings, state files, variables |
-| [whatsapp-jid-system.md](https://github.com/themalik-g/wraith/blob/main/docs/whatsapp-jid-system.md) | PN, LID and JID resolution |
+| [whatsapp-jid-system.md](https://github.com/themalik-g/wraith/blob/main/docs/whatsapp-jid-system.md) | PN, LID, JID resolution |
 | [whatsapp-bot-deployment.md](https://github.com/themalik-g/wraith/blob/main/docs/whatsapp-bot-deployment.md) | VPS, Docker, PM2, panels |
 | [whatsapp-bot-troubleshooting.md](https://github.com/themalik-g/wraith/blob/main/docs/whatsapp-bot-troubleshooting.md) | Common errors and fixes |
 | [whatsapp-bot-architecture.md](https://github.com/themalik-g/wraith/blob/main/docs/whatsapp-bot-architecture.md) | Module design and router flow |
+| [wraith-vs-other-whatsapp-bots.md](https://github.com/themalik-g/wraith/blob/main/docs/wraith-vs-other-whatsapp-bots.md) | Feature comparison vs other bots |
 
 ---
 
 ## ❓ FAQ
 
-**Does WRAITH support interactive WhatsApp buttons?**
+**Does WRAITH support interactive WhatsApp buttons?**  
 Yes. Quick-reply, single-select, URL, and call buttons work natively on the 
-latest Baileys protocol. No custom fork required.
+latest Baileys protocol — no fork required.
 
-**Can I pair a new WhatsApp session without leaving the chat?**
-Yes. WRAITH lets you add additional numbers directly inside WhatsApp using a 
-bot command — no terminal, no dashboard.
+**Can I add a new WhatsApp session without leaving the chat?**  
+Yes. Use `.addsession <number>` inside WhatsApp. No terminal, SSH, or 
+dashboard.
 
-**Does WRAITH support FullDP and HDDP profile pictures?**
-Yes. Full-resolution and HD profile pictures are fetched on the standard 
-Baileys library — no patched build needed.
+**Does WRAITH support FullDP and HDDP profile pictures?**  
+Yes. Full-resolution and HD profile pictures are fetched on stock Baileys.
 
-**Does the YouTube downloader require cookies or a Google account?**
-No. It works without cookies, without a Google account, and without any 
-authentication.
+**Does the YouTube downloader require cookies?**  
+No. It works without cookies, a Google account, or any authentication. 
+Optional `.ytcookies` for edge cases.
 
-**Can WRAITH recover deleted WhatsApp messages?**
-Yes. The Ghost module logs messages and sends deleted or edited ones back 
-to the owner.
-
-**Does it need a QR code?**
-No. It links with an 8-character pairing code via "Link with phone number instead".
-
-**Which Baileys version does WRAITH use?**
+**Which Baileys version does WRAITH use?**  
 `@whiskeysockets/baileys` **v7.0.0.14rc** — the latest release-candidate line.
 
-**Can I run multiple numbers?**
-Yes. Multi-session is built in, and you can add numbers from within WhatsApp.
+**Can WRAITH recover deleted WhatsApp messages?**  
+Yes. The Ghost module logs messages and forwards deleted or edited ones back 
+to the owner.
 
-**Which Node.js version?**
-Node.js 20 or newer.
+**Does it need a QR code to log in?**  
+No. It uses an 8-character pairing code via "Link with phone number instead".
 
-**Is it safe for my account?**
+**Can I run multiple numbers?**  
+Yes. Multi-session is built in — add numbers from inside WhatsApp.
+
+**Is it safe for my account?**  
 WRAITH uses the official multi-device protocol through Baileys, but any 
 unofficial client carries some risk. Use responsibly and avoid spam.
 
+**Which Node.js version is required?**  
+Node.js 20 or newer.
+
 ---
 
-## Quick Troubleshooting
+## 🛠️ Troubleshooting
 
 | Problem | Fix |
 |---|---|
-| "Waiting for this message" | Update to v1.3.3; see Troubleshooting doc |
+| "Waiting for this message" | Update to v1.3.3 — persistent message store fixes retry |
 | Bot won't pair | Delete `session/`, restart, re-enter number |
-| `internal-server-error` on admin | Bot must be admin; resolve target PN first |
-| Buttons not rendering | Update to latest WRAITH; some clients cache |
+| `internal-server-error` on admin command | Bot must be admin; ensure target PN resolves |
+| Buttons not rendering | Update to latest WRAITH; some clients cache old UIs |
 | LID not resolving | Reply to their message in a group first |
+| YouTube download fails | Update yt-dlp; only use `.ytcookies` if truly needed |
+
+Full guide: [Troubleshooting doc](https://github.com/themalik-g/wraith/blob/main/docs/whatsapp-bot-troubleshooting.md)
 
 ---
 
-## Security
+## 🔒 Security
 
-Never commit `instances/`, `session/`, `.env`, `keys.env` or `creds.json`. 
+Never commit `instances/`, `session/`, `.env`, `keys.env`, or `creds.json`. 
 Rotate API keys if they were ever pushed.
 
 ---
@@ -316,27 +500,13 @@ own risk and respect privacy laws and WhatsApp's Terms of Service.
 
 ---
 
-## Contributing
-
-Issues and PRs are welcome. Run `node --check` on changed files and the 
-tests in `/test` before opening a PR.
-
----
-
-## Support
-
-Open an [issue](https://github.com/themalik-g/wraith/issues) or message the 
-owner via the in-bot `.owner` contact.
-
----
-
-## License
+## 📜 License
 
 [MIT](https://github.com/themalik-g/wraith/blob/main/LICENSE) © MALIK MEHTAB
 
 ---
 
-## Credits
+## 🙏 Credits
 
 - Built on [Baileys](https://github.com/WhiskeySockets/Baileys) v7.0.0.14rc
 - Downloader powered by [yt-dlp](https://github.com/yt-dlp/yt-dlp) and 
@@ -347,6 +517,6 @@ owner via the in-bot `.owner` contact.
 
 <div align="center">
 
-**⭐ If WRAITH helped you, consider giving it a star on GitHub! ⭐**
+**⭐ If WRAITH helped you, consider giving it a star! ⭐**
 
 </div>
