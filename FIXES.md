@@ -1,4 +1,4 @@
-# WRAITH — fixed build (𝙒𝙍𝘼𝙄𝙏𝙃-𝘽𝙊𝙏)
+# Al-Jin — fixed build (𝐀𝐥-𝐉𝐢𝐧)
 
 ## Files in this archive (replace these in your project)
 - config.js                    → botName + timezone options

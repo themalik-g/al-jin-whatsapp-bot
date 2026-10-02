@@ -1,5 +1,5 @@
 // ─────────────────────────────────────────────
-//  WRAITH · modules/activity.js  (v2)
+//  Al-Jin · modules/activity.js  (v2)
 //  In-memory cache + debounced atomic flush.
 //
 //  v2 fixes

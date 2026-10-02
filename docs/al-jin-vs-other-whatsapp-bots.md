@@ -1,10 +1,10 @@
-# WRAITH vs Other WhatsApp Bots — Honest Comparison
+# Al-Jin vs Other WhatsApp Bots — Honest Comparison
 
 If you're choosing a WhatsApp MD bot in 2026, you've probably seen dozens of 
 Baileys forks that all claim the same features. This page explains, without 
-hype, what makes **WRAITH** different — and where other bots fall short.
+hype, what makes **Al-Jin** different — and where other bots fall short.
 
-> **Short version:** WRAITH ships **interactive buttons**, **in-WhatsApp 
+> **Short version:** Al-Jin ships **interactive buttons**, **in-WhatsApp
 > multi-session pairing**, **FullDP / HDDP** profile pictures, and a 
 > **cookie-free YouTube downloader** — all on the **standard Baileys v7.0.0-rc.14** 
 > library, with **no custom fork required**.
@@ -13,7 +13,7 @@ hype, what makes **WRAITH** different — and where other bots fall short.
 
 ## At a Glance
 
-| Capability | WRAITH | Typical Baileys bots |
+| Capability | Al-Jin | Typical Baileys bots |
 |---|---|---|
 | **Interactive buttons** (quick-reply, single-select, URL, call) | ✅ Native | ⚠️ Requires custom fork or broken |
 | **Add sessions from inside WhatsApp** | ✅ Yes (`.addsession`) | ❌ Requires SSH / terminal / web panel |
@@ -31,7 +31,7 @@ hype, what makes **WRAITH** different — and where other bots fall short.
 
 ---
 
-## The Four Things WRAITH Does That Most Bots Can't
+## The Four Things Al-Jin Does That Most Bots Can't
 
 ### 1. 🔘 Interactive Buttons on Standard Baileys
 
@@ -40,7 +40,7 @@ Most WhatsApp bots either:
 - Ship buttons that **stopped working** after WhatsApp's 2023–2024 protocol changes, or
 - Require a **custom patched fork** of Baileys to render buttons at all.
 
-WRAITH sends **quick-reply buttons**, **single-select lists**, **URL buttons**, 
+Al-Jin sends **quick-reply buttons**, **single-select lists**, **URL buttons**,
 and **call buttons** natively on the stock `@whiskeysockets/baileys` v7 
 library. There's no separate "buttons build" — it's the same bot.
 
@@ -51,19 +51,19 @@ nicer than typed commands. Users don't need to remember syntax.
 
 ### 2. 🧩 Add a New WhatsApp Session From Inside WhatsApp
 
-This is the biggest quality-of-life win in WRAITH, and almost no other bot has it.
+This is the biggest quality-of-life win in Al-Jin, and almost no other bot has it.
 
 **Other bots:** To run a second number, you open SSH, edit config files, 
 restart PM2, or fiddle with a web panel. If you're hosting on a phone via 
 Termux, it's even worse.
 
-**WRAITH:** Once the bot is running, just send a command inside WhatsApp:
+**Al-Jin:** Once the bot is running, just send a command inside WhatsApp:
 
 ```
 .addsession <phone_number>
 ```
 
-WRAITH generates the pairing code, walks you through linking the new number, 
+Al-Jin generates the pairing code, walks you through linking the new number,
 and spins up a completely isolated session folder. **You never leave the 
 WhatsApp chat.**
 
@@ -81,7 +81,7 @@ feature for years. The usual path is:
 2. Pin your bot to that fork forever
 3. Pray the fork stays maintained
 
-WRAITH fetches **FullDP** and **HDDP** on the **standard, unpatched Baileys** 
+Al-Jin fetches **FullDP** and **HDDP** on the **standard, unpatched Baileys**
 library. You get HD profile pics without inheriting a fork's bugs, security 
 issues, or abandonment.
 
@@ -98,11 +98,11 @@ means:
 - Re-export every few weeks when they expire
 - Risk getting that Google account flagged
 
-WRAITH's YouTube downloader **works without cookies**, **without a Google 
+Al-Jin's YouTube downloader **works without cookies**, **without a Google
 account**, and **without any OAuth flow**. Just `.play` or `.ytv` and it 
 downloads.
 
-For edge cases (age-gated or heavily restricted videos), WRAITH also supports 
+For edge cases (age-gated or heavily restricted videos), Al-Jin also supports
 **optional** `.ytcookies` management — so you're covered either way, but you 
 don't *need* it for normal use.
 
@@ -112,7 +112,7 @@ don't *need* it for normal use.
 
 ### Ghost module (privacy / recovery)
 
-| Feature | WRAITH | Typical |
+| Feature | Al-Jin | Typical |
 |---|---|---|
 | Anti-delete (text) | ✅ | ✅ |
 | Anti-delete (media) | ✅ | ⚠️ Sometimes |
@@ -124,7 +124,7 @@ don't *need* it for normal use.
 
 ### Status tools
 
-| Feature | WRAITH | Typical |
+| Feature | Al-Jin | Typical |
 |---|---|---|
 | Auto-view | ✅ | ✅ |
 | Auto-react (custom emoji) | ✅ | ❌ Rare |
@@ -134,7 +134,7 @@ don't *need* it for normal use.
 
 ### Group administration
 
-WRAITH's group suite is unusually complete:
+Al-Jin's group suite is unusually complete:
 
 - `.open` / `.close` — group open/close
 - `.kick`, `.add`, `.promote`, `.demote`
@@ -171,7 +171,7 @@ search.
 
 ### Downloader coverage
 
-WRAITH handles more sources than most bots in one command set:
+Al-Jin handles more sources than most bots in one command set:
 
 - **YouTube** — `.play`, `.ytv`, `.video`, `.ytdl`, `.youtube`, `.yt`
 - **Instagram** — `.ig`, `.pdl`, `.pdlzip`
@@ -209,19 +209,19 @@ probably:
 3. **It should be feature-complete** — not "add anti-delete" plus thirty missing pieces
 4. **It should be maintained** — updated to the latest Baileys
 
-WRAITH hits all four. The features above aren't marketing bullets — they're 
+Al-Jin hits all four. The features above aren't marketing bullets — they're
 things that require ongoing protocol work, and most forks don't bother.
 
 ---
 
-## What WRAITH Doesn't Try to Be
+## What Al-Jin Doesn't Try to Be
 
 To be fair:
 
-- **Not a WhatsApp Business API wrapper.** WRAITH uses the **unofficial** 
+- **Not a WhatsApp Business API wrapper.** Al-Jin uses the **unofficial**
   multi-device protocol via Baileys. If you need Meta-approved business 
   messaging, use the official Cloud API.
-- **Not a marketing / bulk sender.** WRAITH is a personal and community 
+- **Not a marketing / bulk sender.** Al-Jin is a personal and community
   bot. Spamming will get your number banned.
 - **Not guaranteed-safe.** No unofficial WhatsApp client is. Use a burner 
   number if you're testing at scale.
@@ -232,14 +232,14 @@ To be fair:
 
 | Your priority | Best fit |
 |---|---|
-| Buttons + HD profile pics + cookie-free YT on stock Baileys | **WRAITH** |
+| Buttons + HD profile pics + cookie-free YT on stock Baileys | **Al-Jin** |
 | Minimal feature set, lightweight | Any basic Baileys bot |
 | Official WhatsApp Business API | Meta Cloud API |
-| Maximum features in one install | **WRAITH** |
+| Maximum features in one install | **Al-Jin** |
 
 If any single one of the four "unique" features above matters to you — 
 buttons, in-chat multi-session, HDDP without a fork, or cookie-free 
-YouTube downloads — WRAITH is likely the only bot on GitHub that gives you 
+YouTube downloads — Al-Jin is likely the only bot on GitHub that gives you
 all of them at once.
 
 ---
@@ -247,8 +247,8 @@ all of them at once.
 ## Try It
 
 ```bash
-git clone https://github.com/themalik-g/wraith.git
-cd wraith
+git clone https://github.com/themalik-g/al-jin-whatsapp-bot.git
+cd al-jin-whatsapp-bot
 npm install
 npm start
 ```
@@ -256,13 +256,13 @@ npm start
 Pair with the 8-character code, then send `.menu` inside WhatsApp to 
 explore the full command set.
 
-**Repository:** [github.com/themalik-g/wraith](https://github.com/themalik-g/wraith)  
+**Repository:** [github.com/themalik-g/al-jin-whatsapp-bot](https://github.com/themalik-g/al-jin-whatsapp-bot)
 **License:** MIT © MALIK MEHTAB  
 **Baileys:** v7.0.0-rc.14
 
 ---
 
-*Keywords: WRAITH vs other WhatsApp bots, best WhatsApp MD bot, Baileys buttons bot, 
+*Keywords: Al-Jin vs other WhatsApp bots, best WhatsApp MD bot, Baileys buttons bot,
 cookie-free YouTube downloader WhatsApp, FullDP HDDP WhatsApp bot, 
 in-WhatsApp multi-session pairing, WhatsApp bot without fork, 
 best self-hosted WhatsApp bot 2026.*

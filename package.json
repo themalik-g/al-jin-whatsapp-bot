@@ -1,8 +1,11 @@
 {
-  "name": "wraith",
+  "name": "al-jin-whatsapp-bot",
   "version": "1.3.3",
-  "description": "WRAITH — a silent watcher for WhatsApp",
+  "description": "Al-Jin — free open-source WhatsApp multi-device bot (Baileys v7): anti-delete, view-once reveal, status saver, YouTube downloader, Gemini AI, group admin.",
   "keywords": [
+    "al-jin",
+    "al-jin-md",
+    "al-jin-bot",
     "whatsapp-bot",
     "whatsapp",
     "baileys",
@@ -19,13 +22,13 @@
     "pairing-code",
     "group-management"
   ],
-  "homepage": "https://github.com/themalik-g/wraith#readme",
+  "homepage": "https://github.com/themalik-g/al-jin-whatsapp-bot#readme",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/themalik-g/wraith.git"
+    "url": "git+https://github.com/themalik-g/al-jin-whatsapp-bot.git"
   },
   "bugs": {
-    "url": "https://github.com/themalik-g/wraith/issues"
+    "url": "https://github.com/themalik-g/al-jin-whatsapp-bot/issues"
   },
   "author": "Malik Mehtab (https://github.com/themalik-g)",
   "license": "MIT",

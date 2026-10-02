@@ -1,5 +1,5 @@
 // ─────────────────────────────────────────────
-// WRAITH · modules/presence-track.js  (v2)
+// Al-Jin · modules/presence-track.js  (v2)
 // Stalk: logs EVERY online/offline change of the contacts you track,
 // keeps session durations and builds reports for any time window.
 //

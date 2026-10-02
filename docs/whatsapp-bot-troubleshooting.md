@@ -95,7 +95,7 @@ If the code still fails:
 **Cause:** The host or container limits the maximum number of processes/threads (`NPROC` or CGroup `pids.max`). When running multiple sessions, V8 and libuv background thread allocation exceeds the container thread ceiling.
 
 **Fix:**
-WRAITH defaults `--v8-pool-size=2` and `UV_THREADPOOL_SIZE=2` for spawned session processes. If running many concurrent sessions on tight host limits, set `UV_THREADPOOL_SIZE` and `WRAITH_V8_POOL_SIZE` in your environment or `.env`:
+Al-Jin defaults `--v8-pool-size=2` and `UV_THREADPOOL_SIZE=2` for spawned session processes. If running many concurrent sessions on tight host limits, set `UV_THREADPOOL_SIZE` and `WRAITH_V8_POOL_SIZE` in your environment or `.env`:
 ```bash
 UV_THREADPOOL_SIZE=2
 WRAITH_V8_POOL_SIZE=2

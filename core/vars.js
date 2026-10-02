@@ -1,5 +1,5 @@
 // ─────────────────────────────────────────────
-// WRAITH · core/vars.js
+// Al-Jin · core/vars.js
 // Persistent per-session variable store (cached).
 // ─────────────────────────────────────────────
 import fs from 'node:fs';

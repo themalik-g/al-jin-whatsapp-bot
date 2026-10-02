@@ -1,5 +1,5 @@
 // ─────────────────────────────────────────────
-//  WRAITH · modules/profile.js
+//  Al-Jin · modules/profile.js
 //  .getpp — fetch profile picture of a user,
 //  group, or the current chat.
 // ─────────────────────────────────────────────

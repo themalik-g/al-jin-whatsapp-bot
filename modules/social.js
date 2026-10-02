@@ -1,5 +1,5 @@
 // ─────────────────────────────────────────────
-// WRAITH · modules/social.js
+// Al-Jin · modules/social.js
 // Phase 4: Social search + Background removal
 // ─────────────────────────────────────────────
 import fs from 'node:fs';
@@ -138,7 +138,7 @@ async function socialSearch(sock, chat, msg, args, fn, label) {
             r.videos ? `• *videos* · ${r.videos}` : '',
             r.verified ? '✅ verified account' : '',
             '',
-            'Provided by 𝗪𝗥𝗔𝗜𝗧🇭',
+            'Provided by 𝐀𝐥-𝐉𝐢𝐧',
         ].filter(Boolean);
         if (r.profilePic) {
             try {

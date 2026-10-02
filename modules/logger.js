@@ -1,5 +1,5 @@
 // ─────────────────────────────────────────────
-// WRAITH · modules/logger.js
+// Al-Jin · modules/logger.js
 // Buffered, non-blocking per-session message logger.
 // Lines are queued in memory and flushed asynchronously.
 // ─────────────────────────────────────────────

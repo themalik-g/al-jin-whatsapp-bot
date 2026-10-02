@@ -1,5 +1,5 @@
 // ─────────────────────────────────────────────
-// WRAITH · modules/tools.js
+// Al-Jin · modules/tools.js
 // OCR, Barcode, VCard, TTS utilities
 // ─────────────────────────────────────────────
 import fs from 'node:fs';
@@ -123,7 +123,7 @@ export async function ocrCommand(sock, chat, msg, args) {
     for (const chunk of chunks) {
       await sendInteractive(sock, chat, {
         body: chunk,
-        footer: 'Provided by 𝗪𝗥𝗔Ｉ𝗧🇭',
+        footer: 'Provided by 𝐀𝐥-𝐉𝐢𝐧',
         buttons: [createCtaCopy('📋 Copy Text', text)],
       }, { quoted: msg });
     }
@@ -166,7 +166,7 @@ export async function barcodeCommand(sock, chat, msg, args) {
 
     await sock.sendMessage(chat, {
       image: pngBuffer,
-      caption: `📊 *Barcode (${type.toUpperCase()})*\n\nText: \`${text}\`\n\nProvided by 𝗪𝗥𝗔𝗜𝗧🇭`,
+      caption: `📊 *Barcode (${type.toUpperCase()})*\n\nText: \`${text}\`\n\nProvided by 𝐀𝐥-𝐉𝐢𝐧`,
     }, { quoted: msg });
   } catch (e) {
     await sock.sendMessage(chat, { text: `⚠️ barcode failed: ${e.message}` }, { quoted: msg }).catch(() => {});

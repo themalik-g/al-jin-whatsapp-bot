@@ -40,7 +40,7 @@ WhatsApp's API gives you:
 
 ---
 
-## How WRAITH Resolves LIDs Anyway
+## How Al-Jin Resolves LIDs Anyway
 
 Even though the API doesn't offer a reverse lookup, PN JIDs leak through **five different channels**:
 
@@ -124,7 +124,7 @@ This reveals PNs even for fresh LIDs that have no cache and no `participantAlt`.
 
 ---
 
-## What WRAITH Does with LIDs
+## What Al-Jin Does with LIDs
 
 | Operation | Uses |
 |---|---|
@@ -155,7 +155,7 @@ You **can** send to a LID directly, but only if the bot has an established Signa
 
 ## Debugging JID Resolution
 
-Set `WRAITH_DEBUG=1` to trace:
+Set `WRAITH_DEBUG=1` (or `AL_JIN_DEBUG=1`) to trace:
 
 ```
 [jid-resolver] getPNForLID failed: ...

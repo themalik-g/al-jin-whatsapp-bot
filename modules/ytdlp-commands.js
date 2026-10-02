@@ -1,5 +1,5 @@
 // ─────────────────────────────────────────────
-// WRAITH · modules/ytdlp-commands.js
+// Al-Jin · modules/ytdlp-commands.js
 // .play, .ytv, .ytdl commands via ytdlp-nodejs
 // ─────────────────────────────────────────────
 import fs from 'node:fs';
@@ -74,7 +74,7 @@ export async function playCommand(sock, chat, msg, args) {
         ptt: false,
       }, { quoted: msg });
 
-      await edit(sock, chat, status, `✅ *Audio sent*\n\nProvided by 𝗪𝗥𝗔𝗜𝗧🇭`);
+      await edit(sock, chat, status, `✅ *Audio sent*\n\nProvided by 𝐀𝐥-𝐉𝐢𝐧`);
       await react(sock, chat, msg, '☑');
     } catch (e) {
       console.error('[playCommand]', e);
@@ -107,14 +107,14 @@ async function videoJob(sock, chat, msg, { target, tag, icon, label }) {
 
       // Final safety net: if it still isn't WhatsApp-playable, send as a document so it never arrives broken.
       const playable = await isPlayable(finalPath).catch(() => false);
-      const caption = `${icon} *${label}*\nSize: ${MB(size)} MB\n\nProvided by 𝗪𝗥𝗔𝗜𝗧🇭`;
+      const caption = `${icon} *${label}*\nSize: ${MB(size)} MB\n\nProvided by 𝐀𝐥-𝐉𝐢𝐧`;
       if (playable) {
         await sock.sendMessage(chat, { video: { url: finalPath }, mimetype: 'video/mp4', fileName: path.basename(finalPath), caption }, { quoted: msg });
       } else {
         await sock.sendMessage(chat, { document: { url: finalPath }, mimetype: 'video/mp4', fileName: path.basename(finalPath), caption }, { quoted: msg });
       }
 
-      await edit(sock, chat, status, `✅ *Sent (${MB(size)} MB)*\n\nProvided by 𝗪𝗥𝗔𝗜𝗧🇭`);
+      await edit(sock, chat, status, `✅ *Sent (${MB(size)} MB)*\n\nProvided by 𝐀𝐥-𝐉𝐢𝐧`);
       await react(sock, chat, msg, '☑');
     } catch (e) {
       console.error(`[${tag}]`, e);

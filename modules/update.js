@@ -1,5 +1,5 @@
 // ─────────────────────────────────────────────
-//  WRAITH · modules/update.js
+//  Al-Jin · modules/update.js
 //  .update — re-fetch bot files from the repo,
 //  keep session/state folders untouched,
 //  auto-install if dependencies changed,
@@ -166,7 +166,7 @@ export async function updateCommand(sock, chat, msg) {
         } else if (/already up to date/i.test(out) && !depsChanged) {
             // Nothing changed. Don't restart — avoid pointless downtime.
             _busy = false;
-            return send('✅ wraith is already up to date. Nothing to restart.');
+            return send('✅ Al-Jin is already up to date. Nothing to restart.');
         }
 
         const sessionId = process.env.WRAITH_SESSION_ID || 'main';

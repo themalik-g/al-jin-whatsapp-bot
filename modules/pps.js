@@ -1,5 +1,5 @@
 // ─────────────────────────────────────────────
-//  WRAITH · modules/pps.js
+//  Al-Jin · modules/pps.js
 //  Profile Picture Sync (PPS) for DM chats.
 //  Downloads and updates profile pictures of the top 10 DM chats daily.
 // ─────────────────────────────────────────────

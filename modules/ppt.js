@@ -1,5 +1,5 @@
 // ─────────────────────────────────────────────
-// WRAITH · modules/ppt.js
+// Al-Jin · modules/ppt.js
 // .ppt <topic>;<subtopics>;<theme>;<slides> — Gemini AI Presentation Generator
 // ─────────────────────────────────────────────
 
@@ -34,7 +34,7 @@ export async function pptCommand(sock, chat, msg, args) {
       document: buffer,
       fileName: `${safeFilename}.pptx`,
       mimetype: 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
-      caption: `📊 *${title}*\n_Slides: ${slideCount}_\n\nProvided by 𝗪𝗥𝗔𝗜𝗧🇭`
+      caption: `📊 *${title}*\n_Slides: ${slideCount}_\n\nProvided by 𝐀𝐥-𝐉𝐢𝐧`
     }, { quoted: msg });
 
     await sock.sendMessage(chat, {

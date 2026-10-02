@@ -1,5 +1,5 @@
 // ─────────────────────────────────────────────
-// WRAITH · modules/download.js
+// Al-Jin · modules/download.js
 // Platform downloaders — ytdlp-nodejs + @postfetch/core
 // ─────────────────────────────────────────────
 import fs from 'node:fs';
@@ -209,12 +209,12 @@ async function deliverPostItems(sock, chat, msg, status, items) {
 // Final status + reaction. Green tick ONLY when everything was really delivered.
 async function finishPostDelivery(sock, chat, msg, status, r, extra = '') {
   if (r.failed.length === 0) {
-    await edit(sock, chat, status, `✅ *Download complete* (${r.sent}/${r.total} sent)${extra}\n\nProvided by 𝗪𝗥𝗔𝗜𝗧🇭`);
+    await edit(sock, chat, status, `✅ *Download complete* (${r.sent}/${r.total} sent)${extra}\n\nProvided by 𝐀𝐥-𝐉𝐢𝐧`);
     await react(sock, chat, msg, '☑');
     return;
   }
   const why = r.failed.slice(0, 5).map((f) => `• #${f.n}: ${f.reason}`).join('\n');
-  await edit(sock, chat, status, `⚠️ *Sent ${r.sent}/${r.total}*\n${why}\n\nProvided by 𝗪𝗥𝗔𝗜𝗧🇭`);
+  await edit(sock, chat, status, `⚠️ *Sent ${r.sent}/${r.total}*\n${why}\n\nProvided by 𝐀𝐥-𝐉𝐢𝐧`);
   await react(sock, chat, msg, '⚠️');
 }
 
@@ -236,9 +236,9 @@ export async function downloadPostMediaDirect(sock, chat, msg, url, asZip = fals
         document: Buffer.from(zip.bytes),
         fileName: zip.filename || 'post.zip',
         mimetype: zip.mime || 'application/zip',
-        caption: `📦 *Post Archive* (${result.items.length} items)\n\nProvided by 𝗪𝗥𝗔𝗜𝗧🇭`,
+        caption: `📦 *Post Archive* (${result.items.length} items)\n\nProvided by 𝐀𝐥-𝐉𝐢𝐧`,
       }, { quoted: msg });
-      await edit(sock, chat, status, `✅ *ZIP complete*\n\nProvided by 𝗪𝗥𝗔𝗜𝗧🇭`);
+      await edit(sock, chat, status, `✅ *ZIP complete*\n\nProvided by 𝐀𝐥-𝐉𝐢𝐧`);
       await react(sock, chat, msg, '☑');
       return;
     }
@@ -389,7 +389,7 @@ async function downloadMedia(sock, chat, msg, query, audioOnly) {
       return;
     }
 
-    await edit(sock, chat, status, `✅ *Download complete*\n_${safeName}_\n\nProvided by 𝗪𝗥𝗔𝗜𝗧🇭`);
+    await edit(sock, chat, status, `✅ *Download complete*\n_${safeName}_\n\nProvided by 𝐀𝐥-𝐉𝐢𝐧`);
     await react(sock, chat, msg, '☑');
   } catch (e) {
     console.error('[download]', e.message);
@@ -417,7 +417,7 @@ export async function ytdlCommand(sock, chat, msg, args) {
     const p = getPrefix();
     return sendInteractive(sock, chat, {
       body: `⬇️ *Download Media Options*\n\nURL: _${query.slice(0, 70)}${query.length > 70 ? '…' : ''}_\n\nSelect your desired format:`,
-      footer: 'Provided by 𝗪𝗥𝗔𝗜𝗧🇭',
+      footer: 'Provided by 𝐀𝐥-𝐉𝐢𝐧',
       buttons: [
         createQuickReply('🎬 Video (Best)', `${p}dl ${query} --direct`),
         createQuickReply('🎵 Audio MP3', `${p}mp3 ${query}`),

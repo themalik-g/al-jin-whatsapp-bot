@@ -1,5 +1,5 @@
 // ─────────────────────────────────────────────
-// WRAITH · modules/downloader.js
+// Al-Jin · modules/downloader.js
 // Phase 4: Git downloader, MediaFire downloader
 // ─────────────────────────────────────────────
 import fs from 'node:fs';

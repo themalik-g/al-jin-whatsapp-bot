@@ -1,5 +1,5 @@
 // ─────────────────────────────────────────────
-// WRAITH · modules/spy.js
+// Al-Jin · modules/spy.js
 //   .statusalert  — alert when chosen people post a status
 //   .watch        — alert when chosen people change profile picture / About / name
 //   .ginfo        — inspect a group from its invite link without joining

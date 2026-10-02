@@ -5,7 +5,7 @@
 ```javascript
 export const CONFIG = {
     owner: "923257853673",              // WhatsApp phone number, digits only
-    codename: "WRAITH",                 // Shown in startup banner
+    codename: "Al-Jin",                 // Shown in startup banner
     memoryTTL: 60 * 60 * 1000,          // Ledger message retention (1 hour)
     reconnectDelay: 3000,               // Auto-reconnect delay (ms)
     keepAliveInterval: 30_000           // Presence heartbeat interval (ms)
@@ -32,6 +32,8 @@ Session state directories manage Baileys authentication state and connection cre
 
 Set `WRAITH_DEBUG=1` to enable verbose trace output:
 - Ghost ledger storage events
+
+Every WRAITH_* variable can also be set as AL_JIN_* (for example AL_JIN_DEBUG). The old WRAITH_* names still work.
 - View-once extraction steps
 - JID resolution paths
 - Download execution logs

@@ -1,5 +1,5 @@
 // ─────────────────────────────────────────────
-// WRAITH · core/keys.js — single place for all API keys
+// Al-Jin · core/keys.js — single place for all API keys
 // Reads keys.env from project root; process.env wins.
 // ─────────────────────────────────────────────
 import fs from 'node:fs';

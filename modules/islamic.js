@@ -1,5 +1,5 @@
 // ─────────────────────────────────────────────
-// WRAITH · modules/islamic.js
+// Al-Jin · modules/islamic.js
 // Islamic utilities: Prayer Times, Quran Verses, Surah, Para, Hadith & Quran Search
 // ─────────────────────────────────────────────
 
@@ -191,7 +191,7 @@ export async function prayertimesCommand(sock, chat, msg, args) {
 │ 🌅 *Maghrib:* ${t.Maghrib}
 │ 🌙 *Isha:* ${t.Isha}
 └───────────────────
-Provided by 𝗪𝗥ÃIТ🇭`;
+Provided by 𝐀𝐥-𝐉𝐢𝐧`;
 
     await sendWithCta(sock, chat, reply, { quoted: msg });
   } catch (err) {
@@ -258,7 +258,7 @@ export async function quranCommand(sock, chat, msg, args) {
 │ 🇬🇧 *English (Saheeh International):*
 │ ${englishData.text}
 └───────────────────
-Provided by 𝗪𝗥ÃIТ🇭`;
+Provided by 𝐀𝐥-𝐉𝐢𝐧`;
 
     await sendWithCta(sock, chat, reply, { quoted: msg });
   } catch (err) {
@@ -333,7 +333,7 @@ export async function soraCommand(sock, chat, msg, args) {
           document: buffer,
           fileName: cleanName,
           mimetype: 'application/pdf',
-          caption: `📖 *Surah ${surahNum}: ${surahTitle}* ${surahArabic}${surahTrans}\n\nProvided by 𝗪𝗥ÃIТ🇭`
+          caption: `📖 *Surah ${surahNum}: ${surahTitle}* ${surahArabic}${surahTrans}\n\nProvided by 𝐀𝐥-𝐉𝐢𝐧`
         }, { quoted: msg });
       }
     }
@@ -370,7 +370,7 @@ export async function paraCommand(sock, chat, msg, args) {
           document: buffer,
           fileName: `Quran_Para_${paddedPara}.pdf`,
           mimetype: 'application/pdf',
-          caption: `📖 *Quran Para / Juz ${paraNum} Document*\n\nProvided by 𝗪𝗥ÃIТ🇭`
+          caption: `📖 *Quran Para / Juz ${paraNum} Document*\n\nProvided by 𝐀𝐥-𝐉𝐢𝐧`
         }, { quoted: msg });
       }
     }
@@ -426,7 +426,7 @@ export async function muslimCommand(sock, chat, msg, args) {
 │ 📌 *Hadith Number:* #${num}
 ├───────────────────
 ${arabic ? `│ 🕌 *Arabic:*\n│ ${arabic}\n│\n` : ''}${english ? `│ 🇬🇧 *English:*\n│ ${english}\n` : ''}└───────────────────
-Provided by 𝗪𝗥ÃIТ🇭`;
+Provided by 𝐀𝐥-𝐉𝐢𝐧`;
 
     await sendWithCta(sock, chat, reply, { quoted: msg });
   } catch (err) {
@@ -457,7 +457,7 @@ export async function bukhariCommand(sock, chat, msg, args) {
 │ 📌 *Hadith Number:* #${num}
 ├───────────────────
 ${arabic ? `│ 🕌 *Arabic:*\n│ ${arabic}\n│\n` : ''}${english ? `│ 🇬🇧 *English:*\n│ ${english}\n` : ''}└───────────────────
-Provided by 𝗪𝗥ÃIТ🇭`;
+Provided by 𝐀𝐥-𝐉𝐢𝐧`;
 
     await sendWithCta(sock, chat, reply, { quoted: msg });
   } catch (err) {
@@ -499,7 +499,7 @@ export async function searchQuranCommand(sock, chat, msg, args) {
         `"${m.text.trim()}"\n\n`;
     }
 
-    reply += `└───────────────────\nProvided by 𝗪𝗥ÃIТ🇭`;
+    reply += `└───────────────────\nProvided by 𝐀𝐥-𝐉𝐢𝐧`;
 
     await sendWithCta(sock, chat, reply, { quoted: msg });
   } catch (err) {
@@ -759,7 +759,7 @@ export async function quransearchCommand(sock, chat, msg, args) {
         `───────────────────\n\n`;
     }
 
-    reply += `Provided by 𝗪𝗥ÃIТ🇭`;
+    reply += `Provided by 𝐀𝐥-𝐉𝐢𝐧`;
 
     await sendWithCta(sock, chat, reply.trim(), { quoted: msg });
   } catch (err) {
@@ -816,7 +816,7 @@ export async function hadeessearchCommand(sock, chat, msg, args) {
         `───────────────────\n\n`;
     }
 
-    reply += `Provided by 𝗪𝗥ÃIТ🇭`;
+    reply += `Provided by 𝐀𝐥-𝐉𝐢𝐧`;
 
     await sendWithCta(sock, chat, reply.trim(), { quoted: msg });
   } catch (err) {
@@ -891,7 +891,7 @@ export async function islamsearchCommand(sock, chat, msg, args) {
       }
     }
 
-    reply += `Provided by 𝗪𝗥ÃIТ🇭`;
+    reply += `Provided by 𝐀𝐥-𝐉𝐢𝐧`;
 
     await sendWithCta(sock, chat, reply.trim(), { quoted: msg });
   } catch (err) {

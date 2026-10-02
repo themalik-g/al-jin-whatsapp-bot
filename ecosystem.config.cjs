@@ -1,11 +1,11 @@
 // ─────────────────────────────────────────────
-//  WRAITH · PM2 ecosystem config
+//  Al-Jin · PM2 ecosystem config
 //  Usage: pm2 start ecosystem.config.cjs
 // ─────────────────────────────────────────────
 module.exports = {
     apps: [
         {
-            name: 'wraith',
+            name: 'al-jin',
             script: 'index.js',
             cwd: __dirname,
             interpreter: 'node',
