@@ -1,5 +1,5 @@
 // ─────────────────────────────────────────────
-// WRAITH · modules/ytcookies.js
+// 𝐌𝐄𝐇𝐓𝐀𝐁-𝐌𝐃 · modules/ytcookies.js
 // .ytcookies — YouTube Cookies setup and management
 // ─────────────────────────────────────────────
 import fs from 'node:fs';
@@ -10,7 +10,7 @@ import { sendWithCta } from '../lib/buttons.js';
 import { getPrefix } from '../core/settings.js';
 import { isOwner } from '../core/identity.js';
 
-const DATA_ROOT = process.env.WRAITH_DATA_DIR || process.cwd();
+const DATA_ROOT = process.env.MEHTAB_MD_DATA_DIR || process.cwd();
 const COOKIES_PATH = path.resolve(DATA_ROOT, 'data', 'youtube_cookies.txt');
 
 export function getCookiesFilePath() {
@@ -113,7 +113,7 @@ YouTube frequently blocks bot downloads or demands sign-in. Setting YouTube cook
 • \`${p}ytcookies status\` — Check active cookies
 • \`${p}ytcookies clear\` — Clear stored cookies
 
-Provided by 𝗪𝗥𝗔𝗜𝗧🇭`;
+Provided by 𝐌𝐄𝐇𝐓𝐀𝐁-𝐌𝐃`;
 
   return sendWithCta(sock, chat, guideText, { quoted: msg });
 }

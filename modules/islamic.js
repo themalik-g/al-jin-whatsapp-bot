@@ -1,5 +1,5 @@
 // ─────────────────────────────────────────────
-// WRAITH · modules/islamic.js
+// 𝐌𝐄𝐇𝐓𝐀𝐁-𝐌𝐃 · modules/islamic.js
 // Islamic utilities: Prayer Times, Quran Verses, Surah, Para, Hadith & Quran Search
 // ─────────────────────────────────────────────
 

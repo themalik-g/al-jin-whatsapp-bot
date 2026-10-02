@@ -1,5 +1,5 @@
-# ai.txt — AI Crawler Permissions for WRAITH
-# https://github.com/themalik-g/wraith
+# ai.txt — AI Crawler Permissions for 𝐌𝐄𝐇𝐓𝐀𝐁-𝐌𝐃
+# https://github.com/themalik-g/mehtab-md
 
 User-agent: GPTBot
 Allow: /
@@ -50,4 +50,4 @@ User-agent: Bytespider
 Allow: /
 
 # Sitemap reference
-Sitemap: https://github.com/themalik-g/wraith/blob/main/llms.txt
+Sitemap: https://github.com/themalik-g/mehtab-md/blob/main/llms.txt

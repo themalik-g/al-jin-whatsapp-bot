@@ -122,7 +122,7 @@ function scanFilesRecursive(dirPath, baseFolder = '') {
  * Resolves session directory paths for vault and logs
  */
 function resolveSessionPaths(sessionId) {
-  const repoRoot = process.env.WRAITH_REPO_ROOT || process.cwd();
+  const repoRoot = process.env.MEHTAB_MD_REPO_ROOT || process.cwd();
   const instDir = path.join(repoRoot, 'instances', sessionId);
 
   const targets = [];
@@ -147,9 +147,9 @@ function resolveSessionPaths(sessionId) {
     }
   }
 
-  // Check if current process WRAITH_DATA_DIR matches session or active environment
-  if (process.env.WRAITH_SESSION_ID === sessionId && process.env.WRAITH_DATA_DIR) {
-    const activeDataDir = process.env.WRAITH_DATA_DIR;
+  // Check if current process MEHTAB_MD_DATA_DIR matches session or active environment
+  if (process.env.MEHTAB_MD_SESSION_ID === sessionId && process.env.MEHTAB_MD_DATA_DIR) {
+    const activeDataDir = process.env.MEHTAB_MD_DATA_DIR;
     const activeVault = path.join(activeDataDir, 'vault');
     const activeLogs = path.join(activeDataDir, 'logs');
 

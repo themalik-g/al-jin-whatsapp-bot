@@ -1,5 +1,5 @@
 // ─────────────────────────────────────────────
-// WRAITH · modules/theme.js
+// 𝐌𝐄𝐇𝐓𝐀𝐁-𝐌𝐃 · modules/theme.js
 // Chat Wallpapers & Profile Picture (DP) commands
 // ─────────────────────────────────────────────
 import fs from 'node:fs';
@@ -75,7 +75,7 @@ export async function wpCommand(sock, chat, msg, args = [], indexOverride = null
       delete wps[chat];
       saveJson(WP_FILE(), wps);
 
-      return sendWithCta(sock, chat, `🖼️ *Chat Wallpaper Reset*\n\nRestored chat wallpaper preference to default.\n\nProvided by 𝗪𝗥𝗔𝗜𝗧🇭`, { quoted: msg });
+      return sendWithCta(sock, chat, `🖼️ *Chat Wallpaper Reset*\n\nRestored chat wallpaper preference to default.\n\nProvided by 𝐌𝐄𝐇𝐓𝐀𝐁-𝐌𝐃`, { quoted: msg });
     }
 
     // Check if replying to an image
@@ -87,7 +87,7 @@ export async function wpCommand(sock, chat, msg, args = [], indexOverride = null
 
       return sock.sendMessage(chat, {
         image: imageBuffer,
-        caption: `🖼️ *Chat Wallpaper*\n\nHere is your requested wallpaper image.\n\nProvided by 𝗪𝗥𝗔𝗜𝗧🇭`
+        caption: `🖼️ *Chat Wallpaper*\n\nHere is your requested wallpaper image.\n\nProvided by 𝐌𝐄𝐇𝐓𝐀𝐁-𝐌𝐃`
       }, { quoted: msg });
     }
 
@@ -97,7 +97,7 @@ export async function wpCommand(sock, chat, msg, args = [], indexOverride = null
       WALLPAPER_PRESETS.forEach((w) => {
         listText += `*${w.id}.* ${w.name}\n`;
       });
-      listText += `\n*Photo Reply:* Reply to any image message with \`.wp\` to get it as wallpaper.\n*Reset Command:* \`.reset wp\` or \`.resetwp\`\n\nProvided by 𝗪𝗥𝗔𝗜𝗧🇭`;
+      listText += `\n*Photo Reply:* Reply to any image message with \`.wp\` to get it as wallpaper.\n*Reset Command:* \`.reset wp\` or \`.resetwp\`\n\nProvided by 𝐌𝐄𝐇𝐓𝐀𝐁-𝐌𝐃`;
       return sendWithCta(sock, chat, listText, { quoted: msg });
     }
 
@@ -111,7 +111,7 @@ export async function wpCommand(sock, chat, msg, args = [], indexOverride = null
       presetBuffer = Buffer.from(await response.arrayBuffer());
     } catch (e) {
       console.error('[wpCommand] fetch preset image failed:', e.message);
-      return sendWithCta(sock, chat, `❌ *Wallpaper Download Failed:* ${e.message}\n\nProvided by 𝗪𝗥𝗔𝗜𝗧🇭`, { quoted: msg });
+      return sendWithCta(sock, chat, `❌ *Wallpaper Download Failed:* ${e.message}\n\nProvided by 𝐌𝐄𝐇𝐓𝐀𝐁-𝐌𝐃`, { quoted: msg });
     }
 
     const wps = loadJson(WP_FILE());
@@ -120,11 +120,11 @@ export async function wpCommand(sock, chat, msg, args = [], indexOverride = null
 
     return sock.sendMessage(chat, {
       image: presetBuffer || { url: preset.url },
-      caption: `🖼️ *Chat Wallpaper Preset #${preset.id}*\n\n• *Style:* ${preset.name}\n\nProvided by 𝗪𝗥𝗔𝗜𝗧🇭`
+      caption: `🖼️ *Chat Wallpaper Preset #${preset.id}*\n\n• *Style:* ${preset.name}\n\nProvided by 𝐌𝐄𝐇𝐓𝐀𝐁-𝐌𝐃`
     }, { quoted: msg });
   } catch (e) {
     console.error('[wpCommand] error:', e.message);
-    return sendWithCta(sock, chat, `❌ *Wallpaper Error:* ${e.message}\n\nProvided by 𝗪𝗥𝗔𝗜𝗧🇭`, { quoted: msg });
+    return sendWithCta(sock, chat, `❌ *Wallpaper Error:* ${e.message}\n\nProvided by 𝐌𝐄𝐇𝐓𝐀𝐁-𝐌𝐃`, { quoted: msg });
   }
 }
 
@@ -135,7 +135,7 @@ export async function dpCommand(sock, chat, msg, args = []) {
   try {
     const imageBuffer = await extractQuotedImageBuffer(msg);
     if (!imageBuffer) {
-      return sendWithCta(sock, chat, `🖼️ *Usage:* Reply to an image with \`.dp\` to set it as profile photo.\n\nProvided by 𝗪𝗥𝗔𝗜𝗧🇭`, { quoted: msg });
+      return sendWithCta(sock, chat, `🖼️ *Usage:* Reply to an image with \`.dp\` to set it as profile photo.\n\nProvided by 𝐌𝐄𝐇𝐓𝐀𝐁-𝐌𝐃`, { quoted: msg });
     }
 
     const targetJid = chat.endsWith('@g.us') ? chat : (sock.user?.id ? sock.user.id.split(':')[0] + '@s.whatsapp.net' : chat);
@@ -143,10 +143,10 @@ export async function dpCommand(sock, chat, msg, args = []) {
 
     return sock.sendMessage(chat, {
       image: imageBuffer,
-      caption: `🖼️ *Profile Picture Updated*\n\nSuccessfully updated photo.\n\nProvided by 𝗪𝗥𝗔𝗜𝗧🇭`
+      caption: `🖼️ *Profile Picture Updated*\n\nSuccessfully updated photo.\n\nProvided by 𝐌𝐄𝐇𝐓𝐀𝐁-𝐌𝐃`
     }, { quoted: msg });
   } catch (e) {
     console.error('[dpCommand] error:', e.message);
-    return sendWithCta(sock, chat, `❌ *Profile Photo Error:* ${e.message}\n\nProvided by 𝗪𝗥𝗔𝗜𝗧🇭`, { quoted: msg });
+    return sendWithCta(sock, chat, `❌ *Profile Photo Error:* ${e.message}\n\nProvided by 𝐌𝐄𝐇𝐓𝐀𝐁-𝐌𝐃`, { quoted: msg });
   }
 }

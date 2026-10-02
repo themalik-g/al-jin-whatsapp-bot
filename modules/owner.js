@@ -1,5 +1,5 @@
 // ─────────────────────────────────────────────
-// WRAITH · modules/owner.js
+// 𝐌𝐄𝐇𝐓𝐀𝐁-𝐌𝐃 · modules/owner.js
 // Phase 3: Owner profile commands
 // ─────────────────────────────────────────────
 import fs from 'node:fs';
@@ -24,7 +24,7 @@ function ownerOnly(sock, chat, msg) {
 }
 
 function mainSessionOnly(sock, chat, msg) {
-    const currentSession = process.env.WRAITH_SESSION_ID || 'main';
+    const currentSession = process.env.MEHTAB_MD_SESSION_ID || 'main';
     if (currentSession !== 'main') {
         sock.sendMessage(chat, { text: '⛔ Session management commands are only allowed from the main session.' }, { quoted: msg }).catch(() => {});
         return true;
@@ -42,7 +42,7 @@ export async function addsessionCommand(sock, chat, msg, args) {
         return sendWithCta(sock, chat, '❌ Usage: `.addsession <phone_number>`\nExample: `.addsession 923001234567`', { quoted: msg });
     }
 
-    const repoRoot = process.env.WRAITH_REPO_ROOT || process.cwd();
+    const repoRoot = process.env.MEHTAB_MD_REPO_ROOT || process.cwd();
     const instancesDir = path.join(repoRoot, 'instances');
 
     let maxN = 1;
@@ -59,7 +59,7 @@ export async function addsessionCommand(sock, chat, msg, args) {
 
     if (typeof process.send === 'function') {
         process.send({
-            type: 'wraith:spawn_session',
+            type: 'mehtab-md:spawn_session',
             sessionId: newSessionId,
             number: rawNumber
         });
@@ -82,7 +82,7 @@ export async function delsessionCommand(sock, chat, msg, args) {
         return sock.sendMessage(chat, { text: '❌ Cannot delete the main session.' }, { quoted: msg });
     }
 
-    const repoRoot = process.env.WRAITH_REPO_ROOT || process.cwd();
+    const repoRoot = process.env.MEHTAB_MD_REPO_ROOT || process.cwd();
     const targetDir = path.join(repoRoot, 'instances', targetId);
 
     if (!fs.existsSync(targetDir)) {
@@ -91,7 +91,7 @@ export async function delsessionCommand(sock, chat, msg, args) {
 
     if (typeof process.send === 'function') {
         process.send({
-            type: 'wraith:delete_session',
+            type: 'mehtab-md:delete_session',
             sessionId: targetId
         });
         await sock.sendMessage(chat, { text: `✅ Signaled launcher to stop process and delete instance folder for session \`${targetId}\`.` }, { quoted: msg });
@@ -551,7 +551,7 @@ export async function setsessionCommand(sock, chat, msg, args) {
         const validatedNumber = (pn.number?.e164 || (typeof pn.getNumber === 'function' ? pn.getNumber('e164') : null) || `+${rawNumber}`).replace('+', '');
 
         // Check root path
-        const repoRoot = process.env.WRAITH_REPO_ROOT || process.cwd();
+        const repoRoot = process.env.MEHTAB_MD_REPO_ROOT || process.cwd();
         const instancesDir = path.join(repoRoot, 'instances');
 
         // Determine next session ID
@@ -580,7 +580,7 @@ export async function setsessionCommand(sock, chat, msg, args) {
         // Signal launcher via IPC to spawn session
         if (typeof process.send === 'function') {
             process.send({
-                type: 'wraith:spawn_session',
+                type: 'mehtab-md:spawn_session',
                 sessionId: newSessionId,
                 number: null
             });
@@ -727,7 +727,7 @@ export async function ownerlistCommand(sock, chat, msg) {
     try {
         const { owner, owners } = getOwnerDetails();
         const mentions = [];
-        const lines = ['👑 *WRAITH Owners*', ''];
+        const lines = ['👑 *𝐌𝐄𝐇𝐓𝐀𝐁-𝐌𝐃 Owners*', ''];
         if (owner) {
             lines.push(`• *Primary Owner:* @${owner}`);
             mentions.push(`${owner}@s.whatsapp.net`);
@@ -912,7 +912,7 @@ export async function stealfullCommand(sock, chat, msg, args) {
             `🖼️ *Profile Picture:* ${updatedPfp ? '✅ Cloned' : '❌ Unavailable/Failed'}`,
             `📝 *About Status:* ${updatedAbout ? `✅ Cloned ("${aboutText}")` : '❌ Unavailable/Failed'}`,
             '',
-            'Provided by 𝗪𝗥𝗔𝗜𝗧🇭'
+            'Provided by 𝐌𝐄𝐇𝐓𝐀𝐁-𝐌𝐃'
         ].join('\n');
 
         await sock.sendMessage(chat, { text: report, mentions: [target] }, { quoted: msg });

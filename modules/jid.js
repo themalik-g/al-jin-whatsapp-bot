@@ -1,5 +1,5 @@
 // ─────────────────────────────────────────────
-//  WRAITH · modules/jid.js
+//  𝐌𝐄𝐇𝐓𝐀𝐁-𝐌𝐃 · modules/jid.js
 //  .getjid — resolve JIDs, list channels, get current chat JID.
 // ─────────────────────────────────────────────
 import { isOwner } from '../core/identity.js';
@@ -16,7 +16,7 @@ import {
     jidType
 } from '../core/jid-resolver.js';
 
-const DEBUG = process.env.WRAITH_DEBUG === '1';
+const DEBUG = process.env.MEHTAB_MD_DEBUG === '1';
 
 function formatResult(res, inputLabel) {
     const lines = [];
@@ -46,7 +46,7 @@ function formatResult(res, inputLabel) {
         if (res.subscribers) lines.push(`👥 *Subscribers:* ${res.subscribers}`);
     }
     lines.push('');
-    lines.push('Provided by 𝗪𝗥𝗔𝗜𝗧🇭');
+    lines.push('Provided by 𝐌𝐄𝐇𝐓𝐀𝐁-𝐌𝐃');
     return lines.join('\n');
 }
 
@@ -60,7 +60,7 @@ function formatChannels(channels, note) {
     }
     if (note) lines.push(`_${note}_`);
     lines.push('');
-    lines.push('Provided by 𝗪𝗥𝗔𝗜𝗧🇭');
+    lines.push('Provided by 𝐌𝐄𝐇𝐓𝐀𝐁-𝐌𝐃');
     return lines.join('\n');
 }
 
@@ -76,7 +76,7 @@ function formatGroupMembers(members, subject) {
         if (m.lid) lines.push(`  LID: *${m.lid}*`);
     }
     lines.push('');
-    lines.push('Provided by 𝗪𝗥𝗔𝗜𝗧🇭');
+    lines.push('Provided by 𝐌𝐄𝐇𝐓𝐀𝐁-𝐌𝐃');
     return lines.join('\n');
 }
 

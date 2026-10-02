@@ -1,5 +1,5 @@
 // ─────────────────────────────────────────────
-// WRAITH · modules/noaction.js
+// 𝐌𝐄𝐇𝐓𝐀𝐁-𝐌𝐃 · modules/noaction.js
 // .noaction — keeps chosen numbers safe inside groups.
 //   demoted  → promoted again straight away
 //   kicked   → added back and promoted (invite link sent if WhatsApp refuses the add,
@@ -23,7 +23,7 @@ import { inState } from '../core/paths.js';
 import { getBestUserJid, digitsOf, resolvePnToLid, stripDevice } from '../core/jid-resolver.js';
 import { getTarget, ownerOnly, notifyOwner } from '../lib/targets.js';
 
-const DEBUG = process.env.WRAITH_DEBUG === '1';
+const DEBUG = process.env.MEHTAB_MD_DEBUG === '1';
 const FILE = () => inState('noaction.json');
 const ACT_DELAY_MS = 0;
 const WINDOW_MS = 5 * 60_000;

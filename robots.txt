@@ -1,4 +1,4 @@
-# robots.txt for WRAITH
+# robots.txt for 𝐌𝐄𝐇𝐓𝐀𝐁-𝐌𝐃
 User-agent: *
 Allow: /
 
@@ -15,4 +15,4 @@ Allow: /
 User-agent: Google-Extended
 Allow: /
 
-Sitemap: https://github.com/themalik-g/wraith/blob/main/llms.txt
+Sitemap: https://github.com/themalik-g/mehtab-md/blob/main/llms.txt

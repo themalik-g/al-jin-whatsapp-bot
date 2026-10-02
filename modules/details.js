@@ -1,5 +1,5 @@
 // ─────────────────────────────────────────────
-// WRAITH · modules/details.js
+// 𝐌𝐄𝐇𝐓𝐀𝐁-𝐌𝐃 · modules/details.js
 // .details <command> — Explains how a command works and how to use it
 // .details all — Summarizes details for all commands
 // ─────────────────────────────────────────────
@@ -35,7 +35,7 @@ const BASE_COMMAND_DETAILS = {
   },
   usermanual: {
     title: '📖 User Manual Command',
-    description: 'Fetches and sends the official Wraith PDF user manual document.',
+    description: 'Fetches and sends the official 𝐌𝐄𝐇𝐓𝐀𝐁-𝐌𝐃 PDF user manual document.',
     usage: ['.usermanual'],
   },
   prefix: {
@@ -873,7 +873,7 @@ export async function detailsCommand(sock, chat, msg, args) {
   const query = (args || []).join(' ').toLowerCase().trim();
 
   if (!query || query === 'all') {
-    let listText = `📘 *WRAITH Detailed Command Guide*\n\n`;
+    let listText = `📘 *𝐌𝐄𝐇𝐓𝐀𝐁-𝐌𝐃 Detailed Command Guide*\n\n`;
     listText += `Below are extensive details, usage guidelines, and examples for commands:\n\n`;
 
     const processedKeys = new Set();
@@ -894,7 +894,7 @@ export async function detailsCommand(sock, chat, msg, args) {
       listText += `\n`;
     }
 
-    listText += `Provided by 𝗪𝗥𝗔𝗜𝗧🇭`;
+    listText += `Provided by 𝐌𝐄𝐇𝐓𝐀𝐁-𝐌𝐃`;
     return sendWithCta(sock, chat, listText, { quoted: msg });
   }
 
@@ -916,6 +916,6 @@ export async function detailsCommand(sock, chat, msg, args) {
     text += `\n📌 *Note:* ${data.notes}\n`;
   }
 
-  text += `\nProvided by 𝗪𝗥𝗔𝗜𝗧🇭`;
+  text += `\nProvided by 𝐌𝐄𝐇𝐓𝐀𝐁-𝐌𝐃`;
   return sendWithCta(sock, chat, text, { quoted: msg });
 }

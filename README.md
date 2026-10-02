@@ -1,23 +1,23 @@
-# WRAITH — Multi-Device WhatsApp Bot (Baileys v7.0.0-rc.14)
+# 𝐌𝐄𝐇𝐓𝐀𝐁-𝐌𝐃 — Multi-Device WhatsApp Bot (Baileys v7.0.0-rc.14)
 
 <div align="center">
 
 **A self-hosted WhatsApp MD bot with anti-delete, view-once reveal, status saver, YouTube downloader, Gemini AI and full group administration — on stock Baileys, no fork, no QR scan.**
 
-[![Stars](https://img.shields.io/github/stars/themalik-g/wraith?style=flat&logo=github)](https://github.com/themalik-g/wraith/stargazers)
-[![Forks](https://img.shields.io/github/forks/themalik-g/wraith?style=flat&logo=github)](https://github.com/themalik-g/wraith/network/members)
-[![Issues](https://img.shields.io/github/issues/themalik-g/wraith)](https://github.com/themalik-g/wraith/issues)
-[![Last commit](https://img.shields.io/github/last-commit/themalik-g/wraith)](https://github.com/themalik-g/wraith/commits/main)
-[![Version](https://img.shields.io/badge/version-1.3.3-blue)](https://github.com/themalik-g/wraith)
+[![Stars](https://img.shields.io/github/stars/themalik-g/mehtab-md?style=flat&logo=github)](https://github.com/themalik-g/mehtab-md/stargazers)
+[![Forks](https://img.shields.io/github/forks/themalik-g/mehtab-md?style=flat&logo=github)](https://github.com/themalik-g/mehtab-md/network/members)
+[![Issues](https://img.shields.io/github/issues/themalik-g/mehtab-md)](https://github.com/themalik-g/mehtab-md/issues)
+[![Last commit](https://img.shields.io/github/last-commit/themalik-g/mehtab-md)](https://github.com/themalik-g/mehtab-md/commits/main)
+[![Version](https://img.shields.io/badge/version-1.3.3-blue)](https://github.com/themalik-g/mehtab-md)
 [![Node](https://img.shields.io/badge/node-%3E%3D20-brightgreen?logo=node.js&logoColor=white)](https://nodejs.org)
 [![Baileys](https://img.shields.io/badge/baileys-v7.0.0--rc.14-green)](https://github.com/WhiskeySockets/Baileys)
 [![License](https://img.shields.io/badge/license-MIT-yellow)](./LICENSE)
 
 </div>
 
-**WRAITH is a free, open-source WhatsApp multi-device (MD) bot** written in JavaScript for **Node.js 20+** and built on **`@whiskeysockets/baileys` v7.0.0-rc.14**. It gives you **native interactive buttons**, **downloaders**, **anti-delete / anti-edit / view-once recovery**, **Gemini AI**, an **Islamic toolset** and complete **WhatsApp group management** — with **no browser, no QR scan, no WhatsApp Business API and no custom Baileys fork**.
+**𝐌𝐄𝐇𝐓𝐀𝐁-𝐌𝐃 is a free, open-source WhatsApp multi-device (MD) bot** written in JavaScript for **Node.js 20+** and built on **`@whiskeysockets/baileys` v7.0.0-rc.14**. It gives you **native interactive buttons**, **downloaders**, **anti-delete / anti-edit / view-once recovery**, **Gemini AI**, an **Islamic toolset** and complete **WhatsApp group management** — with **no browser, no QR scan, no WhatsApp Business API and no custom Baileys fork**.
 
-> **Looking for a WhatsApp bot you can self-host?** WRAITH runs on a VPS, Docker, PM2, Pterodactyl panels or Termux and keeps all data on your own machine.
+> **Looking for a WhatsApp bot you can self-host?** 𝐌𝐄𝐇𝐓𝐀𝐁-𝐌𝐃 runs on a VPS, Docker, PM2, Pterodactyl panels or Termux and keeps all data on your own machine.
 
 <div align="center">
 
@@ -29,8 +29,8 @@
 
 ## 📖 Table of Contents
 
-- [What is WRAITH?](#-what-is-wraith)
-- [Why choose WRAITH?](#-why-choose-wraith)
+- [What is 𝐌𝐄𝐇𝐓𝐀𝐁-𝐌𝐃?](#-what-is-mehtab-md)
+- [Why choose 𝐌𝐄𝐇𝐓𝐀𝐁-𝐌𝐃?](#-why-choose-mehtab-md)
 - [Standout Features](#-standout-features)
 - [Command Reference](#-command-reference)
   - [System & General](#system--general)
@@ -58,9 +58,9 @@
 
 ---
 
-## 🌟 What is WRAITH?
+## 🌟 What is 𝐌𝐄𝐇𝐓𝐀𝐁-𝐌𝐃?
 
-**WRAITH** is a self-hosted **WhatsApp MD bot** that links to your WhatsApp account through an 8-character **pairing code** ("Link with phone number instead") — no QR scan needed. It runs on your own server, stores everything locally, and gives you a full command suite for:
+**𝐌𝐄𝐇𝐓𝐀𝐁-𝐌𝐃** is a self-hosted **WhatsApp MD bot** that links to your WhatsApp account through an 8-character **pairing code** ("Link with phone number instead") — no QR scan needed. It runs on your own server, stores everything locally, and gives you a full command suite for:
 
 - **Recovering deleted and edited messages** (anti-delete / anti-edit)
 - **Revealing view-once photos and videos**
@@ -74,9 +74,9 @@ It is built on the latest **Baileys v7.0.0-rc.14** with LID-aware JID resolution
 
 ---
 
-## ✅ Why choose WRAITH?
+## ✅ Why choose 𝐌𝐄𝐇𝐓𝐀𝐁-𝐌𝐃?
 
-| Capability | WRAITH | Typical Baileys bots |
+| Capability | 𝐌𝐄𝐇𝐓𝐀𝐁-𝐌𝐃 | Typical Baileys bots |
 |---|---|---|
 | Interactive buttons | ✅ Native, stock Baileys | ⚠️ Often needs a custom fork |
 | Add sessions from inside WhatsApp | ✅ `.addsession` | ❌ SSH / terminal / web panel |
@@ -87,7 +87,7 @@ It is built on the latest **Baileys v7.0.0-rc.14** with LID-aware JID resolution
 | Baileys version | ✅ v7.0.0-rc.14 | ⚠️ Often v6.x or old forks |
 | Cost / license | ✅ Free, MIT | ⚠️ Varies |
 
-Read the full write-up: [WRAITH vs other WhatsApp bots](https://github.com/themalik-g/wraith/blob/main/docs/wraith-vs-other-whatsapp-bots.md).
+Read the full write-up: [𝐌𝐄𝐇𝐓𝐀𝐁-𝐌𝐃 vs other WhatsApp bots](https://github.com/themalik-g/mehtab-md/blob/main/docs/mehtab-md-vs-other-whatsapp-bots.md).
 
 ---
 
@@ -109,7 +109,7 @@ Download YouTube video and audio **without cookies**, **without a Google account
 The Ghost and Peek modules capture deleted messages, edited messages and view-once media, then forward them to the owner chat.
 
 ### 📡 Latest Baileys
-Built on **`@whiskeysockets/baileys` v7.0.0-rc.14**. Protocol fixes, button support and multi-device improvements land in WRAITH fast.
+Built on **`@whiskeysockets/baileys` v7.0.0-rc.14**. Protocol fixes, button support and multi-device improvements land in 𝐌𝐄𝐇𝐓𝐀𝐁-𝐌𝐃 fast.
 
 ---
 
@@ -126,7 +126,7 @@ Built on **`@whiskeysockets/baileys` v7.0.0-rc.14**. Protocol fixes, button supp
 | `.uptime` | Show total active running time |
 | `.restart` | Restart the current session worker |
 | `.help` / `.menu` | Show full command list (`.help <category>` supported) |
-| `.usermanual` | Send the official WRAITH PDF user manual |
+| `.usermanual` | Send the official 𝐌𝐄𝐇𝐓𝐀𝐁-𝐌𝐃 PDF user manual |
 | `.prefix` | View or change the command prefix |
 | `.mode public\|private` | Toggle public / owner-only mode |
 | `.replymode buttons\|text` | Switch between button UI and text UI |
@@ -374,13 +374,13 @@ Auto-view, react, and download WhatsApp statuses without marking them seen.
 24/7 uptime.
 
 ```bash
-git clone https://github.com/themalik-g/wraith.git
-cd wraith
+git clone https://github.com/themalik-g/mehtab-md.git
+cd mehtab-md
 npm install
 npm start
 ```
 
-On first run, WRAITH prints an 8-character pairing code. Enter it in 
+On first run, 𝐌𝐄𝐇𝐓𝐀𝐁-𝐌𝐃 prints an 8-character pairing code. Enter it in
 WhatsApp → **Linked Devices → Link with phone number instead**.
 
 ### Add another number (from inside WhatsApp)
@@ -390,14 +390,14 @@ Once running, just send:
 .addsession <phone_number>
 ```
 
-WRAITH generates a pairing code, and you link the new number — no terminal 
+𝐌𝐄𝐇𝐓𝐀𝐁-𝐌𝐃 generates a pairing code, and you link the new number — no terminal
 needed.
 
 ---
 
 ## 🖥️ Supported Platforms
 
-WRAITH runs anywhere Node.js 20+ runs:
+𝐌𝐄𝐇𝐓𝐀𝐁-𝐌𝐃 runs anywhere Node.js 20+ runs:
 
 | Platform | Notes |
 |---|---|
@@ -413,43 +413,43 @@ WRAITH runs anywhere Node.js 20+ runs:
 
 | File | Topic |
 |---|---|
-| [whatsapp-bot-commands.md](https://github.com/themalik-g/wraith/blob/main/docs/whatsapp-bot-commands.md) | Detailed command reference |
-| [whatsapp-bot-configuration.md](https://github.com/themalik-g/wraith/blob/main/docs/whatsapp-bot-configuration.md) | Settings, state files, variables |
-| [whatsapp-jid-system.md](https://github.com/themalik-g/wraith/blob/main/docs/whatsapp-jid-system.md) | PN, LID, JID resolution |
-| [whatsapp-bot-deployment.md](https://github.com/themalik-g/wraith/blob/main/docs/whatsapp-bot-deployment.md) | VPS, Docker, PM2, panels |
-| [whatsapp-bot-troubleshooting.md](https://github.com/themalik-g/wraith/blob/main/docs/whatsapp-bot-troubleshooting.md) | Common errors and fixes |
-| [whatsapp-bot-architecture.md](https://github.com/themalik-g/wraith/blob/main/docs/whatsapp-bot-architecture.md) | Module design and router flow |
-| [wraith-vs-other-whatsapp-bots.md](https://github.com/themalik-g/wraith/blob/main/docs/wraith-vs-other-whatsapp-bots.md) | Feature comparison vs other bots |
+| [whatsapp-bot-commands.md](https://github.com/themalik-g/mehtab-md/blob/main/docs/whatsapp-bot-commands.md) | Detailed command reference |
+| [whatsapp-bot-configuration.md](https://github.com/themalik-g/mehtab-md/blob/main/docs/whatsapp-bot-configuration.md) | Settings, state files, variables |
+| [whatsapp-jid-system.md](https://github.com/themalik-g/mehtab-md/blob/main/docs/whatsapp-jid-system.md) | PN, LID, JID resolution |
+| [whatsapp-bot-deployment.md](https://github.com/themalik-g/mehtab-md/blob/main/docs/whatsapp-bot-deployment.md) | VPS, Docker, PM2, panels |
+| [whatsapp-bot-troubleshooting.md](https://github.com/themalik-g/mehtab-md/blob/main/docs/whatsapp-bot-troubleshooting.md) | Common errors and fixes |
+| [whatsapp-bot-architecture.md](https://github.com/themalik-g/mehtab-md/blob/main/docs/whatsapp-bot-architecture.md) | Module design and router flow |
+| [mehtab-md-vs-other-whatsapp-bots.md](https://github.com/themalik-g/mehtab-md/blob/main/docs/mehtab-md-vs-other-whatsapp-bots.md) | Feature comparison vs other bots |
 
 ---
 
 ## ❓ FAQ
 
-**What is WRAITH?**  
-WRAITH is a free, open-source, self-hosted WhatsApp multi-device bot built with Node.js and Baileys v7. It adds anti-delete, view-once reveal, status saving, downloaders, Gemini AI and group management to your own WhatsApp number.
+**What is 𝐌𝐄𝐇𝐓𝐀𝐁-𝐌𝐃?**
+𝐌𝐄𝐇𝐓𝐀𝐁-𝐌𝐃 is a free, open-source, self-hosted WhatsApp multi-device bot built with Node.js and Baileys v7. It adds anti-delete, view-once reveal, status saving, downloaders, Gemini AI and group management to your own WhatsApp number.
 
-**How do I install a WhatsApp bot with WRAITH?**  
+**How do I install a WhatsApp bot with 𝐌𝐄𝐇𝐓𝐀𝐁-𝐌𝐃?**
 Clone the repository, run `npm install`, start it with `npm start`, enter your number and link it with the 8-character pairing code. See [Quick Start](#-quick-start).
 
-**Does WRAITH support interactive WhatsApp buttons?**  
+**Does 𝐌𝐄𝐇𝐓𝐀𝐁-𝐌𝐃 support interactive WhatsApp buttons?**
 Yes. Quick-reply, single-select, URL and call buttons work natively on the latest Baileys protocol — no fork required.
 
-**Can WRAITH recover deleted WhatsApp messages?**  
+**Can 𝐌𝐄𝐇𝐓𝐀𝐁-𝐌𝐃 recover deleted WhatsApp messages?**
 Yes. The Ghost module logs messages and forwards deleted or edited ones back to the owner.
 
-**Can WRAITH reveal view-once photos and videos?**  
+**Can 𝐌𝐄𝐇𝐓𝐀𝐁-𝐌𝐃 reveal view-once photos and videos?**
 Yes. The Peek module captures view-once media and sends it to the owner chat.
 
 **Can I add a new WhatsApp session without leaving the chat?**  
 Yes. Use `.addsession <number>` inside WhatsApp. No terminal, SSH or dashboard.
 
-**Does WRAITH support FullDP and HDDP profile pictures?**  
+**Does 𝐌𝐄𝐇𝐓𝐀𝐁-𝐌𝐃 support FullDP and HDDP profile pictures?**
 Yes. Full-resolution and HD profile pictures are fetched on stock Baileys.
 
 **Does the YouTube downloader require cookies?**  
 No. It works without cookies, a Google account or any authentication. Optional `.ytcookies` for edge cases.
 
-**Which Baileys version does WRAITH use?**  
+**Which Baileys version does 𝐌𝐄𝐇𝐓𝐀𝐁-𝐌𝐃 use?**
 `@whiskeysockets/baileys` **v7.0.0-rc.14** — the latest release-candidate line.
 
 **Does it need a QR code to log in?**  
@@ -458,11 +458,11 @@ No. It uses an 8-character pairing code via "Link with phone number instead".
 **Can I run multiple WhatsApp numbers?**  
 Yes. Multi-session is built in — add numbers from inside WhatsApp.
 
-**Is WRAITH free?**  
+**Is 𝐌𝐄𝐇𝐓𝐀𝐁-𝐌𝐃 free?**
 Yes. It is MIT-licensed and free to use, modify and distribute.
 
 **Is it safe for my account?**  
-WRAITH uses the official multi-device protocol through Baileys, but any unofficial client carries some risk. Use responsibly and avoid spam.
+𝐌𝐄𝐇𝐓𝐀𝐁-𝐌𝐃 uses the official multi-device protocol through Baileys, but any unofficial client carries some risk. Use responsibly and avoid spam.
 
 **Which Node.js version is required?**  
 Node.js 20 or newer.
@@ -476,17 +476,17 @@ Node.js 20 or newer.
 | "Waiting for this message" | Update to v1.3.3 — persistent message store fixes retry |
 | Bot won't pair | Delete `session/`, restart, re-enter number |
 | `internal-server-error` on admin command | Bot must be admin; ensure target PN resolves |
-| Buttons not rendering | Update to latest WRAITH; some clients cache old UIs |
+| Buttons not rendering | Update to latest 𝐌𝐄𝐇𝐓𝐀𝐁-𝐌𝐃; some clients cache old UIs |
 | LID not resolving | Reply to their message in a group first |
 | YouTube download fails | Update yt-dlp; only use `.ytcookies` if truly needed |
 
-Full guide: [Troubleshooting doc](https://github.com/themalik-g/wraith/blob/main/docs/whatsapp-bot-troubleshooting.md)
+Full guide: [Troubleshooting doc](https://github.com/themalik-g/mehtab-md/blob/main/docs/whatsapp-bot-troubleshooting.md)
 
 ---
 
 ## 🤝 Contributing
 
-Issues and pull requests are welcome. If you found a bug or want a feature, [open an issue](https://github.com/themalik-g/wraith/issues). If WRAITH helps you, **star the repository** so more people can find it.
+Issues and pull requests are welcome. If you found a bug or want a feature, [open an issue](https://github.com/themalik-g/mehtab-md/issues). If 𝐌𝐄𝐇𝐓𝐀𝐁-𝐌𝐃 helps you, **star the repository** so more people can find it.
 
 ---
 
@@ -498,13 +498,13 @@ Never commit `instances/`, `session/`, `.env`, `keys.env`, `state/` or `creds.js
 
 ## ⚠️ Disclaimer
 
-WRAITH is not affiliated with or endorsed by WhatsApp or Meta. Use at your own risk and respect privacy laws and WhatsApp's Terms of Service.
+𝐌𝐄𝐇𝐓𝐀𝐁-𝐌𝐃 is not affiliated with or endorsed by WhatsApp or Meta. Use at your own risk and respect privacy laws and WhatsApp's Terms of Service.
 
 ---
 
 ## 📜 License
 
-[MIT](https://github.com/themalik-g/wraith/blob/main/LICENSE) © MALIK MEHTAB
+[MIT](https://github.com/themalik-g/mehtab-md/blob/main/LICENSE) © MALIK MEHTAB
 
 ---
 
@@ -512,12 +512,12 @@ WRAITH is not affiliated with or endorsed by WhatsApp or Meta. Use at your own r
 
 - Built on [Baileys](https://github.com/WhiskeySockets/Baileys) v7.0.0-rc.14
 - Downloader powered by [yt-dlp](https://github.com/yt-dlp/yt-dlp) and [@postfetch/core](https://github.com/postfetch/core)
-- Repository: [themalik-g/wraith](https://github.com/themalik-g/wraith)
+- Repository: [themalik-g/mehtab-md](https://github.com/themalik-g/mehtab-md)
 
 ---
 
 <div align="center">
 
-**⭐ If WRAITH helped you, consider giving it a star! ⭐**
+**⭐ If 𝐌𝐄𝐇𝐓𝐀𝐁-𝐌𝐃 helped you, consider giving it a star! ⭐**
 
 </div>

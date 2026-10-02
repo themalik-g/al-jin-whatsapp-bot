@@ -1,5 +1,5 @@
 // ─────────────────────────────────────────────
-// WRAITH · modules/tools.js
+// 𝐌𝐄𝐇𝐓𝐀𝐁-𝐌𝐃 · modules/tools.js
 // OCR, Barcode, VCard, TTS utilities
 // ─────────────────────────────────────────────
 import fs from 'node:fs';
@@ -18,7 +18,7 @@ import { getVar } from '../core/vars.js';
 const ocrQueue = new PQueue({ concurrency: 2 });
 
 const TMP_DIR = () => {
-  const dir = path.resolve(process.env.WRAITH_DATA_DIR || process.cwd(), 'data', 'tmp');
+  const dir = path.resolve(process.env.MEHTAB_MD_DATA_DIR || process.cwd(), 'data', 'tmp');
   fs.mkdirSync(dir, { recursive: true });
   return dir;
 };
@@ -166,7 +166,7 @@ export async function barcodeCommand(sock, chat, msg, args) {
 
     await sock.sendMessage(chat, {
       image: pngBuffer,
-      caption: `📊 *Barcode (${type.toUpperCase()})*\n\nText: \`${text}\`\n\nProvided by 𝗪𝗥𝗔𝗜𝗧🇭`,
+      caption: `📊 *Barcode (${type.toUpperCase()})*\n\nText: \`${text}\`\n\nProvided by 𝐌𝐄𝐇𝐓𝐀𝐁-𝐌𝐃`,
     }, { quoted: msg });
   } catch (e) {
     await sock.sendMessage(chat, { text: `⚠️ barcode failed: ${e.message}` }, { quoted: msg }).catch(() => {});

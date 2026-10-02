@@ -1,5 +1,5 @@
 // ─────────────────────────────────────────────
-// WRAITH · modules/pin.js
+// 𝐌𝐄𝐇𝐓𝐀𝐁-𝐌𝐃 · modules/pin.js
 // .pinchat / .unpinchat — Pin or unpin chat to top
 // ─────────────────────────────────────────────
 import { isOwner } from '../core/identity.js';

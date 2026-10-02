@@ -1,4 +1,4 @@
-# WRAITH — fixed build (𝙒𝙍𝘼𝙄𝙏𝙃-𝘽𝙊𝙏)
+# 𝐌𝐄𝐇𝐓𝐀𝐁-𝐌𝐃 — fixed build (𝐌𝐄𝐇𝐓𝐀𝐁-𝐌𝐃)
 
 ## Files in this archive (replace these in your project)
 - config.js                    → botName + timezone options

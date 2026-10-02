@@ -1,5 +1,5 @@
 // ─────────────────────────────────────────────
-//  WRAITH · modules/ping.js
+//  𝐌𝐄𝐇𝐓𝐀𝐁-𝐌𝐃 · modules/ping.js
 //  Latency probe + container-aware system vitals.
 //
 //  Reads cgroup v1/v2 directly so CPU% and memory
@@ -304,7 +304,7 @@ export async function restartCommand(sock, chat, msg) {
     if (!msg.key.fromMe && !isOwner(from)) {
         return sock.sendMessage(chat, { text: '⛔ Owner only.' }, { quoted: msg });
     }
-    await sock.sendMessage(chat, { text: '🔄 *Restarting WRAITH server…*' }, { quoted: msg });
+    await sock.sendMessage(chat, { text: '🔄 *Restarting 𝐌𝐄𝐇𝐓𝐀𝐁-𝐌𝐃 server…*' }, { quoted: msg });
     setTimeout(() => {
         process.exit(0);
     }, 1000);

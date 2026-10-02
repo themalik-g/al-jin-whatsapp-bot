@@ -1,5 +1,5 @@
 // ─────────────────────────────────────────────
-// WRAITH · test/new-commands.test.js
+// 𝐌𝐄𝐇𝐓𝐀𝐁-𝐌𝐃 · test/new-commands.test.js
 // Unit tests for newly added commands
 // ─────────────────────────────────────────────
 import test from 'node:test';
@@ -22,7 +22,7 @@ test('Barcode generation test', async () => {
 test('Barcode QR generation test', async () => {
   const buf = await bwipjs.toBuffer({
     bcid: 'qrcode',
-    text: 'https://github.com/themalik-g/wraith',
+    text: 'https://github.com/themalik-g/mehtab-md',
     scale: 3,
     height: 20,
     includetext: true,

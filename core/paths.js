@@ -3,7 +3,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 
 export function dataDir() {
-  const d = path.resolve(process.env.WRAITH_DATA_DIR || process.cwd());
+  const d = path.resolve(process.env.MEHTAB_MD_DATA_DIR || process.cwd());
   fs.mkdirSync(d, { recursive: true });
   return d;
 }

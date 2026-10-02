@@ -9,7 +9,7 @@ console.log('Testing fetchCommand...');
 
 // Setup test directory
 const testRepoRoot = path.join(process.cwd(), 'data', 'tmp', 'test_fetch_env');
-process.env.WRAITH_REPO_ROOT = testRepoRoot;
+process.env.MEHTAB_MD_REPO_ROOT = testRepoRoot;
 
 const testInstDir = path.join(testRepoRoot, 'instances', 'sess2');
 const vaultDir = path.join(testInstDir, 'vault');
@@ -92,7 +92,7 @@ async function runTests() {
 
   // Cleanup
   fs.rmSync(testRepoRoot, { recursive: true, force: true });
-  delete process.env.WRAITH_REPO_ROOT;
+  delete process.env.MEHTAB_MD_REPO_ROOT;
 
   console.log('All fetchCommand tests passed successfully!');
 }

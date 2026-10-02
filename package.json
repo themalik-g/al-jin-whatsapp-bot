@@ -1,7 +1,7 @@
 {
-  "name": "wraith",
+  "name": "mehtab-md",
   "version": "1.3.3",
-  "description": "WRAITH — a silent watcher for WhatsApp",
+  "description": "𝐌𝐄𝐇𝐓𝐀𝐁-𝐌𝐃 — a silent watcher for WhatsApp",
   "keywords": [
     "whatsapp-bot",
     "whatsapp",
@@ -19,13 +19,13 @@
     "pairing-code",
     "group-management"
   ],
-  "homepage": "https://github.com/themalik-g/wraith#readme",
+  "homepage": "https://github.com/themalik-g/mehtab-md#readme",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/themalik-g/wraith.git"
+    "url": "git+https://github.com/themalik-g/mehtab-md.git"
   },
   "bugs": {
-    "url": "https://github.com/themalik-g/wraith/issues"
+    "url": "https://github.com/themalik-g/mehtab-md/issues"
   },
   "author": "Malik Mehtab (https://github.com/themalik-g)",
   "license": "MIT",

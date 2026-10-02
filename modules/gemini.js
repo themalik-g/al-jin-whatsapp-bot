@@ -1,5 +1,5 @@
 // ─────────────────────────────────────────────
-// WRAITH · modules/gemini.js
+// 𝐌𝐄𝐇𝐓𝐀𝐁-𝐌𝐃 · modules/gemini.js
 // .gemini <prompt> — Gemini AI: text, image, or image + text (own caption or replied-to message)
 // .scholar <topic/question> — Academic Scholar AI Assistant (text + image aware)
 // .photo <prompt> — AI image generator
@@ -139,7 +139,7 @@ async function runAi(sock, chat, msg, args, cfg) {
     parts.push({ text: prompt });
 
     const answer = await askGemini(apiKey, parts, cfg.system);
-    await editOrReply(sock, chat, msg, statusMsg, `${cfg.title}\n\n${answer}\n\nProvided by 𝗪𝗥𝗔𝗜𝗧🇭`);
+    await editOrReply(sock, chat, msg, statusMsg, `${cfg.title}\n\n${answer}\n\nProvided by 𝐌𝐄𝐇𝐓𝐀𝐁-𝐌𝐃`);
   } catch (err) {
     console.error(`[${cfg.title}]`, err.message);
     await editOrReply(sock, chat, msg, statusMsg, `❌ *${cfg.failLabel}:* ${err.message}`);
@@ -309,7 +309,7 @@ export async function photoCommand(sock, chat, msg, args) {
 
     await sock.sendMessage(chat, {
       image: imageBuffer,
-      caption: `📸 *AI Photo Generator*\n💬 _${prompt}_\n\nProvided by 𝗪𝗥𝗔𝗜𝗧🇭`
+      caption: `📸 *AI Photo Generator*\n💬 _${prompt}_\n\nProvided by 𝐌𝐄𝐇𝐓𝐀𝐁-𝐌𝐃`
     }, { quoted: msg });
 
     await sock.sendMessage(chat, {

@@ -1,5 +1,5 @@
 // ─────────────────────────────────────────────
-// WRAITH · modules/stickers.js
+// 𝐌𝐄𝐇𝐓𝐀𝐁-𝐌𝐃 · modules/stickers.js
 // .sticker (.s) — convert image / video / gif / quoted media to WhatsApp sticker (.webp)
 // .toimg (.tovid) — convert quoted WebP sticker to image (JPG) or video (MP4)
 // ─────────────────────────────────────────────

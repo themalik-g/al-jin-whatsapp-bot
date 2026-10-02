@@ -5,7 +5,7 @@
 ```javascript
 export const CONFIG = {
     owner: "923257853673",              // WhatsApp phone number, digits only
-    codename: "WRAITH",                 // Shown in startup banner
+    codename: "𝐌𝐄𝐇𝐓𝐀𝐁-𝐌𝐃",                 // Shown in startup banner
     memoryTTL: 60 * 60 * 1000,          // Ledger message retention (1 hour)
     reconnectDelay: 3000,               // Auto-reconnect delay (ms)
     keepAliveInterval: 30_000           // Presence heartbeat interval (ms)
@@ -28,9 +28,9 @@ Session state directories manage Baileys authentication state and connection cre
 | Var | Default | Purpose |
 |---|---|---|
 | `NODE_ENV` | `production` | Node environment |
-| `WRAITH_DEBUG` | unset | Set to `1` for verbose trace logs |
+| `MEHTAB_MD_DEBUG` | unset | Set to `1` for verbose trace logs |
 
-Set `WRAITH_DEBUG=1` to enable verbose trace output:
+Set `MEHTAB_MD_DEBUG=1` to enable verbose trace output:
 - Ghost ledger storage events
 - View-once extraction steps
 - JID resolution paths

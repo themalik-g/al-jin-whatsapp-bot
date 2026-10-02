@@ -1,5 +1,5 @@
 // ─────────────────────────────────────────────
-//  WRAITH · modules/pps.js
+//  𝐌𝐄𝐇𝐓𝐀𝐁-𝐌𝐃 · modules/pps.js
 //  Profile Picture Sync (PPS) for DM chats.
 //  Downloads and updates profile pictures of the top 10 DM chats daily.
 // ─────────────────────────────────────────────

@@ -1,5 +1,5 @@
 // ─────────────────────────────────────────────
-// WRAITH · core/groupEvents.js
+// 𝐌𝐄𝐇𝐓𝐀𝐁-𝐌𝐃 · core/groupEvents.js
 // Welcome / goodbye messages + PDD on membership changes.
 // Wired in start.js → 'group-participants.update'
 // ─────────────────────────────────────────────

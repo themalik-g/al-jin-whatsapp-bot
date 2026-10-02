@@ -1,5 +1,5 @@
 // ─────────────────────────────────────────────
-// WRAITH · modules/media-tools.js
+// 𝐌𝐄𝐇𝐓𝐀𝐁-𝐌𝐃 · modules/media-tools.js
 // Media utilities: exifwipe/sanitize, trim, tomp3, vn, compress, extracompress
 // ─────────────────────────────────────────────
 import fs from 'node:fs';
@@ -9,7 +9,7 @@ import { downloadContentFromMessage } from '@whiskeysockets/baileys';
 import { ffmpegPath } from '../lib/ffmpeg-resolver.js';
 
 const TMP_DIR = () => {
-  const dir = path.resolve(process.env.WRAITH_DATA_DIR || process.cwd(), 'data', 'tmp');
+  const dir = path.resolve(process.env.MEHTAB_MD_DATA_DIR || process.cwd(), 'data', 'tmp');
   fs.mkdirSync(dir, { recursive: true });
   return dir;
 };
@@ -82,11 +82,11 @@ export async function exifwipeCommand(sock, chat, msg) {
 
       const outBuf = fs.readFileSync(tmpOut);
       if (media.kind === 'image') {
-        await sock.sendMessage(chat, { image: outBuf, caption: '🧹 *EXIF Metadata Stripped*\n\nProvided by 𝗪𝗥𝗔𝗜𝗧🇭' }, { quoted: msg });
+        await sock.sendMessage(chat, { image: outBuf, caption: '🧹 *EXIF Metadata Stripped*\n\nProvided by 𝐌𝐄𝐇𝐓𝐀𝐁-𝐌𝐃' }, { quoted: msg });
       } else if (media.kind === 'video') {
-        await sock.sendMessage(chat, { video: outBuf, caption: '🧹 *EXIF Metadata Stripped*\n\nProvided by 𝗪𝗥𝗔𝗜𝗧🇭' }, { quoted: msg });
+        await sock.sendMessage(chat, { video: outBuf, caption: '🧹 *EXIF Metadata Stripped*\n\nProvided by 𝐌𝐄𝐇𝐓𝐀𝐁-𝐌𝐃' }, { quoted: msg });
       } else {
-        await sock.sendMessage(chat, { document: outBuf, mimetype: media.mimetype, fileName: `sanitized_${media.fileName}`, caption: '🧹 *EXIF Metadata Stripped*\n\nProvided by 𝗪𝗥𝗔𝗜𝗧🇭' }, { quoted: msg });
+        await sock.sendMessage(chat, { document: outBuf, mimetype: media.mimetype, fileName: `sanitized_${media.fileName}`, caption: '🧹 *EXIF Metadata Stripped*\n\nProvided by 𝐌𝐄𝐇𝐓𝐀𝐁-𝐌𝐃' }, { quoted: msg });
       }
     } finally {
       try { if (fs.existsSync(tmpIn)) fs.unlinkSync(tmpIn); } catch {}
@@ -127,9 +127,9 @@ export async function trimCommand(sock, chat, msg, args) {
       const outBuf = fs.readFileSync(tmpOut);
 
       if (media.kind === 'video') {
-        await sock.sendMessage(chat, { video: outBuf, caption: `✂️ *Trimmed* (${start} → ${end})\n\nProvided by 𝗪𝗥𝗔𝗜𝗧🇭` }, { quoted: msg });
+        await sock.sendMessage(chat, { video: outBuf, caption: `✂️ *Trimmed* (${start} → ${end})\n\nProvided by 𝐌𝐄𝐇𝐓𝐀𝐁-𝐌𝐃` }, { quoted: msg });
       } else {
-        await sock.sendMessage(chat, { audio: outBuf, mimetype: 'audio/mpeg', ptt: false, caption: `✂️ *Trimmed* (${start} → ${end})\n\nProvided by 𝗪𝗥𝗔𝗜𝗧🇭` }, { quoted: msg });
+        await sock.sendMessage(chat, { audio: outBuf, mimetype: 'audio/mpeg', ptt: false, caption: `✂️ *Trimmed* (${start} → ${end})\n\nProvided by 𝐌𝐄𝐇𝐓𝐀𝐁-𝐌𝐃` }, { quoted: msg });
       }
     } finally {
       try { if (fs.existsSync(tmpIn)) fs.unlinkSync(tmpIn); } catch {}
@@ -208,7 +208,7 @@ export async function compressCommand(sock, chat, msg, args, isExtra = false) {
       try {
         await runFfmpeg(['-y', '-i', tmpIn, '-vf', 'scale=-2:480', '-c:v', 'libx264', '-crf', '28', '-preset', 'faster', '-c:a', 'aac', '-b:a', '96k', tmpOut]);
         const outBuf = fs.readFileSync(tmpOut);
-        await sock.sendMessage(chat, { video: outBuf, caption: `📉 *Video Compressed* (${(outBuf.length / (1024 * 1024)).toFixed(2)} MB)\n\nProvided by 𝗪𝗥𝗔𝗜𝗧🇭` }, { quoted: msg });
+        await sock.sendMessage(chat, { video: outBuf, caption: `📉 *Video Compressed* (${(outBuf.length / (1024 * 1024)).toFixed(2)} MB)\n\nProvided by 𝐌𝐄𝐇𝐓𝐀𝐁-𝐌𝐃` }, { quoted: msg });
       } finally {
         try { if (fs.existsSync(tmpIn)) fs.unlinkSync(tmpIn); } catch {}
         try { if (fs.existsSync(tmpOut)) fs.unlinkSync(tmpOut); } catch {}
@@ -228,7 +228,7 @@ export async function compressCommand(sock, chat, msg, args, isExtra = false) {
           outBuf = fs.readFileSync(tmpOut);
         }
 
-        await sock.sendMessage(chat, { image: outBuf, caption: `📉 *Image Compressed* (${(outBuf.length / 1024).toFixed(1)} KB)\n\nProvided by 𝗪𝗥𝗔𝗜𝗧🇭` }, { quoted: msg });
+        await sock.sendMessage(chat, { image: outBuf, caption: `📉 *Image Compressed* (${(outBuf.length / 1024).toFixed(1)} KB)\n\nProvided by 𝐌𝐄𝐇𝐓𝐀𝐁-𝐌𝐃` }, { quoted: msg });
       } finally {
         try { if (fs.existsSync(tmpIn)) fs.unlinkSync(tmpIn); } catch {}
         try { if (fs.existsSync(tmpOut)) fs.unlinkSync(tmpOut); } catch {}
@@ -262,7 +262,7 @@ export async function waveformCommand(sock, chat, msg) {
         tmpOut
       ]);
       const outBuf = fs.readFileSync(tmpOut);
-      await sock.sendMessage(chat, { image: outBuf, caption: '🌊 *Audio Waveform*\n\nProvided by 𝗪𝗥𝗔𝗜𝗧🇭' }, { quoted: msg });
+      await sock.sendMessage(chat, { image: outBuf, caption: '🌊 *Audio Waveform*\n\nProvided by 𝐌𝐄𝐇𝐓𝐀𝐁-𝐌𝐃' }, { quoted: msg });
     } finally {
       try { if (fs.existsSync(tmpIn)) fs.unlinkSync(tmpIn); } catch {}
       try { if (fs.existsSync(tmpOut)) fs.unlinkSync(tmpOut); } catch {}
@@ -421,7 +421,7 @@ export async function enhanceCommand(sock, chat, msg) {
         tmpOut
       ]);
       const outBuf = fs.readFileSync(tmpOut);
-      await sock.sendMessage(chat, { image: outBuf, caption: '✨ *Image Enhanced & Sharpened*\n\nProvided by 𝗪𝗥𝗔𝗜𝗧🇭' }, { quoted: msg });
+      await sock.sendMessage(chat, { image: outBuf, caption: '✨ *Image Enhanced & Sharpened*\n\nProvided by 𝐌𝐄𝐇𝐓𝐀𝐁-𝐌𝐃' }, { quoted: msg });
     } finally {
       try { if (fs.existsSync(tmpIn)) fs.unlinkSync(tmpIn); } catch {}
       try { if (fs.existsSync(tmpOut)) fs.unlinkSync(tmpOut); } catch {}

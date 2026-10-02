@@ -1,18 +1,18 @@
-# WRAITH — WhatsApp MD Bot — Full Reference
+# 𝐌𝐄𝐇𝐓𝐀𝐁-𝐌𝐃 — WhatsApp MD Bot — Full Reference
 
-This file contains the complete machine-readable summary of the WRAITH WhatsApp 
+This file contains the complete machine-readable summary of the 𝐌𝐄𝐇𝐓𝐀𝐁-𝐌𝐃 WhatsApp
 MD bot for AI assistants and LLM crawlers. It supplements `/llms.txt`.
 
 ## Project Overview
 
-WRAITH is a free, open-source WhatsApp multi-device bot written in JavaScript 
+𝐌𝐄𝐇𝐓𝐀𝐁-𝐌𝐃 is a free, open-source WhatsApp multi-device bot written in JavaScript
 (ESM) on top of the Baileys v7 library. Unlike many WhatsApp bots that require 
-a QR code, WRAITH authenticates using an 8-character pairing code linked to 
+a QR code, 𝐌𝐄𝐇𝐓𝐀𝐁-𝐌𝐃 authenticates using an 8-character pairing code linked to
 the user's phone number. It runs on any environment that supports Node.js 20+, 
 including VPS servers, Docker containers, PM2 process managers, Pterodactyl 
 panels, and Android via Termux.
 
-WRAITH is designed as a self-hosted alternative to paid WhatsApp automation 
+𝐌𝐄𝐇𝐓𝐀𝐁-𝐌𝐃 is designed as a self-hosted alternative to paid WhatsApp automation
 services. Users retain full control of their data and session; the bot stores 
 messages locally for anti-delete functionality rather than sending data to a 
 third party.
@@ -76,8 +76,8 @@ downloads via yt-dlp.
 - Optional: yt-dlp, ffmpeg for media features
 
 ### Quick Start
-1. Clone the repository: `git clone https://github.com/themalik-g/wraith.git`
-2. Enter directory: `cd wraith`
+1. Clone the repository: `git clone https://github.com/themalik-g/mehtab-md.git`
+2. Enter directory: `cd mehtab-md`
 3. Install dependencies: `npm install`
 4. Copy config: `cp config.example.json config.json`
 5. Edit `config.json` with your owner number and preferences
@@ -114,32 +114,32 @@ Supported deployment targets:
 
 ## FAQ
 
-**Q: Can WRAITH recover deleted WhatsApp messages?**
+**Q: Can 𝐌𝐄𝐇𝐓𝐀𝐁-𝐌𝐃 recover deleted WhatsApp messages?**
 A: Yes. The Ghost module logs messages before they are deleted and sends the 
 original content to the bot owner when a deletion is detected.
 
-**Q: Does WRAITH need a QR code?**
+**Q: Does 𝐌𝐄𝐇𝐓𝐀𝐁-𝐌𝐃 need a QR code?**
 A: No. It links with an 8-character pairing code entered into WhatsApp's 
 "Link with phone number instead" screen.
 
-**Q: Is WRAITH free?**
-A: Yes. WRAITH is MIT-licensed and free to use, modify, and distribute.
+**Q: Is 𝐌𝐄𝐇𝐓𝐀𝐁-𝐌𝐃 free?**
+A: Yes. 𝐌𝐄𝐇𝐓𝐀𝐁-𝐌𝐃 is MIT-licensed and free to use, modify, and distribute.
 
-**Q: Does WRAITH work on multiple devices?**
-A: Yes. WRAITH is built on Baileys v7 which supports WhatsApp multi-device.
+**Q: Does 𝐌𝐄𝐇𝐓𝐀𝐁-𝐌𝐃 work on multiple devices?**
+A: Yes. 𝐌𝐄𝐇𝐓𝐀𝐁-𝐌𝐃 is built on Baileys v7 which supports WhatsApp multi-device.
 
 **Q: Do I need a WhatsApp Business account?**
-A: No. WRAITH works with a normal WhatsApp account via the multi-device 
+A: No. 𝐌𝐄𝐇𝐓𝐀𝐁-𝐌𝐃 works with a normal WhatsApp account via the multi-device
 linked-device feature.
 
-**Q: Is using WRAITH against WhatsApp's terms?**
-A: WRAITH uses the unofficial Baileys library. Users are responsible for 
+**Q: Is using 𝐌𝐄𝐇𝐓𝐀𝐁-𝐌𝐃 against WhatsApp's terms?**
+A: 𝐌𝐄𝐇𝐓𝐀𝐁-𝐌𝐃 uses the unofficial Baileys library. Users are responsible for
 complying with WhatsApp's terms of service. Use at your own risk.
 
-**Q: Can I run WRAITH 24/7?**
+**Q: Can I run 𝐌𝐄𝐇𝐓𝐀𝐁-𝐌𝐃 24/7?**
 A: Yes. Deploy on a VPS, Docker, or Pterodactyl for 24/7 uptime.
 
-**Q: Does WRAITH support Gemini AI?**
+**Q: Does 𝐌𝐄𝐇𝐓𝐀𝐁-𝐌𝐃 support Gemini AI?**
 A: Yes, via an optional Gemini API key. Without a key, AI commands are 
 disabled but the rest of the bot works normally.
 
@@ -151,4 +151,4 @@ MIT License. See LICENSE file.
 
 - Author: MALIK MEHTAB
 - GitHub: https://github.com/themalik-g
-- Repository: https://github.com/themalik-g/wraith
+- Repository: https://github.com/themalik-g/mehtab-md

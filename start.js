@@ -1,15 +1,15 @@
 #!/usr/bin/env node
 // ─────────────────────────────────────────────
-// WRAITH · per-session bootstrap worker (ESM)
+// 𝐌𝐄𝐇𝐓𝐀𝐁-𝐌𝐃 · per-session bootstrap worker (ESM)
 // node start.js --session <id> [--number <digits>]
-// Code loads from repo root; all session data lives in WRAITH_DATA_DIR (instances/<id>)
+// Code loads from repo root; all session data lives in MEHTAB_MD_DATA_DIR (instances/<id>)
 // ─────────────────────────────────────────────
 
 try {
   await import('dotenv/config');
 } catch (err) {
-  if (process.env.WRAITH_DEBUG) {
-    console.warn('[wraith] dotenv not loaded:', err?.code || err?.message || err);
+  if (process.env.MEHTAB_MD_DEBUG) {
+    console.warn('[mehtab-md] dotenv not loaded:', err?.code || err?.message || err);
   }
 }
 
@@ -48,7 +48,7 @@ const argVal = (name) => {
   return i !== -1 && argv[i + 1] ? argv[i + 1] : null;
 };
 
-const sessionId     = argVal('--session') || process.env.WRAITH_SESSION_ID || 'main';
+const sessionId     = argVal('--session') || process.env.MEHTAB_MD_SESSION_ID || 'main';
 const rawNumber     = argVal('--number');
 const pairingNumber = rawNumber ? rawNumber.replace(/\D/g, '') : null;
 
@@ -61,7 +61,7 @@ const OWNER_FILE = inState('owner.json');
 try {
   loadVars();
 } catch (e) {
-  if (process.env.WRAITH_DEBUG) console.warn('[start.js] loadVars error:', e.message);
+  if (process.env.MEHTAB_MD_DEBUG) console.warn('[start.js] loadVars error:', e.message);
 }
 
 if (pairingNumber) {
@@ -101,8 +101,8 @@ const tag = grey(`[${sessionId}]`);
 // is stuck on "Waiting for this message. This may take a while."
 // The store survives restarts (JSON on disk) and holds far more history.
 const MESSAGE_STORE = new Map();
-const MESSAGE_STORE_MAX = Number(process.env.WRAITH_MSG_STORE_MAX || 3000);
-const MESSAGE_STORE_TTL_MS = Number(process.env.WRAITH_MSG_STORE_TTL_H || 24) * 60 * 60 * 1000;
+const MESSAGE_STORE_MAX = Number(process.env.MEHTAB_MD_MSG_STORE_MAX || 3000);
+const MESSAGE_STORE_TTL_MS = Number(process.env.MEHTAB_MD_MSG_STORE_TTL_H || 24) * 60 * 60 * 1000;
 const STORE_FILE = path.join(STATE_DIR, 'msgstore.json');
 let storeDirty = false;
 
@@ -199,7 +199,7 @@ async function requestPairingCode(sock, number, attempt = 0) {
 }
 
 function notifyLinked() {
-  try { process.send?.({ type: 'wraith:linked', sessionId }); } catch (e) {
+  try { process.send?.({ type: 'mehtab-md:linked', sessionId }); } catch (e) {
     try { console.error('[notifyLinked]', e?.message); } catch {}
   }
 }
@@ -228,14 +228,14 @@ async function handleStartupTasks(sock) {
       const vcard = [
         'BEGIN:VCARD',
         'VERSION:3.0',
-        'FN:WRAITH OWNER',
+        'FN:𝐌𝐄𝐇𝐓𝐀𝐁-𝐌𝐃 OWNER',
         `TEL;type=CELL;type=VOICE;waid=${ownerNumber}:+${ownerNumber}`,
-        'NOTE:WRAITH OWNER',
+        'NOTE:𝐌𝐄𝐇𝐓𝐀𝐁-𝐌𝐃 OWNER',
         'END:VCARD'
       ].join('\n');
       await sock.sendMessage(selfJid, {
         contacts: {
-          displayName: 'WRAITH OWNER',
+          displayName: '𝐌𝐄𝐇𝐓𝐀𝐁-𝐌𝐃 OWNER',
           contacts: [{ vcard }]
         }
       });

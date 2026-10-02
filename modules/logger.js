@@ -1,5 +1,5 @@
 // ─────────────────────────────────────────────
-// WRAITH · modules/logger.js
+// 𝐌𝐄𝐇𝐓𝐀𝐁-𝐌𝐃 · modules/logger.js
 // Buffered, non-blocking per-session message logger.
 // Lines are queued in memory and flushed asynchronously.
 // ─────────────────────────────────────────────

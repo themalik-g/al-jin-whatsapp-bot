@@ -1,5 +1,5 @@
 // ─────────────────────────────────────────────
-// WRAITH · modules/spy.js
+// 𝐌𝐄𝐇𝐓𝐀𝐁-𝐌𝐃 · modules/spy.js
 //   .statusalert  — alert when chosen people post a status
 //   .watch        — alert when chosen people change profile picture / About / name
 //   .ginfo        — inspect a group from its invite link without joining
@@ -16,7 +16,7 @@ import { fetchBuffer } from '../lib/net.js';
 import { getTarget, ownerOnly, notifyOwner } from '../lib/targets.js';
 import { startNoAction } from './noaction.js';
 
-const DEBUG = process.env.WRAITH_DEBUG === '1';
+const DEBUG = process.env.MEHTAB_MD_DEBUG === '1';
 const FILE = () => inState('spy.json');
 const WATCH_DIR = () => inState('watch');
 const POLL_MS = 30 * 60_000;

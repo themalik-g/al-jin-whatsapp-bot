@@ -1,11 +1,11 @@
 // ─────────────────────────────────────────────
-//  WRAITH · PM2 ecosystem config
+//  𝐌𝐄𝐇𝐓𝐀𝐁-𝐌𝐃 · PM2 ecosystem config
 //  Usage: pm2 start ecosystem.config.cjs
 // ─────────────────────────────────────────────
 module.exports = {
     apps: [
         {
-            name: 'wraith',
+            name: 'mehtab-md',
             script: 'index.js',
             cwd: __dirname,
             interpreter: 'node',

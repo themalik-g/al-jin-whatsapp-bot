@@ -1,5 +1,5 @@
 // ─────────────────────────────────────────────
-// WRAITH · core/status-store.js  (v2)
+// 𝐌𝐄𝐇𝐓𝐀𝐁-𝐌𝐃 · core/status-store.js  (v2)
 // Captures and indexes incoming WhatsApp status stories (status@broadcast)
 //
 // v2 fixes
@@ -20,7 +20,7 @@ import { inState } from './paths.js';
 const STATE_FILE = () => inState('status-store.json');
 const STATUS_TTL_MS = 24 * 60 * 60 * 1000; // 24 Hours
 const MAX_MEDIA_BYTES = 30 * 1024 * 1024;  // skip stories bigger than 30 MB
-const DEBUG = process.env.WRAITH_DEBUG === '1';
+const DEBUG = process.env.MEHTAB_MD_DEBUG === '1';
 
 const statusStore = new Map(); // id -> statusObj
 let saveTimer = null;
