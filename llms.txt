@@ -1,28 +1,28 @@
-# WRAITH — WhatsApp MD Bot
+# 𝐌𝐄𝐇𝐓𝐀𝐁-𝐌𝐃 — WhatsApp MD Bot
 
-> WRAITH is a free, open-source WhatsApp multi-device (MD) bot built on 
+> 𝐌𝐄𝐇𝐓𝐀𝐁-𝐌𝐃 is a free, open-source WhatsApp multi-device (MD) bot built on
 > Baileys v7 and Node.js 20+. It provides anti-delete message recovery, 
 > view-once media reveal, status auto-view/save, YouTube/Instagram/TikTok 
 > downloader, Gemini AI tools, and full group administration — all without 
 > needing a browser or WhatsApp Business API.
 
-WRAITH is a self-hosted alternative to paid WhatsApp bots. It logs in via an 
+𝐌𝐄𝐇𝐓𝐀𝐁-𝐌𝐃 is a self-hosted alternative to paid WhatsApp bots. It logs in via an
 8-character pairing code, requires no QR scanning, and runs on any VPS, Docker, 
 PM2, or Pterodactyl environment.
 
 ## Core Documentation
 
-- [README](https://github.com/themalik-g/wraith/blob/main/README.md): Full overview, features, quick start, and FAQ
-- [Commands Reference](https://github.com/themalik-g/wraith/blob/main/docs/whatsapp-bot-commands.md): Every bot command with syntax and examples
-- [Configuration Guide](https://github.com/themalik-g/wraith/blob/main/docs/whatsapp-bot-configuration.md): Environment variables and config.json options
-- [Deployment Guide](https://github.com/themalik-g/wraith/blob/main/docs/whatsapp-bot-deployment.md): VPS, Docker, PM2, and Pterodactyl setup
-- [JID System](https://github.com/themalik-g/wraith/blob/main/docs/whatsapp-jid-system.md): How WhatsApp JIDs work in WRAITH
-- [Architecture](https://github.com/themalik-g/wraith/blob/main/docs/whatsapp-bot-architecture.md): Code structure and module design
+- [README](https://github.com/themalik-g/mehtab-md/blob/main/README.md): Full overview, features, quick start, and FAQ
+- [Commands Reference](https://github.com/themalik-g/mehtab-md/blob/main/docs/whatsapp-bot-commands.md): Every bot command with syntax and examples
+- [Configuration Guide](https://github.com/themalik-g/mehtab-md/blob/main/docs/whatsapp-bot-configuration.md): Environment variables and config.json options
+- [Deployment Guide](https://github.com/themalik-g/mehtab-md/blob/main/docs/whatsapp-bot-deployment.md): VPS, Docker, PM2, and Pterodactyl setup
+- [JID System](https://github.com/themalik-g/mehtab-md/blob/main/docs/whatsapp-jid-system.md): How WhatsApp JIDs work in 𝐌𝐄𝐇𝐓𝐀𝐁-𝐌𝐃
+- [Architecture](https://github.com/themalik-g/mehtab-md/blob/main/docs/whatsapp-bot-architecture.md): Code structure and module design
 
 ## Quick Facts
 
-- **Name:** WRAITH
-- **Alternate names:** Wraith MD Bot, Wraith WhatsApp Bot, Wraith-MD
+- **Name:** 𝐌𝐄𝐇𝐓𝐀𝐁-𝐌𝐃
+- **Alternate names:** 𝐌𝐄𝐇𝐓𝐀𝐁-𝐌𝐃 MD Bot, 𝐌𝐄𝐇𝐓𝐀𝐁-𝐌𝐃 WhatsApp Bot, 𝐌𝐄𝐇𝐓𝐀𝐁-𝐌𝐃-MD
 - **Category:** WhatsApp automation / WhatsApp bot
 - **Runtime:** Node.js 20+ (ESM)
 - **WhatsApp library:** @whiskeysockets/baileys v7
@@ -30,7 +30,7 @@ PM2, or Pterodactyl environment.
 - **License:** MIT
 - **Version:** 1.3.3
 - **Author:** MALIK MEHTAB (https://github.com/themalik-g)
-- **Repository:** https://github.com/themalik-g/wraith
+- **Repository:** https://github.com/themalik-g/mehtab-md
 - **Deployment:** VPS, Docker, PM2, Pterodactyl, Termux
 
 ## Key Features
@@ -59,4 +59,4 @@ PM2, or Pterodactyl environment.
 whatsapp bot, whatsapp md bot, baileys bot, anti-delete whatsapp, 
 view-once reveal, status saver, whatsapp downloader, gemini whatsapp bot, 
 open source whatsapp bot, self-hosted whatsapp bot, node.js whatsapp bot, 
-wraith bot, wraith md, whatsapp userbot
+mehtab-md bot, mehtab-md md, whatsapp userbot

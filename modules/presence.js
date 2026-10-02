@@ -1,5 +1,5 @@
 // ─────────────────────────────────────────────
-//  WRAITH · modules/presence.js
+//  𝐌𝐄𝐇𝐓𝐀𝐁-𝐌𝐃 · modules/presence.js
 //  Always online + typing + recording + read receipts.
 //  FIX #8: `alwaysOnline` now defaults to FALSE so the
 //  bot honours markOnlineOnConnect:false and stays a
@@ -14,7 +14,7 @@ import { getPrefix } from '../core/settings.js';
 import { inState } from '../core/paths.js';
 
 const STATE = () => inState('presence.json');
-const DEBUG = process.env.WRAITH_DEBUG === '1';
+const DEBUG = process.env.MEHTAB_MD_DEBUG === '1';
 
 const DEFAULTS = {
     alwaysOnline: false,
@@ -120,7 +120,7 @@ export async function presenceCommand(sock, chat, msg, args) {
                 `auto typing   · ${s.autoTyping ? 'ON' : 'OFF'}\n` +
                 `auto recording · ${s.autoRecording ? 'ON' : 'OFF'}\n` +
                 `read receipts · ${s.readReceipts ? 'ON' : 'OFF'}\n`,
-            footer: 'Provided by 𝗪𝗥𝗔𝗜𝗧🇭 · Select an option below',
+            footer: 'Provided by 𝐌𝐄𝐇𝐓𝐀𝐁-𝐌𝐃 · Select an option below',
             buttons: [
                 createQuickReply(s.alwaysOnline ? 'Online OFF' : 'Online ON', `${p}presence online ${s.alwaysOnline ? 'off' : 'on'}`),
                 createQuickReply(s.autoTyping ? 'Typing OFF' : 'Typing ON', `${p}presence typing ${s.autoTyping ? 'off' : 'on'}`),

@@ -12,7 +12,7 @@ import { getPrefix } from '../core/settings.js';
 const here = path.dirname(fileURLToPath(import.meta.url));
 const STATE = path.join(here, '..', 'state', 'lurk.json');
 
-const DEBUG = process.env.WRAITH_DEBUG === '1';
+const DEBUG = process.env.MEHTAB_MD_DEBUG === '1';
 
 // ─────────────────────────────────────────────
 //  State
@@ -81,7 +81,7 @@ export async function lurkCommand(sock, chat, msg, args) {
                 `auto-react · ${s.react ? 'ON' : 'OFF'}\n` +
                 `download   · ${s.download ? 'ON' : 'OFF'}\n` +
                 `emoji      · ${s.emoji}\n`,
-            footer: 'Provided by 𝗪𝗥𝗔𝗜𝗧🇭 · Select an option below',
+            footer: 'Provided by 𝐌𝐄𝐇𝐓𝐀𝐁-𝐌𝐃 · Select an option below',
             buttons: [
                 createQuickReply(s.on ? 'Auto-View OFF' : 'Auto-View ON', `${p}lurk ${s.on ? 'off' : 'on'}`),
                 createQuickReply(s.react ? 'Auto-React OFF' : 'Auto-React ON', `${p}lurk react ${s.react ? 'off' : 'on'}`),
@@ -109,7 +109,7 @@ export async function lurkCommand(sock, chat, msg, args) {
                       `auto-react · ${s.react ? 'ON' : 'OFF'}\n` +
                       `download   · ${s.download ? 'ON' : 'OFF'}\n` +
                       `emoji      · ${s.emoji}\n`,
-                footer: 'Provided by 𝗪𝗥𝗔𝗜𝗧🇭 · Select an option below',
+                footer: 'Provided by 𝐌𝐄𝐇𝐓𝐀𝐁-𝐌𝐃 · Select an option below',
                 buttons: [
                     createQuickReply(s.on ? 'Auto-View OFF' : 'Auto-View ON', `${p}lurk ${s.on ? 'off' : 'on'}`),
                     createQuickReply(s.react ? 'Auto-React OFF' : 'Auto-React ON', `${p}lurk react ${s.react ? 'off' : 'on'}`),
@@ -125,7 +125,7 @@ export async function lurkCommand(sock, chat, msg, args) {
                   `auto-react · ${s.react ? 'ON' : 'OFF'}\n` +
                   `download   · ${s.download ? 'ON' : 'OFF'}\n` +
                   `emoji      · ${s.emoji}\n`,
-            footer: 'Provided by 𝗪𝗥𝗔𝗜𝗧🇭 · Select an option below',
+            footer: 'Provided by 𝐌𝐄𝐇𝐓𝐀𝐁-𝐌𝐃 · Select an option below',
             buttons: [
                 createQuickReply(s.on ? 'Auto-View OFF' : 'Auto-View ON', `${p}lurk ${s.on ? 'off' : 'on'}`),
                 createQuickReply(s.react ? 'Auto-React OFF' : 'Auto-React ON', `${p}lurk react ${s.react ? 'off' : 'on'}`),
@@ -146,7 +146,7 @@ export async function lurkCommand(sock, chat, msg, args) {
                       `auto-react · ${s.react ? 'ON' : 'OFF'}\n` +
                       `download   · ${s.download ? 'ON' : 'OFF'}\n` +
                       `emoji      · ${s.emoji}\n`,
-                footer: 'Provided by 𝗪𝗥𝗔𝗜𝗧🇭 · Select an option below',
+                footer: 'Provided by 𝐌𝐄𝐇𝐓𝐀𝐁-𝐌𝐃 · Select an option below',
                 buttons: [
                     createQuickReply(s.on ? 'Auto-View OFF' : 'Auto-View ON', `${p}lurk ${s.on ? 'off' : 'on'}`),
                     createQuickReply(s.react ? 'Auto-React OFF' : 'Auto-React ON', `${p}lurk react ${s.react ? 'off' : 'on'}`),
@@ -162,7 +162,7 @@ export async function lurkCommand(sock, chat, msg, args) {
                   `auto-react · ${s.react ? 'ON' : 'OFF'}\n` +
                   `download   · ${s.download ? 'ON' : 'OFF'}\n` +
                   `emoji      · ${s.emoji}\n`,
-            footer: 'Provided by 𝗪𝗥𝗔𝗜𝗧🇭 · Select an option below',
+            footer: 'Provided by 𝐌𝐄𝐇𝐓𝐀𝐁-𝐌𝐃 · Select an option below',
             buttons: [
                 createQuickReply(s.on ? 'Auto-View OFF' : 'Auto-View ON', `${p}lurk ${s.on ? 'off' : 'on'}`),
                 createQuickReply(s.react ? 'Auto-React OFF' : 'Auto-React ON', `${p}lurk react ${s.react ? 'off' : 'on'}`),
@@ -183,7 +183,7 @@ export async function lurkCommand(sock, chat, msg, args) {
                       `auto-react · ${s.react ? 'ON' : 'OFF'}\n` +
                       `download   · ${s.download ? 'ON' : 'OFF'}\n` +
                       `emoji      · ${s.emoji}\n`,
-                footer: 'Provided by 𝗪𝗥𝗔𝗜𝗧🇭 · Select an option below',
+                footer: 'Provided by 𝐌𝐄𝐇𝐓𝐀𝐁-𝐌𝐃 · Select an option below',
                 buttons: [
                     createQuickReply(s.on ? 'Auto-View OFF' : 'Auto-View ON', `${p}lurk ${s.on ? 'off' : 'on'}`),
                     createQuickReply(s.react ? 'Auto-React OFF' : 'Auto-React ON', `${p}lurk react ${s.react ? 'off' : 'on'}`),
@@ -199,7 +199,7 @@ export async function lurkCommand(sock, chat, msg, args) {
                   `auto-react · ${s.react ? 'ON' : 'OFF'}\n` +
                   `download   · ${s.download ? 'ON' : 'OFF'}\n` +
                   `emoji      · ${s.emoji}\n`,
-            footer: 'Provided by 𝗪𝗥𝗔𝗜𝗧🇭 · Select an option below',
+            footer: 'Provided by 𝐌𝐄𝐇𝐓𝐀𝐁-𝐌𝐃 · Select an option below',
             buttons: [
                 createQuickReply(s.on ? 'Auto-View OFF' : 'Auto-View ON', `${p}lurk ${s.on ? 'off' : 'on'}`),
                 createQuickReply(s.react ? 'Auto-React OFF' : 'Auto-React ON', `${p}lurk react ${s.react ? 'off' : 'on'}`),

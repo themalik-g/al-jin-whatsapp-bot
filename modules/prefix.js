@@ -1,5 +1,5 @@
 // ─────────────────────────────────────────────
-// WRAITH · modules/prefix.js
+// 𝐌𝐄𝐇𝐓𝐀𝐁-𝐌𝐃 · modules/prefix.js
 // .prefix        → show current prefix
 // .prefix <sym>  → change prefix
 // .prefix reset  → back to "."
@@ -22,7 +22,7 @@ export async function prefixCommand(sock, chat, msg, args) {
       chat,
       {
         text: [
-          '* WRAITH · PREFIX*',
+          '* 𝐌𝐄𝐇𝐓𝐀𝐁-𝐌𝐃 · PREFIX*',
           '',
           `Current prefix: \`${current}\``,
           '',

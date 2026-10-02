@@ -1,12 +1,12 @@
 // ─────────────────────────────────────────────
-// WRAITH · modules/help.js
+// 𝐌𝐄𝐇𝐓𝐀𝐁-𝐌𝐃 · modules/help.js
 // Clean single-message plain text list menu with box layout
 // ─────────────────────────────────────────────
 import { isOwner } from '../core/identity.js';
 import { getPrefix } from '../core/settings.js';
 import { NEWSLETTER_CONTEXT, sendWithCta } from '../lib/buttons.js';
 
-const MENU_IMAGE = process.env.WRAITH_MENU_IMAGE || 'https://i.picrd.com/images/YZUezOztDow.jpg';
+const MENU_IMAGE = process.env.MEHTAB_MD_MENU_IMAGE || 'https://i.picrd.com/images/YZUezOztDow.jpg';
 const CAPTION_MAX = 3000;
 
 // Sends the menu with the banner image. Falls back to the plain text menu
@@ -463,7 +463,7 @@ function renderHeaderBox(prefix, isOwnerUser) {
   const ownerText = isOwnerUser ? toSmallCaps('COMMANDS ARE OWNER-ONLY') : toSmallCaps('COMMANDS ARE PUBLIC');
   const guideCmd = applyPrefix('.ᴄᴏᴍᴍᴀɴᴅ ꜰᴏʀ ɢᴜɪᴅᴇ', prefix);
   return [
-    '      【 🤖 𝗪𝗥𝗔𝗜𝗧🇭 🤖 】',
+    '      【 🤖 𝐌𝐄𝐇𝐓𝐀𝐁-𝐌𝐃 🤖 】',
     '┌──────────────────┈⚝',
     `│ ${ownerText}`,
     `│ ${toSmallCaps('PREFIX')} · ${prefix}`,

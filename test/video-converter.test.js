@@ -1,5 +1,5 @@
 // ─────────────────────────────────────────────
-// WRAITH · test/video-converter.test.js
+// 𝐌𝐄𝐇𝐓𝐀𝐁-𝐌𝐃 · test/video-converter.test.js
 // ─────────────────────────────────────────────
 import fs from 'node:fs';
 import path from 'node:path';

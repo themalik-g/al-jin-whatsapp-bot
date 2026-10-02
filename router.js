@@ -1,4 +1,4 @@
-// router.js — WRAITH full router (lazy cold commands)
+// router.js — 𝐌𝐄𝐇𝐓𝐀𝐁-𝐌𝐃 full router (lazy cold commands)
 import { remember, revealDelete, revealEdit, revealSecretEdit, ghostCommand, classifyMessage, getLedgerEntry } from './modules/ghost.js';
 import { logMessageHistory } from './modules/logger.js';
 import { peekCommand, autoPeek, watchQuotedViewOnce } from './modules/peek.js';

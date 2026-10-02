@@ -1,5 +1,5 @@
 // ─────────────────────────────────────────────
-//  WRAITH · core/jid-resolver.js
+//  𝐌𝐄𝐇𝐓𝐀𝐁-𝐌𝐃 · core/jid-resolver.js
 //  Shared JID resolution + newsletter metadata + channel cache.
 // ─────────────────────────────────────────────
 import fs from 'fs';
@@ -8,7 +8,7 @@ import { readJson, writeJsonAtomic } from './state-io.js';
 import { inState, statePath } from './paths.js';
 
 const CACHE_FILE = inState('channel-cache.json');
-const DEBUG = process.env.WRAITH_DEBUG === '1';
+const DEBUG = process.env.MEHTAB_MD_DEBUG === '1';
 
 // Ensure state dir exists
 statePath();

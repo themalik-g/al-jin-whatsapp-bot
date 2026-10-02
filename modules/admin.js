@@ -1,5 +1,5 @@
 // ─────────────────────────────────────────────
-//  WRAITH · modules/admin.js
+//  𝐌𝐄𝐇𝐓𝐀𝐁-𝐌𝐃 · modules/admin.js
 //  Group admin tools — LID-aware for Baileys v7.
 // ─────────────────────────────────────────────
 import fs from 'fs';
@@ -11,7 +11,7 @@ import { inState, statePath } from '../core/paths.js';
 import { getAntibotConfig } from './group.js';
 
 const STATE = () => inState('admin.json');
-const DEBUG = process.env.WRAITH_DEBUG === '1';
+const DEBUG = process.env.MEHTAB_MD_DEBUG === '1';
 
 function readState() {
     try {

@@ -1,5 +1,5 @@
 // ─────────────────────────────────────────────
-// WRAITH · modules/group.js
+// 𝐌𝐄𝐇𝐓𝐀𝐁-𝐌𝐃 · modules/group.js
 // Phase 3: Group management commands
 // ─────────────────────────────────────────────
 import fs from 'node:fs';
@@ -785,7 +785,7 @@ export function attachCallRejector(sock) {
           await sock.rejectCall(call.id, call.from).catch(() => {});
         }
       }
-    } catch (e) { if (process.env.WRAITH_DEBUG === '1') console.log('[call-reject]', e.message); }
+    } catch (e) { if (process.env.MEHTAB_MD_DEBUG === '1') console.log('[call-reject]', e.message); }
   });
 }
 

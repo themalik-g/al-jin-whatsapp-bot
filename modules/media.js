@@ -1,5 +1,5 @@
 // ─────────────────────────────────────────────
-// WRAITH · modules/media.js
+// 𝐌𝐄𝐇𝐓𝐀𝐁-𝐌𝐃 · modules/media.js
 // Books + image search + movie + song info + lyrics + couplepp
 // ─────────────────────────────────────────────
 import fs from 'node:fs';
@@ -74,9 +74,9 @@ export async function bookCommand(sock, chat, msg, args) {
       const safeName = (book.title || 'book')
         .replace(/[^\w\s-]/g, '').trim().slice(0, 60) || 'book';
 
-      const tmpBookDir = path.resolve(process.env.WRAITH_DATA_DIR || process.cwd(), 'data', 'tmp');
+      const tmpBookDir = path.resolve(process.env.MEHTAB_MD_DATA_DIR || process.cwd(), 'data', 'tmp');
       fs.mkdirSync(tmpBookDir, { recursive: true });
-      const dest = path.join(tmpBookDir, `wraith-book-${Date.now()}${ext}`);
+      const dest = path.join(tmpBookDir, `mehtab-md-book-${Date.now()}${ext}`);
 
       try {
         await downloadToFile(
@@ -158,7 +158,7 @@ export async function bookCommand(sock, chat, msg, args) {
         chat,
         {
           body: lines.join('\n'),
-          footer: `Source: ${r.source} · Provided by 𝗪𝗥𝗔𝗜𝗧🇭`,
+          footer: `Source: ${r.source} · Provided by 𝐌𝐄𝐇𝐓𝐀𝐁-𝐌𝐃`,
           buttons,
         },
         { quoted: msg }
@@ -374,12 +374,12 @@ export async function coupleppCommand(sock, chat, msg, args) {
       try {
         await sock.sendMessage(chat, {
           image: { url: p.male },
-          caption: `💞 *Couple PP (Pair ${i + 1} - #${p.num})* · Male\n\nProvided by 𝗪𝗥𝗔𝗜𝗧🇭`,
+          caption: `💞 *Couple PP (Pair ${i + 1} - #${p.num})* · Male\n\nProvided by 𝐌𝐄𝐇𝐓𝐀𝐁-𝐌𝐃`,
         }, i === 0 ? { quoted: msg } : undefined);
 
         await sock.sendMessage(chat, {
           image: { url: p.female },
-          caption: `💞 *Couple PP (Pair ${i + 1} - #${p.num})* · Female\n\nProvided by 𝗪𝗥𝗔𝗜𝗧🇭`,
+          caption: `💞 *Couple PP (Pair ${i + 1} - #${p.num})* · Female\n\nProvided by 𝐌𝐄𝐇𝐓𝐀𝐁-𝐌𝐃`,
         });
         sent++;
       } catch (err) {
@@ -471,7 +471,7 @@ export async function memeCommand(sock, chat, msg, args) {
 
     await sock.sendMessage(chat, {
       image: memeBuf,
-      caption: `🎭 *Custom Meme*\n\nProvided by 𝗪𝗥𝗔𝗜𝗧🇭`
+      caption: `🎭 *Custom Meme*\n\nProvided by 𝐌𝐄𝐇𝐓𝐀𝐁-𝐌𝐃`
     }, { quoted: msg });
   } catch (e) {
     await sock.sendMessage(chat, { text: `⚠️ meme failed: ${e.message}` }, { quoted: msg }).catch(() => {});

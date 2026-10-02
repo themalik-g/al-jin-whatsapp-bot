@@ -12,14 +12,14 @@
 - Retry counter cache extended to 10 min with `maxMsgRetryCount: 5`
 - Group metadata cache so sender keys reach every participant
 - `react`, `delete`, `edit`, `forward`, `poll` no longer get a newsletter `contextInfo`
-- Default reply mode is now plain text. Enable buttons with `.replymode buttons` or `WRAITH_REPLY_MODE=buttons`
+- Default reply mode is now plain text. Enable buttons with `.replymode buttons` or `MEHTAB_MD_REPLY_MODE=buttons`
 
 **If it still happens (stale encryption sessions):**
 1. Stop the bot
 2. Delete only `instances/<id>/session/session-*.json` and `sender-key-*.json` (keep `creds.json`)
 3. Start the bot, then send one message from the recipient's side to rebuild the session
 
-Tunables: `WRAITH_MSG_STORE_MAX` (default 3000), `WRAITH_MSG_STORE_TTL_H` (default 24).
+Tunables: `MEHTAB_MD_MSG_STORE_MAX` (default 3000), `MEHTAB_MD_MSG_STORE_TTL_H` (default 24).
 
 ---
 
@@ -95,10 +95,10 @@ If the code still fails:
 **Cause:** The host or container limits the maximum number of processes/threads (`NPROC` or CGroup `pids.max`). When running multiple sessions, V8 and libuv background thread allocation exceeds the container thread ceiling.
 
 **Fix:**
-WRAITH defaults `--v8-pool-size=2` and `UV_THREADPOOL_SIZE=2` for spawned session processes. If running many concurrent sessions on tight host limits, set `UV_THREADPOOL_SIZE` and `WRAITH_V8_POOL_SIZE` in your environment or `.env`:
+𝐌𝐄𝐇𝐓𝐀𝐁-𝐌𝐃 defaults `--v8-pool-size=2` and `UV_THREADPOOL_SIZE=2` for spawned session processes. If running many concurrent sessions on tight host limits, set `UV_THREADPOOL_SIZE` and `MEHTAB_MD_V8_POOL_SIZE` in your environment or `.env`:
 ```bash
 UV_THREADPOOL_SIZE=2
-WRAITH_V8_POOL_SIZE=2
+MEHTAB_MD_V8_POOL_SIZE=2
 ```
 
 ---

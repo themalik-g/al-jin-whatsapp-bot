@@ -1,5 +1,5 @@
 // ─────────────────────────────────────────────
-// WRAITH · modules/textmaker.js
+// 𝐌𝐄𝐇𝐓𝐀𝐁-𝐌𝐃 · modules/textmaker.js
 // 30 popular Ephoto 360 textmaker commands
 // ─────────────────────────────────────────────
 import { EPHOTO_EFFECTS, createEphotoImage } from '../lib/ephoto360.js';
@@ -22,7 +22,7 @@ function parseTextArgs(args, isDual) {
     if (spaceIndex !== -1) {
       return { text1: raw.slice(0, spaceIndex).trim(), text2: raw.slice(spaceIndex + 1).trim() };
     }
-    return { text1: raw, text2: 'WRAITH' };
+    return { text1: raw, text2: '𝐌𝐄𝐇𝐓𝐀𝐁-𝐌𝐃' };
   }
 
   return { text1: raw, text2: '' };
@@ -51,7 +51,7 @@ export async function handleTextmakerCommand(sock, chat, msg, effectKey, args) {
     const buffer = await createEphotoImage(effectKey, text1, text2);
     await sock.sendMessage(chat, {
       image: buffer,
-      caption: `🎨 *Ephoto360:* ${effectKey}\n💬 _${text1}${text2 ? ' | ' + text2 : ''}_\n\nProvided by 𝗪𝗥𝗔𝗜𝗧🇭`
+      caption: `🎨 *Ephoto360:* ${effectKey}\n💬 _${text1}${text2 ? ' | ' + text2 : ''}_\n\nProvided by 𝐌𝐄𝐇𝐓𝐀𝐁-𝐌𝐃`
     }, { quoted: msg });
 
     await sock.sendMessage(chat, { text: '✅ *Done!*', edit: statusMsg.key }).catch(() => {});

@@ -1,5 +1,5 @@
 // ─────────────────────────────────────────────
-// WRAITH · modules/settings-cmd.js
+// 𝐌𝐄𝐇𝐓𝐀𝐁-𝐌𝐃 · modules/settings-cmd.js
 // .settings — Shows current status of all features & modes
 // ─────────────────────────────────────────────
 import fs from 'fs';
@@ -30,7 +30,7 @@ export async function settingsCommand(sock, chat, msg) {
   const prefix = getPrefix();
   const replyMode = getReplyMode();
 
-  let text = `⚙️ *WRAITH System Settings & Modes*\n\n`;
+  let text = `⚙️ *𝐌𝐄𝐇𝐓𝐀𝐁-𝐌𝐃 System Settings & Modes*\n\n`;
 
   text += `👻 *Ghost Mode*\n`;
   text += `• Antidelete: *${ghostState.on !== false ? 'ON' : 'OFF'}*\n`;
@@ -65,7 +65,7 @@ export async function settingsCommand(sock, chat, msg) {
   text += `• Prefix: \`${prefix}\` \n`;
   text += `• Reply Mode: *${replyMode}*\n\n`;
 
-  text += `Provided by 𝗪𝗥𝗔𝗜𝗧🇭`;
+  text += `Provided by 𝐌𝐄𝐇𝐓𝐀𝐁-𝐌𝐃`;
 
   return sendWithCta(sock, chat, text, { quoted: msg });
 }

@@ -19,8 +19,8 @@ sudo npm install -g pm2
 ### 3. Clone Repository & Install Dependencies
 
 ```bash
-git clone https://github.com/themalik-g/wraith.git
-cd wraith
+git clone https://github.com/themalik-g/mehtab-md.git
+cd mehtab-md
 npm install
 ```
 
@@ -37,7 +37,7 @@ pm2 startup
 ### 5. Monitor Logs
 
 ```bash
-pm2 logs wraith
+pm2 logs mehtab-md
 pm2 monit
 ```
 
@@ -63,14 +63,14 @@ CMD ["node", "start.js"]
 **Build & Run:**
 
 ```bash
-docker build -t wraith .
+docker build -t mehtab-md .
 docker run -d \
-  --name wraith \
+  --name mehtab-md \
   -v $(pwd)/session:/app/session \
   -v $(pwd)/state:/app/state \
   -v $(pwd)/vault:/app/vault \
   --restart unless-stopped \
-  wraith
+  mehtab-md
 ```
 
 ---
@@ -81,7 +81,7 @@ First run will request your phone number in terminal and output a pairing code:
 
 ```bash
 ssh -t user@your-vps-ip
-cd wraith
+cd mehtab-md
 npm start
 ```
 
@@ -92,16 +92,16 @@ Enter your phone number when prompted, then open WhatsApp on your phone:
 
 ## Pterodactyl & Container Hosting Notes
 
-When running WRAITH on containerized game/bot panels like Pterodactyl, the container may enforce strict thread or process limits (`pids.max` or `NPROC`).
+When running 𝐌𝐄𝐇𝐓𝐀𝐁-𝐌𝐃 on containerized game/bot panels like Pterodactyl, the container may enforce strict thread or process limits (`pids.max` or `NPROC`).
 
-To prevent Node `thread_create` assertion crashes when running multiple sessions simultaneously, WRAITH configures lightweight background thread defaults for spawned session processes:
+To prevent Node `thread_create` assertion crashes when running multiple sessions simultaneously, 𝐌𝐄𝐇𝐓𝐀𝐁-𝐌𝐃 configures lightweight background thread defaults for spawned session processes:
 - `UV_THREADPOOL_SIZE=2`
 - `--v8-pool-size=2`
 
 You can customize these variables in your panel environment settings or `.env` if needed:
 ```env
 UV_THREADPOOL_SIZE=2
-WRAITH_V8_POOL_SIZE=2
+MEHTAB_MD_V8_POOL_SIZE=2
 ```
 
 ---
@@ -111,7 +111,7 @@ WRAITH_V8_POOL_SIZE=2
 To create a backup:
 
 ```bash
-tar czf wraith-backup-$(date +%F).tar.gz \
+tar czf mehtab-md-backup-$(date +%F).tar.gz \
   session/ \
   state/ \
   config.js \

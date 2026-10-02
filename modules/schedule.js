@@ -1,5 +1,5 @@
 // ─────────────────────────────────────────────
-//  WRAITH · modules/schedule.js
+//  𝐌𝐄𝐇𝐓𝐀𝐁-𝐌𝐃 · modules/schedule.js
 //  Scan-based date/time parser — works with LIDs.
 //  · retries + owner notice on failure
 //  · .schedule list / .schedule cancel
@@ -18,7 +18,7 @@ import { CONFIG } from '../config.js';
 const here = path.dirname(fileURLToPath(import.meta.url));
 const STATE = path.join(here, '..', 'state', 'schedule.json');
 const MEDIA_DIR = path.join(here, '..', 'state', 'schedule-media');
-const DEBUG = process.env.WRAITH_DEBUG === '1';
+const DEBUG = process.env.MEHTAB_MD_DEBUG === '1';
 
 fs.mkdirSync(MEDIA_DIR, { recursive: true });
 

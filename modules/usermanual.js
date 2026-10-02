@@ -1,14 +1,14 @@
 // ─────────────────────────────────────────────
-// WRAITH · modules/usermanual.js
+// 𝐌𝐄𝐇𝐓𝐀𝐁-𝐌𝐃 · modules/usermanual.js
 // Dynamic PDF downloader for official bot user manual
 // ─────────────────────────────────────────────
 import { fetchBuffer } from '../lib/net.js';
 
-const MANUAL_URL = 'https://raw.githubusercontent.com/themalik-g/wraith_manual/main/wraith_manual.pdf';
+const MANUAL_URL = 'https://raw.githubusercontent.com/themalik-g/mehtab_md_manual/main/mehtab_md_manual.pdf';
 
 export async function usermanualCommand(sock, chat, msg) {
   const statusMsg = await sock.sendMessage(chat, {
-    text: '📄 *Fetching WRAITH User Manual PDF…*'
+    text: '📄 *Fetching 𝐌𝐄𝐇𝐓𝐀𝐁-𝐌𝐃 User Manual PDF…*'
   }, { quoted: msg });
 
   try {
@@ -23,8 +23,8 @@ export async function usermanualCommand(sock, chat, msg) {
       {
         document: pdfBuffer,
         mimetype: 'application/pdf',
-        fileName: 'wraith_manual.pdf',
-        caption: '📄 *WRAITH Bot — Official User Manual*\n\nDownloaded from: `https://github.com/themalik-g/wraith_manual.git`\n\nProvided by 𝗪𝗥𝗔𝗜𝗧🇭',
+        fileName: 'mehtab_md_manual.pdf',
+        caption: '📄 *𝐌𝐄𝐇𝐓𝐀𝐁-𝐌𝐃 Bot — Official User Manual*\n\nDownloaded from: `https://github.com/themalik-g/mehtab-md_manual.git`\n\nProvided by 𝐌𝐄𝐇𝐓𝐀𝐁-𝐌𝐃',
       },
       { quoted: msg }
     );

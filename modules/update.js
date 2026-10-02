@@ -1,5 +1,5 @@
 // ─────────────────────────────────────────────
-//  WRAITH · modules/update.js
+//  𝐌𝐄𝐇𝐓𝐀𝐁-𝐌𝐃 · modules/update.js
 //  .update — re-fetch bot files from the repo,
 //  keep session/state folders untouched,
 //  auto-install if dependencies changed,
@@ -23,8 +23,8 @@ const here = path.dirname(fileURLToPath(import.meta.url));
 let _busy = false;
 
 function repoRoot() {
-    if (process.env.WRAITH_REPO_ROOT && fs.existsSync(process.env.WRAITH_REPO_ROOT)) {
-        return process.env.WRAITH_REPO_ROOT;
+    if (process.env.MEHTAB_MD_REPO_ROOT && fs.existsSync(process.env.MEHTAB_MD_REPO_ROOT)) {
+        return process.env.MEHTAB_MD_REPO_ROOT;
     }
     return path.resolve(here, '..');
 }
@@ -118,7 +118,7 @@ export async function updateCommand(sock, chat, msg) {
         let stashed = false;
         if (await isDirty()) {
             await send('📦 local changes detected — stashing…');
-            const s = await tryRun('git', ['stash', 'push', '-u', '-m', `wraith-auto-${Date.now()}`]);
+            const s = await tryRun('git', ['stash', 'push', '-u', '-m', `mehtab-md-auto-${Date.now()}`]);
             if (s.ok && !/No local changes/i.test(s.stdout)) stashed = true;
         }
 
@@ -166,10 +166,10 @@ export async function updateCommand(sock, chat, msg) {
         } else if (/already up to date/i.test(out) && !depsChanged) {
             // Nothing changed. Don't restart — avoid pointless downtime.
             _busy = false;
-            return send('✅ wraith is already up to date. Nothing to restart.');
+            return send('✅ mehtab-md is already up to date. Nothing to restart.');
         }
 
-        const sessionId = process.env.WRAITH_SESSION_ID || 'main';
+        const sessionId = process.env.MEHTAB_MD_SESSION_ID || 'main';
         const isMain = sessionId === 'main';
 
         // 6) Tell the user what happens next, THEN trigger restart
@@ -182,7 +182,7 @@ export async function updateCommand(sock, chat, msg) {
 
         // 7) If executed from main session, inform parent to restart all secondary sessions
         if (isMain) {
-            try { process.send?.({ type: 'wraith:restart_all' }); } catch {}
+            try { process.send?.({ type: 'mehtab-md:restart_all' }); } catch {}
         }
 
         // 8) Give time for message delivery, then exit non-zero so the

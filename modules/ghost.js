@@ -14,7 +14,7 @@ import { inState, statePath } from '../core/paths.js';
 const STATE = () => inState('ghost.json');
 const LEDGER_FILE = () => inState('ghost-ledger.json');
 
-const DEBUG = process.env.WRAITH_DEBUG === '1';
+const DEBUG = process.env.MEHTAB_MD_DEBUG === '1';
 const MAX_STORAGE_MEDIA_BYTES = 30 * 1024 * 1024; // 30 MB per file
 const LEDGER_MAX = 400;      // max text entries
 const MEDIA_QUEUE_MAX = 20;  // max media files on disk (FIFO)
@@ -206,7 +206,7 @@ export async function ghostCommand(sock, chat, msg, args) {
     if (!a0) {
         return sendInteractive(sock, chat, {
             body: `👻 *ghost* — watcher status\n\n${statusBody()}`,
-            footer: 'Provided by 𝗪𝗥𝗔𝗜𝗧🇭',
+            footer: 'Provided by 𝐌𝐄𝐇𝐓𝐀𝐁-𝐌𝐃',
             buttons: buttons(),
         }, { quoted: msg });
     }
@@ -223,14 +223,14 @@ export async function ghostCommand(sock, chat, msg, args) {
         if (s.on === targetState) {
             return sendInteractive(sock, chat, {
                 body: `ℹ️ Antidelete is already *${s.on ? 'ARMED (ON)' : 'DISARMED (OFF)'}*.\n\n${statusBody()}`,
-                footer: 'Provided by 𝗪𝗥𝗔𝗜𝗧🇭',
+                footer: 'Provided by 𝐌𝐄𝐇𝐓𝐀𝐁-𝐌𝐃',
                 buttons: buttons(),
             }, { quoted: msg });
         }
         s.on = targetState; write(s);
         return sendInteractive(sock, chat, {
             body: `👻 Antidelete is now *${s.on ? 'ARMED (ON)' : 'DISARMED (OFF)'}*.\n\n${statusBody()}`,
-            footer: 'Provided by 𝗪𝗥𝗔𝗜𝗧🇭',
+            footer: 'Provided by 𝐌𝐄𝐇𝐓𝐀𝐁-𝐌𝐃',
             buttons: buttons(),
         }, { quoted: msg });
     }
@@ -243,14 +243,14 @@ export async function ghostCommand(sock, chat, msg, args) {
         if (s.edit === targetState) {
             return sendInteractive(sock, chat, {
                 body: `ℹ️ Antiedit is already *${s.edit ? 'ARMED (ON)' : 'DISARMED (OFF)'}*.\n\n${statusBody()}`,
-                footer: 'Provided by 𝗪𝗥𝗔𝗜𝗧🇭',
+                footer: 'Provided by 𝐌𝐄𝐇𝐓𝐀𝐁-𝐌𝐃',
                 buttons: buttons(),
             }, { quoted: msg });
         }
         s.edit = targetState; write(s);
         return sendInteractive(sock, chat, {
             body: `👻 Antiedit is now *${s.edit ? 'ARMED (ON)' : 'DISARMED (OFF)'}*.\n\n${statusBody()}`,
-            footer: 'Provided by 𝗪𝗥𝗔𝗜𝗧🇭',
+            footer: 'Provided by 𝐌𝐄𝐇𝐓𝐀𝐁-𝐌𝐃',
             buttons: buttons(),
         }, { quoted: msg });
     }

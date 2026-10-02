@@ -1,5 +1,5 @@
 // ─────────────────────────────────────────────
-// WRAITH · modules/network-tools.js
+// 𝐌𝐄𝐇𝐓𝐀𝐁-𝐌𝐃 · modules/network-tools.js
 // Online Lookup & Network Utilities:
 // speedtest, npm, unroll, web2img/webss, tempmail/readmail, whatanime
 // ─────────────────────────────────────────────
@@ -9,7 +9,7 @@ import { getMediaFromMsg } from './media-tools.js';
 import { chunkText } from '../lib/net.js';
 
 const TMP_DIR = () => {
-  const dir = path.resolve(process.env.WRAITH_DATA_DIR || process.cwd(), 'data', 'tmp');
+  const dir = path.resolve(process.env.MEHTAB_MD_DATA_DIR || process.cwd(), 'data', 'tmp');
   fs.mkdirSync(dir, { recursive: true });
   return dir;
 };
@@ -47,7 +47,7 @@ export async function speedtestCommand(sock, chat, msg) {
       `📥 *Download:* ${dlSpeed} Mbps`,
       `📤 *Upload:* ${ulSpeed} Mbps`,
       '',
-      'Provided by 𝗪𝗥𝗔𝗜𝗧🇭'
+      'Provided by 𝐌𝐄𝐇𝐓𝐀𝐁-𝐌𝐃'
     ].join('\n');
 
     await sock.sendMessage(chat, { text: report }, { quoted: msg });
@@ -96,7 +96,7 @@ export async function npmCommand(sock, chat, msg, args) {
       `📊 *Weekly Downloads:* ${downloads}`,
       `🔗 *Homepage:* ${homepage}`,
       '',
-      'Provided by 𝗪𝗥𝗔𝗜𝗧🇭'
+      'Provided by 𝐌𝐄𝐇𝐓𝐀𝐁-𝐌𝐃'
     ].join('\n');
 
     await sock.sendMessage(chat, { text: report }, { quoted: msg });
@@ -161,7 +161,7 @@ export async function unrollCommand(sock, chat, msg, args) {
     }
 
     lines.push('');
-    lines.push('Provided by 𝗪𝗥𝗔𝗜𝗧🇭');
+    lines.push('Provided by 𝐌𝐄𝐇𝐓𝐀𝐁-𝐌𝐃');
 
     await sock.sendMessage(chat, { text: lines.join('\n') }, { quoted: msg });
   } catch (e) {
@@ -193,7 +193,7 @@ export async function web2imgCommand(sock, chat, msg, args) {
 
     await sock.sendMessage(chat, {
       image: imgBuffer,
-      caption: `📸 *Web Screenshot*\n\nURL: ${url}\n\nProvided by 𝗪𝗥𝗔𝗜𝗧🇭`,
+      caption: `📸 *Web Screenshot*\n\nURL: ${url}\n\nProvided by 𝐌𝐄𝐇𝐓𝐀𝐁-𝐌𝐃`,
     }, { quoted: msg });
   } catch (e) {
     await sock.sendMessage(chat, { text: `⚠️ web2img failed: ${e.message}` }, { quoted: msg }).catch(() => {});
@@ -220,7 +220,7 @@ export async function tempmailCommand(sock, chat, msg, args) {
     };
 
     await sock.sendMessage(chat, {
-      text: `📧 *Temporary Email Generated (Guerrilla Mail)*\n\n\`${data.email_addr}\`\n\nTo check inbox:\n\`.readmail\` (or \`.readmail ${data.sid_token}\`)\n\nProvided by 𝗪𝗥𝗔𝗜𝗧🇭`,
+      text: `📧 *Temporary Email Generated (Guerrilla Mail)*\n\n\`${data.email_addr}\`\n\nTo check inbox:\n\`.readmail\` (or \`.readmail ${data.sid_token}\`)\n\nProvided by 𝐌𝐄𝐇𝐓𝐀𝐁-𝐌𝐃`,
     }, { quoted: msg });
   } catch (e) {
     await sock.sendMessage(chat, { text: `⚠️ tempmail failed: ${e.message}` }, { quoted: msg }).catch(() => {});
@@ -258,7 +258,7 @@ export async function readmailCommand(sock, chat, msg, args) {
     });
 
     lines.push('');
-    lines.push('Provided by 𝗪𝗥𝗔𝗜𝗧🇭');
+    lines.push('Provided by 𝐌𝐄𝐇𝐓𝐀𝐁-𝐌𝐃');
 
     for (const chunk of chunkText(lines.join('\n'), 3800)) {
       await sock.sendMessage(chat, { text: chunk }, { quoted: msg });
@@ -307,7 +307,7 @@ export async function whatanimeCommand(sock, chat, msg) {
       `⏱️ *Timestamp:* ${timestamp}`,
       `🎯 *Similarity:* ${similarity}%`,
       '',
-      'Provided by 𝗪𝗥𝗔𝗜𝗧🇭'
+      'Provided by 𝐌𝐄𝐇𝐓𝐀𝐁-𝐌𝐃'
     ].join('\n');
 
     if (match.video) {
@@ -380,7 +380,7 @@ export async function githubdiffCommand(sock, chat, msg, args) {
     ].join('\n');
 
     if (diffText.length <= 3000) {
-      const fullText = `${header}\`\`\`diff\n${diffText.slice(0, 2800)}\n\`\`\`\n\nProvided by 𝗪𝗥𝗔𝗜𝗧🇭`;
+      const fullText = `${header}\`\`\`diff\n${diffText.slice(0, 2800)}\n\`\`\`\n\nProvided by 𝐌𝐄𝐇𝐓𝐀𝐁-𝐌𝐃`;
       return await sock.sendMessage(chat, { text: fullText }, { quoted: msg });
     } else {
       const snippet = diffText.slice(0, 1500);
@@ -390,7 +390,7 @@ export async function githubdiffCommand(sock, chat, msg, args) {
         document: docBuf,
         mimetype: 'text/x-diff',
         fileName,
-        caption: `${header}\`\`\`diff\n${snippet}\n...\n[Truncated - full diff attached above]\n\`\`\`\n\nProvided by 𝗪𝗥𝗔𝗜𝗧🇭`
+        caption: `${header}\`\`\`diff\n${snippet}\n...\n[Truncated - full diff attached above]\n\`\`\`\n\nProvided by 𝐌𝐄𝐇𝐓𝐀𝐁-𝐌𝐃`
       }, { quoted: msg });
     }
   } catch (e) {
@@ -427,7 +427,7 @@ export async function urbanCommand(sock, chat, msg, args) {
       cleanExample ? `💬 *Example:*\n_${cleanExample}_\n` : '',
       `👍 *Upvotes:* ${item.thumbs_up || 0}  |  👎 *Downvotes:* ${item.thumbs_down || 0}`,
       '',
-      'Provided by 𝗪𝗥𝗔𝗜𝗧🇭'
+      'Provided by 𝐌𝐄𝐇𝐓𝐀𝐁-𝐌𝐃'
     ].filter(Boolean).join('\n');
 
     await sock.sendMessage(chat, { text: report }, { quoted: msg });

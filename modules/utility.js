@@ -1,5 +1,5 @@
 // ─────────────────────────────────────────────
-// WRAITH · modules/utility.js
+// 𝐌𝐄𝐇𝐓𝐀𝐁-𝐌𝐃 · modules/utility.js
 // Phase 1 utility commands + presence tracker backbone.
 // All handlers crash-safe.
 // ─────────────────────────────────────────────
@@ -148,7 +148,7 @@ export async function currencyCommand(sock, chat, msg, args) {
     const rate = r.rate;
     const converted = amount * rate;
     await sock.sendMessage(chat, {
-      text: `💱 *currency*\n\n*${amount} ${from}*  →  *${converted.toFixed(4)} ${to}*\n_1 ${from} = ${rate} ${to}_\n_1 ${to} = ${(1 / rate).toFixed(6)} ${from}_\n\nProvided by 𝗪𝗥𝗔𝗜𝗧🇭`,
+      text: `💱 *currency*\n\n*${amount} ${from}*  →  *${converted.toFixed(4)} ${to}*\n_1 ${from} = ${rate} ${to}_\n_1 ${to} = ${(1 / rate).toFixed(6)} ${from}_\n\nProvided by 𝐌𝐄𝐇𝐓𝐀𝐁-𝐌𝐃`,
     }, { quoted: msg });
   } catch (e) {
     await sock.sendMessage(chat, { text: `⚠️ currency failed: ${e.message}` }, { quoted: msg }).catch(() => {});
@@ -263,7 +263,7 @@ export async function weatherCommand(sock, chat, msg, args) {
       lines.push(`• wind · ${r.current.wind} km/h`);
     }
     lines.push('');
-    lines.push('Provided by 𝗪𝗥𝗔𝗜𝗧🇭');
+    lines.push('Provided by 𝐌𝐄𝐇𝐓𝐀𝐁-𝐌𝐃');
     await sendChunked(sock, chat, msg, lines.join('\n'));
   } catch (e) {
     await sock.sendMessage(chat, { text: `⚠️ weather failed: ${e.message}` }, { quoted: msg }).catch(() => {});
@@ -302,13 +302,13 @@ export async function ownerCommand(sock, chat, msg, args) {
     const digits = CONFIG.owner.replace(/\D/g, '');
     const vcard = [
       'BEGIN:VCARD', 'VERSION:3.0',
-      `FN:${CONFIG.codename || 'WRAITH'} Owner`,
+      `FN:${CONFIG.codename || '𝐌𝐄𝐇𝐓𝐀𝐁-𝐌𝐃'} Owner`,
       `TEL;type=CELL;type=VOICE;waid=${digits}:+${digits}`,
-      `NOTE:${CONFIG.botName || 'WRAITH'} owner`,
+      `NOTE:${CONFIG.botName || '𝐌𝐄𝐇𝐓𝐀𝐁-𝐌𝐃'} owner`,
       'END:VCARD',
     ].join('\n');
     await sock.sendMessage(chat, {
-      contacts: { displayName: `${CONFIG.codename || 'WRAITH'} Owner`, contacts: [{ vcard }] },
+      contacts: { displayName: `${CONFIG.codename || '𝐌𝐄𝐇𝐓𝐀𝐁-𝐌𝐃'} Owner`, contacts: [{ vcard }] },
     }, { quoted: msg });
   } catch (e) {
     await sock.sendMessage(chat, { text: `⚠️ owner card failed: ${e.message}` }, { quoted: msg }).catch(() => {});
@@ -318,13 +318,13 @@ export async function ownerCommand(sock, chat, msg, args) {
 // ── .script / .repo ─────────────────────────────────────────────────────────
 export async function scriptCommand(sock, chat, msg) {
   try {
-    const url = CONFIG.repoUrl || 'https://github.com/themalik-g/wraith';
+    const url = CONFIG.repoUrl || 'https://github.com/themalik-g/mehtab-md';
     await sendInteractive(
       sock,
       chat,
       {
-        body: `📦 *WRAITH*\n\n_${CONFIG.codename || 'WRAITH'} v${CONFIG.version || ''} — a silent watcher for WhatsApp._\n\n${url}`,
-        footer: 'Provided by 𝗪𝗥𝗔𝗜𝗧🇭',
+        body: `📦 *𝐌𝐄𝐇𝐓𝐀𝐁-𝐌𝐃*\n\n_${CONFIG.codename || '𝐌𝐄𝐇𝐓𝐀𝐁-𝐌𝐃'} v${CONFIG.version || ''} — a silent watcher for WhatsApp._\n\n${url}`,
+        footer: 'Provided by 𝐌𝐄𝐇𝐓𝐀𝐁-𝐌𝐃',
         buttons: [
           createCtaUrl('🌐 GitHub Repository', url),
           createCtaCopy('📋 Copy Repo URL', url)
@@ -380,7 +380,7 @@ export async function shortenCommand(sock, chat, msg, args) {
     }
 
     await sock.sendMessage(chat, {
-      text: `🔗 *Shortened URL*\n\n*Original:* ${url}\n*Short:* ${r.shortUrl}\n\nProvided by 𝗪𝗥𝗔𝗜𝗧🇭`
+      text: `🔗 *Shortened URL*\n\n*Original:* ${url}\n*Short:* ${r.shortUrl}\n\nProvided by 𝐌𝐄𝐇𝐓𝐀𝐁-𝐌𝐃`
     }, { quoted: msg });
   } catch (e) {
     await sock.sendMessage(chat, { text: `⚠️ shorten failed: ${e.message}` }, { quoted: msg }).catch(() => {});
@@ -403,7 +403,7 @@ export async function newsCommand(sock, chat, msg, args) {
       lines.push(`   🔗 ${a.link}`);
       lines.push('');
     });
-    lines.push('Provided by 𝗪𝗥𝗔𝗜𝗧🇭');
+    lines.push('Provided by 𝐌𝐄𝐇𝐓𝐀𝐁-𝐌𝐃');
 
     await sendChunked(sock, chat, msg, lines.join('\n'));
   } catch (e) {
@@ -426,7 +426,7 @@ export async function hackernewsCommand(sock, chat, msg) {
       lines.push(`   🔗 ${s.url}`);
       lines.push('');
     });
-    lines.push('Provided by 𝗪𝗥𝗔𝗜𝗧🇭');
+    lines.push('Provided by 𝐌𝐄𝐇𝐓𝐀𝐁-𝐌𝐃');
 
     await sendChunked(sock, chat, msg, lines.join('\n'));
   } catch (e) {
@@ -447,7 +447,7 @@ export async function wikiCommand(sock, chat, msg, args) {
       return sock.sendMessage(chat, { text: `❌ No Wikipedia article found for *${query}*.` }, { quoted: msg });
     }
 
-    const text = `🌐 *Wikipedia: ${r.title}*\n_${r.description}_\n\n${r.extract}\n\n🔗 ${r.url}\n\nProvided by 𝗪𝗥𝗔𝗜𝗧🇭`;
+    const text = `🌐 *Wikipedia: ${r.title}*\n_${r.description}_\n\n${r.extract}\n\n🔗 ${r.url}\n\nProvided by 𝐌𝐄𝐇𝐓𝐀𝐁-𝐌𝐃`;
     await sendChunked(sock, chat, msg, text);
   } catch (e) {
     await sock.sendMessage(chat, { text: `⚠️ wikipedia failed: ${e.message}` }, { quoted: msg }).catch(() => {});
@@ -460,7 +460,7 @@ export async function jokeCommand(sock, chat, msg) {
     const r = await fetchJoke();
     if (!r.ok) return sock.sendMessage(chat, { text: '❌ Could not fetch a joke right now.' }, { quoted: msg });
     await sock.sendMessage(chat, {
-      text: `😂 *Joke*\n\n${r.joke}\n\nProvided by 𝗪𝗥𝗔𝗜𝗧🇭`
+      text: `😂 *Joke*\n\n${r.joke}\n\nProvided by 𝐌𝐄𝐇𝐓𝐀𝐁-𝐌𝐃`
     }, { quoted: msg });
   } catch (e) {
     await sock.sendMessage(chat, { text: `⚠️ joke failed: ${e.message}` }, { quoted: msg }).catch(() => {});
@@ -473,7 +473,7 @@ export async function adviceCommand(sock, chat, msg) {
     const r = await fetchAdvice();
     if (!r.ok) return sock.sendMessage(chat, { text: '❌ Could not fetch advice right now.' }, { quoted: msg });
     await sock.sendMessage(chat, {
-      text: `💡 *Advice*\n\n_"${r.advice}"_\n\nProvided by 𝗪𝗥𝗔𝗜𝗧🇭`
+      text: `💡 *Advice*\n\n_"${r.advice}"_\n\nProvided by 𝐌𝐄𝐇𝐓𝐀𝐁-𝐌𝐃`
     }, { quoted: msg });
   } catch (e) {
     await sock.sendMessage(chat, { text: `⚠️ advice failed: ${e.message}` }, { quoted: msg }).catch(() => {});
@@ -486,7 +486,7 @@ export async function factCommand(sock, chat, msg) {
     const r = await fetchFact();
     if (!r.ok) return sock.sendMessage(chat, { text: '❌ Could not fetch a fact right now.' }, { quoted: msg });
     await sock.sendMessage(chat, {
-      text: `🧠 *Random Fact*\n\n_${r.fact}_\n\nProvided by 𝗪𝗥𝗔𝗜𝗧🇭`
+      text: `🧠 *Random Fact*\n\n_${r.fact}_\n\nProvided by 𝐌𝐄𝐇𝐓𝐀𝐁-𝐌𝐃`
     }, { quoted: msg });
   } catch (e) {
     await sock.sendMessage(chat, { text: `⚠️ fact failed: ${e.message}` }, { quoted: msg }).catch(() => {});
@@ -548,7 +548,7 @@ export async function channelinfoCommand(sock, chat, msg, args) {
       '',
       `📝 *Description:*\n_${description.slice(0, 500)}_`,
       '',
-      'Provided by 𝗪𝗥𝗔𝗜𝗧🇭'
+      'Provided by 𝐌𝐄𝐇𝐓𝐀𝐁-𝐌𝐃'
     ].join('\n');
 
     await sock.sendMessage(chat, { text: report }, { quoted: msg });
@@ -609,7 +609,7 @@ export async function unitCommand(sock, chat, msg, args) {
       return sock.sendMessage(chat, { text: `❌ Unsupported conversion from *${u1}* to *${u2}*.` }, { quoted: msg });
     }
 
-    const report = `📐 *Unit Conversion (${label})*\n\n*${val} ${u1.toUpperCase()}* = *${result.toFixed(4)} ${u2.toUpperCase()}*\n\nProvided by 𝗪𝗥𝗔𝗜𝗧🇭`;
+    const report = `📐 *Unit Conversion (${label})*\n\n*${val} ${u1.toUpperCase()}* = *${result.toFixed(4)} ${u2.toUpperCase()}*\n\nProvided by 𝐌𝐄𝐇𝐓𝐀𝐁-𝐌𝐃`;
     await sock.sendMessage(chat, { text: report }, { quoted: msg });
   } catch (e) {
     await sock.sendMessage(chat, { text: `⚠️ unit conversion failed: ${e.message}` }, { quoted: msg }).catch(() => {});
@@ -634,12 +634,12 @@ export async function commandcountCommand(sock, chat, msg) {
     });
 
     const report = [
-      '📊 *WRAITH Command Count*',
+      '📊 *𝐌𝐄𝐇𝐓𝐀𝐁-𝐌𝐃 Command Count*',
       '',
       `⚙️ *Total Help Menu Entries:* ${totalInHelp}`,
       `🎯 *Unique Command Verbs:* ${countSet.size}`,
       '',
-      'Provided by 𝗪𝗥𝗔𝗜𝗧🇭'
+      'Provided by 𝐌𝐄𝐇𝐓𝐀𝐁-𝐌𝐃'
     ].join('\n');
 
     await sock.sendMessage(chat, { text: report }, { quoted: msg });

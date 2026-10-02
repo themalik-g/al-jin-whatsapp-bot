@@ -1,5 +1,5 @@
 // ─────────────────────────────────────────────
-//  WRAITH · modules/activity.js  (v2)
+//  𝐌𝐄𝐇𝐓𝐀𝐁-𝐌𝐃 · modules/activity.js  (v2)
 //  In-memory cache + debounced atomic flush.
 //
 //  v2 fixes
@@ -15,7 +15,7 @@ import { inState } from '../core/paths.js';
 import { getBestUserJidSync, getCachedPnForLid } from '../core/jid-resolver.js';
 
 const STATE = () => inState('activity.json');
-const DEBUG = process.env.WRAITH_DEBUG === '1';
+const DEBUG = process.env.MEHTAB_MD_DEBUG === '1';
 const FLUSH_MS = 5000;
 const MAX_SENDERS_PER_CHAT = 150;   // prune when above this
 const PRUNE_TO = 100;               // ...down to this many (most recent kept)

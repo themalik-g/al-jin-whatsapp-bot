@@ -1,5 +1,5 @@
 // ─────────────────────────────────────────────
-// WRAITH · modules/presence-track.js  (v2)
+// 𝐌𝐄𝐇𝐓𝐀𝐁-𝐌𝐃 · modules/presence-track.js  (v2)
 // Stalk: logs EVERY online/offline change of the contacts you track,
 // keeps session durations and builds reports for any time window.
 //
@@ -24,7 +24,7 @@ import {
     resolvePnToLid, resolveLidToPn
 } from '../core/jid-resolver.js';
 
-const DEBUG = process.env.WRAITH_DEBUG === '1';
+const DEBUG = process.env.MEHTAB_MD_DEBUG === '1';
 const STORE_FILE = () => inState('stalk.json');
 
 const MAX_EVENTS = 2000;            // events kept per contact (tiny arrays)

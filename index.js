@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // ─────────────────────────────────────────────
-// WRAITH · bootstrap launcher (standalone, zero-dep)
+// 𝐌𝐄𝐇𝐓𝐀𝐁-𝐌𝐃 · bootstrap launcher (standalone, zero-dep)
 // ─────────────────────────────────────────────
 
 import { spawn, spawnSync } from 'node:child_process';
@@ -37,7 +37,7 @@ function loadEnvFile(file) {
       if (!(key in process.env)) process.env[key] = val;
     }
   } catch (e) {
-    console.warn('[wraith] .env load skipped:', e.message);
+    console.warn('[mehtab-md] .env load skipped:', e.message);
   }
 }
 
@@ -53,8 +53,8 @@ if (!process.env.UV_THREADPOOL_SIZE) {
 // ─────────────────────────────────────────────
 // 3. Constants
 // ─────────────────────────────────────────────
-const SOURCE = 'https://github.com/themalik-g/wraith.git';
-const BRANCH = process.env.WRAITH_BRANCH || 'main';
+const SOURCE = 'https://github.com/themalik-g/mehtab-md.git';
+const BRANCH = process.env.MEHTAB_MD_BRANCH || 'main';
 const HARDCODED_BOT_NUMBER = '';
 const CLONE_TIMEOUT = 180_000;
 const INSTALL_TIMEOUT = 300_000;
@@ -63,7 +63,7 @@ const MAX_RESTARTS = 10;
 const ADD_MODE =
   process.argv.includes('--add') || process.argv.includes('--setup');
 const PROMPT_TIMEOUT_MS = Number(
-  process.env.WRAITH_PROMPT_TIMEOUT_MS || 20_000
+  process.env.MEHTAB_MD_PROMPT_TIMEOUT_MS || 20_000
 );
 
 // ─────────────────────────────────────────────
@@ -110,7 +110,7 @@ function resolveConfiguredPhone(argv = process.argv, env = process.env) {
     return HARDCODED_BOT_NUMBER;
   }
 
-  const fromEnv = (env.WRAITH_PHONE || env.WRAITH_NUMBER || '').replace(
+  const fromEnv = (env.MEHTAB_MD_PHONE || env.MEHTAB_MD_NUMBER || '').replace(
     /\D/g,
     ''
   );
@@ -126,9 +126,9 @@ const CONFIGURED_PHONE = resolveConfiguredPhone();
 function repoRoot() {
   if (fs.existsSync(path.join(__dirname, 'start.js'))) return __dirname;
 
-  const dir = path.join(__dirname, 'wraith');
+  const dir = path.join(__dirname, 'mehtab-md');
   if (!fs.existsSync(path.join(dir, 'start.js'))) {
-    say(yellow('fetching wraith from origin…'));
+    say(yellow('fetching mehtab-md from origin…'));
     const res = spawnSync(
       'git',
       ['clone', '--depth', '1', '-b', BRANCH, SOURCE, dir],
@@ -322,14 +322,14 @@ async function promptNumber(label = 'number') {
 
 function spawnSession(root, id, number) {
   const dir = makeInstance(root, id);
-  const maxOldSpace = process.env.WRAITH_MAX_OLD_SPACE_SIZE || '256';
+  const maxOldSpace = process.env.MEHTAB_MD_MAX_OLD_SPACE_SIZE || '256';
   const args = [
     `--max-old-space-size=${maxOldSpace}`,
     '--max-semi-space-size=16',
     '--expose-gc',
   ];
-  if (process.env.WRAITH_V8_POOL_SIZE) {
-    args.push(`--v8-pool-size=${process.env.WRAITH_V8_POOL_SIZE}`);
+  if (process.env.MEHTAB_MD_V8_POOL_SIZE) {
+    args.push(`--v8-pool-size=${process.env.MEHTAB_MD_V8_POOL_SIZE}`);
   }
   args.push(path.join(root, 'start.js'), '--session', id);
   if (number) args.push('--number', number);
@@ -337,9 +337,9 @@ function spawnSession(root, id, number) {
   const env = {
     ...process.env,
     UV_THREADPOOL_SIZE: process.env.UV_THREADPOOL_SIZE || '2',
-    WRAITH_REPO_ROOT: root,
-    WRAITH_SESSION_ID: id,
-    WRAITH_DATA_DIR: dir,
+    MEHTAB_MD_REPO_ROOT: root,
+    MEHTAB_MD_SESSION_ID: id,
+    MEHTAB_MD_DATA_DIR: dir,
   };
 
   say(cyan(`starting session ${id}${number ? ' · +' + number : ''}`));
@@ -383,12 +383,12 @@ function spawnSession(root, id, number) {
   children.set(id, rec);
 
   proc.on('message', m => {
-    if (m?.type === 'wraith:linked') {
+    if (m?.type === 'mehtab-md:linked') {
       try {
         resolveLinked(true);
       } catch {}
     }
-    if (m?.type === 'wraith:spawn_session' && m.sessionId) {
+    if (m?.type === 'mehtab-md:spawn_session' && m.sessionId) {
       if (children.has(m.sessionId)) {
         say(yellow(`session ${m.sessionId} is already running`));
       } else {
@@ -402,7 +402,7 @@ function spawnSession(root, id, number) {
         spawnSession(root, m.sessionId, m.number || null);
       }
     }
-    if (m?.type === 'wraith:restart_all') {
+    if (m?.type === 'mehtab-md:restart_all') {
       say(
         cyan(
           `multi-session update requested by ${id} — restarting all other sessions`
@@ -417,7 +417,7 @@ function spawnSession(root, id, number) {
         }
       }
     }
-    if (m?.type === 'wraith:delete_session' && m.sessionId) {
+    if (m?.type === 'mehtab-md:delete_session' && m.sessionId) {
       const targetId = m.sessionId;
       say(yellow(`delete session request received for ${targetId}`));
       if (children.has(targetId)) {
@@ -533,7 +533,7 @@ async function linkOne(root, label, presetNumber = null) {
     say(cyan(`using configured number +${number}`));
   } else if (!process.stdin.isTTY || !rl) {
     throw new Error(
-      'no phone number available — set WRAITH_PHONE env or pass --phone=923001234567'
+      'no phone number available — set MEHTAB_MD_PHONE env or pass --phone=923001234567'
     );
   } else {
     number = await promptNumber(label);
@@ -556,7 +556,7 @@ async function linkOne(root, label, presetNumber = null) {
 async function wizard(root) {
   console.log();
   console.log(violet(' ╭───────────────────────────────────────╮'));
-  console.log(violet(' │') + ' WRAITH · pairing wizard ' + violet('│'));
+  console.log(violet(' │') + ' 𝐌𝐄𝐇𝐓𝐀𝐁-𝐌𝐃 · pairing wizard ' + violet('│'));
   console.log(violet(' ╰───────────────────────────────────────╯'));
 
   const firstLabel = ADD_MODE ? 'new number' : 'first number';
@@ -649,10 +649,10 @@ process.on('SIGTERM', () => quiet('SIGTERM'));
         return;
       }
 
-      say(red('[non-interactive] no linked sessions and no WRAITH_PHONE set'));
+      say(red('[non-interactive] no linked sessions and no MEHTAB_MD_PHONE set'));
       say(
         grey(
-          '  → set WRAITH_PHONE=923001234567 in your env, or run once interactively'
+          '  → set MEHTAB_MD_PHONE=923001234567 in your env, or run once interactively'
         )
       );
       process.exit(0);
