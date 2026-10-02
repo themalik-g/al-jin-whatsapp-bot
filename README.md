@@ -13,30 +13,16 @@
 
 **⭐ If Al-Jin helps you, please star the repository — it helps others discover the project!**
 
-**Al-Jin is a self-hosted WhatsApp MD bot** that links to your WhatsApp account through an 8-character **pairing code** ("Link with phone number instead") — no QR scan needed. It runs on your own server, stores everything locally, and gives you a full command suite for:
+---
 
-- **Recovering deleted and edited messages** (anti-delete / anti-edit)
-- **Revealing view-once photos and videos**
-- **Saving and auto-viewing WhatsApp statuses**
-- **Downloading** YouTube, Instagram, TikTok and Facebook media
-- **Chatting with Gemini AI** and running AI tools
-- **Managing WhatsApp groups** (kick, promote, welcome messages, protection)
-- **Islamic tools** (Quran, Hadith, prayer times)
-
-It is built on the latest **Baileys v7.0.0-rc.14** with LID-aware JID resolution, so it keeps working with WhatsApp's newer identifier system.
-
-> **Looking for a WhatsApp bot you can self-host?** Al-Jin runs on a VPS, Docker, PM2, Pterodactyl panels or Termux and keeps all data on your own machine.
-
-**Keywords:** al-jin · al jin bot · aljin whatsapp bot · al-jin whatsapp bot · whatsapp bot · whatsapp md bot · whatsapp multi device bot · baileys bot · baileys v7 · whatsapp bot nodejs · whatsapp anti delete bot · view once reveal · whatsapp status saver · whatsapp youtube downloader · fulldp hddp · whatsapp gemini ai bot · whatsapp group management bot · multi session whatsapp bot · self-hosted whatsapp bot · pairing code login
-
-## Table of Contents
+## 📖 Table of Contents
 
 - [What is Al-Jin?](#what-is-al-jin)
-- [Why choose Al-Jin?](#why-choose-al-jin)
-- [Standout Features](#standout-features)
-- [Command Reference](#command-reference)
+- [Why Choose Al-Jin?](#why-choose-al-jin)
+- [Key Features](#key-features)
+- [Command Categories](#command-categories)
 - [Quick Start](#quick-start)
-- [Supported Platforms](#supported-platforms)
+- [Deployment Options](#deployment-options)
 - [Documentation](#documentation)
 - [FAQ](#faq)
 - [Troubleshooting](#troubleshooting)
@@ -44,14 +30,24 @@ It is built on the latest **Baileys v7.0.0-rc.14** with LID-aware JID resolution
 - [Security](#security)
 - [License](#license)
 - [Credits](#credits)
+- [Keywords](#keywords)
+- [For AI Assistants](#for-ai-assistants)
+
+---
 
 ## What is Al-Jin?
 
 **Al-Jin** is a self-hosted **WhatsApp MD bot** that links to your WhatsApp account through an 8-character **pairing code** — no QR scan needed. It runs on your own server, stores everything locally, and provides anti-delete recovery, view-once reveal, status saving, media downloading, Gemini AI tools, Islamic tools, and complete group administration.
 
-It is built on the latest **Baileys v7.0.0-rc.14** with LID-aware JID resolution.
+It is built on the latest **Baileys v7.0.0-rc.14** with LID-aware JID resolution, so it keeps working with WhatsApp's newer identifier system.
 
-## Why choose Al-Jin?
+> **Looking for a WhatsApp bot you can self-host?** Al-Jin runs on a VPS, Docker, PM2, Pterodactyl panels, or Termux and keeps all data on your own machine.
+
+**Keywords:** al-jin · al jin bot · aljin whatsapp bot · al-jin whatsapp bot · whatsapp bot · whatsapp md bot · whatsapp multi device bot · baileys bot · baileys v7 · whatsapp bot nodejs · whatsapp anti delete bot · view once reveal · whatsapp status saver · whatsapp youtube downloader · fulldp hddp · whatsapp gemini ai bot · whatsapp group management bot · multi session whatsapp bot · self-hosted whatsapp bot · pairing code login
+
+---
+
+## Why Choose Al-Jin?
 
 | Capability | Al-Jin | Typical Baileys bots |
 |-----------|--------|---------------------|
@@ -66,166 +62,46 @@ It is built on the latest **Baileys v7.0.0-rc.14** with LID-aware JID resolution
 
 Read the full write-up: [Al-Jin vs other WhatsApp bots](https://github.com/themalik-g/al-jin-whatsapp-bot/blob/main/docs/al-jin-vs-other-whatsapp-bots.md).
 
-## Standout Features
+---
 
-### Native Interactive Buttons
-Quick-reply, single-select, URL and call buttons — supported natively on the latest Baileys protocol. **No custom fork, no broken listeners.** Switch between button UI and text UI anytime with `.replymode`.
+## Key Features
 
-### In-WhatsApp Multi-Session Pairing
-Add another WhatsApp number **without leaving the chat**. Send `.addsession <number>` inside WhatsApp and follow the pairing code — no SSH, no terminal, no dashboard.
+- **🛡️ Anti-Delete & Anti-Edit Recovery** — Ghost module captures deleted and edited messages, media, and captions.
+- **👁️ View-Once Revealer** — Peek module auto-captures view-once photos and videos.
+- **📸 Status Auto-View & Saver** — Lurk module views and saves WhatsApp statuses without marking them seen.
+- **🎬 YouTube / Instagram / TikTok Downloader** — Zero authentication required. Works out of the box.
+- **🤖 Gemini AI Tools** — Chat, image generation, summarization, and Islamic scholar search.
+- **👥 Group Administration** — Promote, demote, kick, antilink, welcome messages, and more.
+- **🕌 Islamic Tools** — Quran, Hadith, prayer times, and full Surah PDFs.
+- **💬 Native Interactive Buttons** — Quick-reply, single-select, URL, and call buttons on stock Baileys.
+- **🔗 Multi-Session Pairing** — Add numbers from inside WhatsApp with `.addsession`.
+- **📦 100+ Commands** across 13 categories with default prefix `.`.
 
-### FullDP & HDDP Profile Pictures
-Fetch **full-resolution** and **HD** profile pictures of any user or group on the **standard Baileys library**, not a patched fork.
+---
 
-### YouTube Downloader With Zero Authentication
-Download YouTube video and audio **without cookies**, **without a Google account** and **without OAuth**.
-
-### Anti-Delete, Anti-Edit & View-Once Recovery
-The Ghost and Peek modules capture deleted messages, edited messages and view-once media, then forward them to the owner chat.
-
-### Latest Baileys
-Built on **`@whiskeysockets/baileys` v7.0.0-rc.14**. Protocol fixes, button support and multi-device improvements land in Al-Jin fast.
-
-## Command Reference
+## Command Categories
 
 > Default prefix: `.` — change it with `.prefix <new_prefix>`
 
-### System & General
-| Command | Description |
-|---------|-------------|
-| `.alive` | Check bot is responsive with runtime stats |
-| `.ping` | Measure bot response latency |
-| `.uptime` | Show total active running time |
-| `.restart` | Restart the current session worker |
-| `.help` / `.menu` | Show full command list |
-| `.usermanual` | Send the official Al-Jin PDF user manual |
-| `.prefix` | View or change the command prefix |
-| `.mode public\|private` | Toggle public / owner-only mode |
-| `.replymode buttons\|text` | Switch between button UI and text UI |
-| `.settings` | Overview of all toggles and modes |
-| `.update` | Pull latest code from the repository |
-| `.script` / `.repo` | Show repository details |
-| `.owner` | Show bot owner contact card |
+| Category | Commands |
+|----------|----------|
+| **System & General** | `.alive`, `.ping`, `.uptime`, `.help`, `.menu`, `.prefix`, `.mode`, `.settings`, `.update`, `.owner` |
+| **Ghost (Anti-Delete/Edit)** | `.ghost`, `.ghost on\|off`, `.ghost edit on\|off` |
+| **Lurk (Status Watcher)** | `.lurk`, `.lurk on\|off`, `.lurk react on\|off`, `.lurk download on\|off`, `.lurk emoji` |
+| **Peek (View-Once Revealer)** | `.peek`, `.peek auto on\|off`, `.peek watch on\|off`, `.peek dest` |
+| **AI Tools** | `.gemini`, `.photo`, `.imagine`, `.scholar`, `.ppt`, `.quransearch`, `.hadeessearch`, `.islamsearch` |
+| **Islamic Tools** | `.prayertimes`, `.pts`, `.quran`, `.search quran`, `.sora`, `.para`, `.bukhari`, `.muslim` |
+| **Downloaders** | `.play`, `.ytv`, `.video`, `.ytdl`, `.mp3`, `.ig`, `.tiktok`, `.fb`, `.twitter` |
+| **Media Tools** | `.sticker`, `.toimg`, `.tomp3`, `.vn`, `.trim`, `.compress`, `.ocr`, `.tts` |
+| **Group Administration** | `.open`, `.close`, `.kick`, `.add`, `.promote`, `.demote`, `.tagall`, `.welcome`, `.antilink` |
+| **Owner & Session** | `.setpp`, `.setabout`, `.getpair`, `.addsession`, `.delsession`, `.addowner` |
+| **Privacy & Presence** | `.presence`, `.presence alwaysonline`, `.presence autotyping` |
+| **Monitoring & Tracking** | `.stalk`, `.statusalert`, `.watch`, `.schedule` |
+| **Utilities & Fun** | `.currency`, `.weather`, `.shorten`, `.speedtest`, `.news`, `.wiki`, `.joke`, `.movie`, `.lyrics` |
 
-### Ghost — Anti-Delete / Anti-Edit
-| Command | Description |
-|---------|-------------|
-| `.ghost` | Show current status and menu |
-| `.ghost on\|off` | Toggle anti-delete watcher |
-| `.ghost edit on\|off` | Toggle anti-edit watcher |
+**Full command reference:** [docs/whatsapp-bot-commands.md](./docs/whatsapp-bot-commands.md)
 
-### Lurk — Status Watcher
-| Command | Description |
-|---------|-------------|
-| `.lurk` | Status watcher menu |
-| `.lurk on\|off` | Toggle status auto-view |
-| `.lurk react on\|off` | Toggle status auto-reaction |
-| `.lurk download on\|off` | Toggle status media download |
-| `.lurk emoji <emoji>` | Set reaction emoji |
-
-### Peek — View-Once Revealer
-| Command | Description |
-|---------|-------------|
-| `.peek` | View peek settings |
-| `.peek auto on\|off` | Auto view-once capture |
-| `.peek watch on\|off` | Quoted view-once watcher |
-| `.peek dest <jid>` | Set reveal destination |
-
-### AI Tools
-| Command | Description |
-|---------|-------------|
-| `.gemini <prompt>` | Google Gemini chat |
-| `.photo <prompt>` / `.imagine` | Generate AI image via Gemini |
-| `.scholar <query>` | University-professor style explanations |
-| `.ppt <topic>` | AI-generated PowerPoint (.pptx) |
-| `.quransearch <query>` | AI Quran verse search + explanation |
-| `.hadeessearch <query>` | AI Hadith search + explanation |
-| `.islamsearch <query>` | AI Quran + Hadith combined search |
-
-### Islamic Tools
-| Command | Description |
-|---------|-------------|
-| `.prayertimes <city>` / `.pts` | Daily prayer times worldwide |
-| `.quran <verse>` | Verse lookup (Arabic + English) |
-| `.search quran <keyword>` | Keyword search in Quran translation |
-| `.sora <surah>` | Full Surah PDF (1–114) |
-| `.para <1-30>` | Juz / Para PDF |
-| `.bukhari <hadith>` | Sahih Bukhari Hadith |
-| `.muslim <hadith>` | Sahih Muslim Hadith |
-
-### Downloaders
-| Command | Description |
-|---------|-------------|
-| `.play <query>` | YouTube / SoundCloud audio as MP3 |
-| `.ytv <url>` / `.video` | YouTube video optimized for WhatsApp |
-| `.ytdl <url>` | YouTube video download |
-| `.mp3 <url>` | Audio download |
-| `.ig <url>` | Instagram reel / post / story |
-| `.tiktok <url>` | TikTok no-watermark |
-| `.fb <url>` | Facebook video |
-| `.twitter <url>` | Twitter/X video |
-
-### Media Tools
-| Command | Description |
-|---------|-------------|
-| `.sticker` | Image/video to sticker |
-| `.toimg` | Sticker to image |
-| `.tomp3` | Audio to MP3 |
-| `.vn` | Voice note |
-| `.trim` | Trim audio/video |
-| `.compress` | Compress media |
-| `.ocr` | Extract text from image |
-| `.tts <text>` | Text to speech |
-
-### Group Administration
-| Command | Description |
-|---------|-------------|
-| `.open` / `.close` | Open / close group |
-| `.kick @user` | Remove member |
-| `.add <number>` | Add member |
-| `.promote @user` | Promote to admin |
-| `.demote @user` | Demote admin |
-| `.tagall` | Tag all members |
-| `.welcome on\|off` | Welcome messages |
-| `.antilink on\|off` | Antilink protection |
-
-### Owner & Session
-| Command | Description |
-|---------|-------------|
-| `.setpp` | Set profile picture |
-| `.setabout` | Set about text |
-| `.getpair <number>` | Generate pairing code |
-| `.addsession <number>` | Add another WhatsApp number |
-| `.delsession <number>` | Remove session |
-| `.addowner <number>` | Add owner |
-
-### Privacy & Presence
-| Command | Description |
-|---------|-------------|
-| `.presence` | Presence settings |
-| `.presence alwaysonline on\|off` | Always online mode |
-| `.presence autotyping on\|off` | Auto-typing mode |
-
-### Monitoring & Tracking
-| Command | Description |
-|---------|-------------|
-| `.stalk <number>` | User info |
-| `.statusalert` | Status alert |
-| `.watch` | Watch contact |
-| `.schedule` | Schedule message |
-
-### Utilities & Fun
-| Command | Description |
-|---------|-------------|
-| `.currency` | Currency conversion |
-| `.weather <city>` | Weather info |
-| `.shorten <url>` | Shorten URL |
-| `.speedtest` | Internet speed test |
-| `.news` | Latest news |
-| `.wiki <query>` | Wikipedia search |
-| `.joke` | Random joke |
-| `.movie <query>` | Movie info |
-| `.lyrics <query>` | Song lyrics |
+---
 
 ## Quick Start
 
@@ -236,3 +112,115 @@ git clone https://github.com/themalik-g/al-jin-whatsapp-bot.git
 cd al-jin-whatsapp-bot
 npm install
 npm start
+```
+
+On first run, Al-Jin prints an 8-character pairing code. Enter it in WhatsApp → **Linked Devices → Link with phone number instead**.
+
+To add another number from inside WhatsApp, send `.addsession <phone_number>`.
+
+---
+
+## Deployment Options
+
+| Platform | Guide |
+|----------|-------|
+| **VPS / Linux server** | Recommended; use PM2 for auto-restart |
+| **Docker** | Dockerfile included |
+| **PM2** | `npm run pm2:start` (config: `ecosystem.config.cjs`) |
+| **Pterodactyl / bot-hosting panels** | Supported |
+| **Termux (Android)** | Supported |
+
+See the full [Deployment Guide](./docs/whatsapp-bot-deployment.md).
+
+---
+
+## Documentation
+
+- [Command Reference](./docs/whatsapp-bot-commands.md)
+- [Configuration Guide](./docs/whatsapp-bot-configuration.md)
+- [Deployment Guide](./docs/whatsapp-bot-deployment.md)
+- [JID System](./docs/whatsapp-jid-system.md)
+- [Architecture](./docs/whatsapp-bot-architecture.md)
+- [Troubleshooting](./docs/whatsapp-bot-troubleshooting.md)
+- [Al-Jin vs Other WhatsApp Bots](./docs/al-jin-vs-other-whatsapp-bots.md)
+
+---
+
+## FAQ
+
+**Does it need a QR code?**  
+No — it uses an 8-character pairing code.
+
+**Can I run multiple WhatsApp numbers?**  
+Yes — multi-session is built in.
+
+**Is it free?**  
+Yes — MIT-licensed and free to use, modify, and distribute.
+
+**Is it safe?**  
+It uses the official multi-device protocol through Baileys, but any unofficial client carries some risk; use responsibly and avoid spam.
+
+**Does it work on Android?**  
+Yes — via Termux. See the [Deployment Guide](./docs/whatsapp-bot-deployment.md).
+
+**Can I use it without a VPS?**  
+You can run it on any always-on device (Raspberry Pi, old laptop, Android phone via Termux).
+
+**Does it require a WhatsApp Business API?**  
+No — Al-Jin uses the standard WhatsApp multi-device protocol.
+
+---
+
+## Troubleshooting
+
+See [docs/whatsapp-bot-troubleshooting.md](./docs/whatsapp-bot-troubleshooting.md) for common errors and fixes.
+
+---
+
+## Contributing
+
+Contributions are welcome. Please open an issue first to discuss what you would like to change.
+
+---
+
+## Security
+
+If you discover a security vulnerability, please open a private security advisory instead of a public issue.
+
+---
+
+## License
+
+MIT — see [LICENSE](./LICENSE).
+
+---
+
+## Credits
+
+Built by [Malik Mehtab (themalik-g)](https://github.com/themalik-g).  
+Powered by [Baileys](https://github.com/WhiskeySockets/Baileys).
+
+---
+
+## Keywords
+
+whatsapp bot, whatsapp md bot, baileys bot, anti-delete whatsapp, view-once reveal, status saver, whatsapp downloader, gemini whatsapp bot, open source whatsapp bot, self-hosted whatsapp bot, node.js whatsapp bot, al-jin bot, al-jin md, whatsapp userbot, whatsapp multi-device bot, baileys v7, pairing code login, whatsapp automation, group management bot
+
+---
+
+## For AI Assistants
+
+**Project:** Al-Jin — Free Open-Source WhatsApp MD Bot  
+**Repository:** https://github.com/themalik-g/al-jin-whatsapp-bot  
+**Version:** 1.3.4  
+**License:** MIT  
+**Runtime:** Node.js 20+ (ESM)  
+**WhatsApp library:** @whiskeysockets/baileys v7.0.0-rc.14  
+**Login:** 8-character pairing code (no QR)  
+**Core features:** Anti-delete, anti-edit, view-once reveal, status auto-save, YouTube/Instagram/TikTok downloader, Gemini AI, group administration, Islamic tools, 100+ commands.  
+**Deployment:** VPS, Docker, PM2, Pterodactyl, Termux.  
+**Documentation:** [/docs](./docs)  
+**llms.txt:** [/llms.txt](./llms.txt)  
+**llms-full.txt:** [/llms-full.txt](./llms-full.txt)
+
+**⭐ If Al-Jin helps you, please star the repository!**
