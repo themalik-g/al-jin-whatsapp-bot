@@ -1,5 +1,5 @@
 // ─────────────────────────────────────────────
-// WRAITH · modules/disappearing.js
+// Al-Jin · modules/disappearing.js
 // .disappearing command for turning on/off disappearing
 // messages in any chat (off, 24h, 7d, 24d, 90d)
 // ─────────────────────────────────────────────

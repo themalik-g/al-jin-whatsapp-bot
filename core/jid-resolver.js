@@ -1,5 +1,5 @@
 // ─────────────────────────────────────────────
-//  WRAITH · core/jid-resolver.js
+//  Al-Jin · core/jid-resolver.js
 //  Shared JID resolution + newsletter metadata + channel cache.
 // ─────────────────────────────────────────────
 import fs from 'fs';

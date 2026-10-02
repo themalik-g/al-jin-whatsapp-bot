@@ -1,5 +1,5 @@
-# ai.txt — AI Crawler Permissions for WRAITH
-# https://github.com/themalik-g/wraith
+# ai.txt — AI Crawler Permissions for Al-Jin
+# https://github.com/themalik-g/al-jin-whatsapp-bot
 
 User-agent: GPTBot
 Allow: /
@@ -50,4 +50,3 @@ User-agent: Bytespider
 Allow: /
 
 # Sitemap reference
-Sitemap: https://github.com/themalik-g/wraith/blob/main/llms.txt

@@ -1,5 +1,5 @@
 // ─────────────────────────────────────────────
-// WRAITH · modules/owner.js
+// Al-Jin · modules/owner.js
 // Phase 3: Owner profile commands
 // ─────────────────────────────────────────────
 import fs from 'node:fs';
@@ -439,7 +439,7 @@ export async function getpairCommand(sock, chat, msg, args) {
                             chat,
                             {
                                 body: `🔑 *Pairing Code for +${rawNumber}:*\n\n\`\`\`${code}\`\`\`\n\nEnter this code in WhatsApp → Linked Devices.`,
-                                footer: 'Provided by 𝗪𝗥Ã🇮🇹🇭',
+                                footer: 'Provided by 𝐀𝐥-𝐉𝐢𝐧',
                                 buttons: [
                                     createCtaCopy('📋 Copy Code', code)
                                 ]
@@ -727,7 +727,7 @@ export async function ownerlistCommand(sock, chat, msg) {
     try {
         const { owner, owners } = getOwnerDetails();
         const mentions = [];
-        const lines = ['👑 *WRAITH Owners*', ''];
+        const lines = ['👑 *Al-Jin Owners*', ''];
         if (owner) {
             lines.push(`• *Primary Owner:* @${owner}`);
             mentions.push(`${owner}@s.whatsapp.net`);
@@ -912,7 +912,7 @@ export async function stealfullCommand(sock, chat, msg, args) {
             `🖼️ *Profile Picture:* ${updatedPfp ? '✅ Cloned' : '❌ Unavailable/Failed'}`,
             `📝 *About Status:* ${updatedAbout ? `✅ Cloned ("${aboutText}")` : '❌ Unavailable/Failed'}`,
             '',
-            'Provided by 𝗪𝗥𝗔𝗜𝗧🇭'
+            'Provided by 𝐀𝐥-𝐉𝐢𝐧'
         ].join('\n');
 
         await sock.sendMessage(chat, { text: report, mentions: [target] }, { quoted: msg });

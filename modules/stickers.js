@@ -1,5 +1,5 @@
 // ─────────────────────────────────────────────
-// WRAITH · modules/stickers.js
+// Al-Jin · modules/stickers.js
 // .sticker (.s) — convert image / video / gif / quoted media to WhatsApp sticker (.webp)
 // .toimg (.tovid) — convert quoted WebP sticker to image (JPG) or video (MP4)
 // ─────────────────────────────────────────────
@@ -186,9 +186,9 @@ export async function toimgCommand(sock, chat, msg, args = []) {
 
     const outputBuffer = fs.readFileSync(outputPath);
     if (isAnimated) {
-      await sock.sendMessage(chat, { video: outputBuffer, caption: 'Provided by 𝗪𝗥𝗔𝗜Т🇭' }, { quoted: msg });
+      await sock.sendMessage(chat, { video: outputBuffer, caption: 'Provided by 𝐀𝐥-𝐉𝐢𝐧' }, { quoted: msg });
     } else {
-      await sock.sendMessage(chat, { image: outputBuffer, caption: 'Provided by 𝗪𝗥𝗔𝗜Т🇭' }, { quoted: msg });
+      await sock.sendMessage(chat, { image: outputBuffer, caption: 'Provided by 𝐀𝐥-𝐉𝐢𝐧' }, { quoted: msg });
     }
   } catch (e) {
     return reply(`⚠️ Conversion failed: ${e.message}`).catch(() => {});

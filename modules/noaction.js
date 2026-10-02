@@ -1,5 +1,5 @@
 // ─────────────────────────────────────────────
-// WRAITH · modules/noaction.js
+// Al-Jin · modules/noaction.js
 // .noaction — keeps chosen numbers safe inside groups.
 //   demoted  → promoted again straight away
 //   kicked   → added back and promoted (invite link sent if WhatsApp refuses the add,

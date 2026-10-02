@@ -1,5 +1,5 @@
 // ─────────────────────────────────────────────
-//  WRAITH · modules/ping.js
+//  Al-Jin · modules/ping.js
 //  Latency probe + container-aware system vitals.
 //
 //  Reads cgroup v1/v2 directly so CPU% and memory
@@ -286,7 +286,7 @@ export async function pingCommand(sock, chat, msg) {
 //  .alive
 // ─────────────────────────────────────────────
 export async function aliveCommand(sock, chat, msg) {
-    return sendWithCta(sock, chat, '𝗪𝗥𝗔𝗜𝗧𝗛 𝗜𝗦 𝗔𝗟𝗜𝗩𝗘 ✅', { quoted: msg });
+    return sendWithCta(sock, chat, '𝐀𝐥-𝐉𝐢𝐧 𝗜𝗦 𝗔𝗟𝗜𝗩𝗘 ✅', { quoted: msg });
 }
 
 // ─────────────────────────────────────────────
@@ -304,7 +304,7 @@ export async function restartCommand(sock, chat, msg) {
     if (!msg.key.fromMe && !isOwner(from)) {
         return sock.sendMessage(chat, { text: '⛔ Owner only.' }, { quoted: msg });
     }
-    await sock.sendMessage(chat, { text: '🔄 *Restarting WRAITH server…*' }, { quoted: msg });
+    await sock.sendMessage(chat, { text: '🔄 *Restarting Al-Jin server…*' }, { quoted: msg });
     setTimeout(() => {
         process.exit(0);
     }, 1000);

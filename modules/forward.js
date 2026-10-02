@@ -1,5 +1,5 @@
 // ─────────────────────────────────────────────
-// WRAITH · modules/forward.js
+// Al-Jin · modules/forward.js
 // .forward <custom text / JID> — Forwards text, quoted media, or quoted message to specified recipient JID/LID/phone
 // ─────────────────────────────────────────────
 import fs from 'fs';

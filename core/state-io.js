@@ -1,5 +1,5 @@
 // ─────────────────────────────────────────────
-//  WRAITH · core/state-io.js
+//  Al-Jin · core/state-io.js
 //  Crash-safe JSON state files (tmp + rename).
 //  A crash mid-write can no longer corrupt state.
 // ─────────────────────────────────────────────

@@ -1,18 +1,18 @@
-// config.js — WRAITH per-session config
+// config.js — Al-Jin per-session config
 import fs from 'fs';
 import { statePath, inState } from './core/paths.js';
 
 const BASE = {
   owner: "",
-  codename: "𝗪𝗥𝗔𝗜𝗧🇭",
-  botName: "𝗪𝗥𝗔𝗜𝗧🇭",
+  codename: "𝐀𝐥-𝐉𝐢𝐧",
+  botName: "𝐀𝐥-𝐉𝐢𝐧",
   version: "1.3.3",
   timezone: "Asia/Karachi",
   memoryTTL: 24 * 60 * 60 * 1000,
   vaultDir: "vault",
   vaultMaxMB: 200,
   reconnectDelay: 3000,
-  repoUrl: "https://github.com/themalik-g/wraith",
+  repoUrl: "https://github.com/themalik-g/al-jin-whatsapp-bot",
   stalk: { maxEventsPerJid: 500 },
   weather: { stormThreshold: 50 },
   media: { maxImages: 10, maxCouplePairs: 5, maxDownloadMB: 100 },

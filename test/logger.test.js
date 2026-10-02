@@ -27,7 +27,7 @@ async function runTests() {
     direction: 'INCOMING',
     chatJid: '1234567890@s.whatsapp.net',
     senderJid: '9876543210@s.whatsapp.net',
-    messageText: 'Hello WRAITH bot!',
+    messageText: 'Hello Al-Jin bot!',
     msgId: 'TEST_MSG_1'
   });
   flushSync();
@@ -36,7 +36,7 @@ async function runTests() {
   let content = fs.readFileSync(expectedLogFile, 'utf-8');
   assert.ok(content.includes('[INCOMING]'), 'Should contain [INCOMING]');
   assert.ok(content.includes('+9876543210 -> +1234567890'), 'Should contain formatted phone numbers');
-  assert.ok(content.includes('Hello WRAITH bot!'), 'Should contain message text');
+  assert.ok(content.includes('Hello Al-Jin bot!'), 'Should contain message text');
 
   // Test 2: Log duplicate message ID (should be skipped)
   await logMessageHistory({
@@ -44,7 +44,7 @@ async function runTests() {
     direction: 'INCOMING',
     chatJid: '1234567890@s.whatsapp.net',
     senderJid: '9876543210@s.whatsapp.net',
-    messageText: 'Hello WRAITH bot!',
+    messageText: 'Hello Al-Jin bot!',
     msgId: 'TEST_MSG_1'
   });
   flushSync();

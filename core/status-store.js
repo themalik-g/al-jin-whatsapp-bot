@@ -1,5 +1,5 @@
 // ─────────────────────────────────────────────
-// WRAITH · core/status-store.js  (v2)
+// Al-Jin · core/status-store.js  (v2)
 // Captures and indexes incoming WhatsApp status stories (status@broadcast)
 //
 // v2 fixes

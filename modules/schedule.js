@@ -1,5 +1,5 @@
 // ─────────────────────────────────────────────
-//  WRAITH · modules/schedule.js
+//  Al-Jin · modules/schedule.js
 //  Scan-based date/time parser — works with LIDs.
 //  · retries + owner notice on failure
 //  · .schedule list / .schedule cancel

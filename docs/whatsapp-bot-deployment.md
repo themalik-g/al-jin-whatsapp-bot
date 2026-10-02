@@ -19,8 +19,8 @@ sudo npm install -g pm2
 ### 3. Clone Repository & Install Dependencies
 
 ```bash
-git clone https://github.com/themalik-g/wraith.git
-cd wraith
+git clone https://github.com/themalik-g/al-jin-whatsapp-bot.git
+cd al-jin-whatsapp-bot
 npm install
 ```
 
@@ -37,7 +37,7 @@ pm2 startup
 ### 5. Monitor Logs
 
 ```bash
-pm2 logs wraith
+pm2 logs al-jin
 pm2 monit
 ```
 
@@ -63,14 +63,14 @@ CMD ["node", "start.js"]
 **Build & Run:**
 
 ```bash
-docker build -t wraith .
+docker build -t al-jin .
 docker run -d \
-  --name wraith \
+  --name al-jin \
   -v $(pwd)/session:/app/session \
   -v $(pwd)/state:/app/state \
   -v $(pwd)/vault:/app/vault \
   --restart unless-stopped \
-  wraith
+  al-jin
 ```
 
 ---
@@ -81,7 +81,7 @@ First run will request your phone number in terminal and output a pairing code:
 
 ```bash
 ssh -t user@your-vps-ip
-cd wraith
+cd al-jin-whatsapp-bot
 npm start
 ```
 
@@ -92,9 +92,9 @@ Enter your phone number when prompted, then open WhatsApp on your phone:
 
 ## Pterodactyl & Container Hosting Notes
 
-When running WRAITH on containerized game/bot panels like Pterodactyl, the container may enforce strict thread or process limits (`pids.max` or `NPROC`).
+When running Al-Jin on containerized game/bot panels like Pterodactyl, the container may enforce strict thread or process limits (`pids.max` or `NPROC`).
 
-To prevent Node `thread_create` assertion crashes when running multiple sessions simultaneously, WRAITH configures lightweight background thread defaults for spawned session processes:
+To prevent Node `thread_create` assertion crashes when running multiple sessions simultaneously, Al-Jin configures lightweight background thread defaults for spawned session processes:
 - `UV_THREADPOOL_SIZE=2`
 - `--v8-pool-size=2`
 
@@ -104,6 +104,8 @@ UV_THREADPOOL_SIZE=2
 WRAITH_V8_POOL_SIZE=2
 ```
 
+Every WRAITH_* variable can also be set as AL_JIN_* (for example AL_JIN_DEBUG). The old WRAITH_* names still work.
+
 ---
 
 ## Backup & Restoration
@@ -111,7 +113,7 @@ WRAITH_V8_POOL_SIZE=2
 To create a backup:
 
 ```bash
-tar czf wraith-backup-$(date +%F).tar.gz \
+tar czf al-jin-backup-$(date +%F).tar.gz \
   session/ \
   state/ \
   config.js \

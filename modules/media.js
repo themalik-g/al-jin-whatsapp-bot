@@ -1,5 +1,5 @@
 // ─────────────────────────────────────────────
-// WRAITH · modules/media.js
+// Al-Jin · modules/media.js
 // Books + image search + movie + song info + lyrics + couplepp
 // ─────────────────────────────────────────────
 import fs from 'node:fs';
@@ -158,7 +158,7 @@ export async function bookCommand(sock, chat, msg, args) {
         chat,
         {
           body: lines.join('\n'),
-          footer: `Source: ${r.source} · Provided by 𝗪𝗥𝗔𝗜𝗧🇭`,
+          footer: `Source: ${r.source} · Provided by 𝐀𝐥-𝐉𝐢𝐧`,
           buttons,
         },
         { quoted: msg }
@@ -374,12 +374,12 @@ export async function coupleppCommand(sock, chat, msg, args) {
       try {
         await sock.sendMessage(chat, {
           image: { url: p.male },
-          caption: `💞 *Couple PP (Pair ${i + 1} - #${p.num})* · Male\n\nProvided by 𝗪𝗥𝗔𝗜𝗧🇭`,
+          caption: `💞 *Couple PP (Pair ${i + 1} - #${p.num})* · Male\n\nProvided by 𝐀𝐥-𝐉𝐢𝐧`,
         }, i === 0 ? { quoted: msg } : undefined);
 
         await sock.sendMessage(chat, {
           image: { url: p.female },
-          caption: `💞 *Couple PP (Pair ${i + 1} - #${p.num})* · Female\n\nProvided by 𝗪𝗥𝗔𝗜𝗧🇭`,
+          caption: `💞 *Couple PP (Pair ${i + 1} - #${p.num})* · Female\n\nProvided by 𝐀𝐥-𝐉𝐢𝐧`,
         });
         sent++;
       } catch (err) {
@@ -471,7 +471,7 @@ export async function memeCommand(sock, chat, msg, args) {
 
     await sock.sendMessage(chat, {
       image: memeBuf,
-      caption: `🎭 *Custom Meme*\n\nProvided by 𝗪𝗥𝗔𝗜𝗧🇭`
+      caption: `🎭 *Custom Meme*\n\nProvided by 𝐀𝐥-𝐉𝐢𝐧`
     }, { quoted: msg });
   } catch (e) {
     await sock.sendMessage(chat, { text: `⚠️ meme failed: ${e.message}` }, { quoted: msg }).catch(() => {});

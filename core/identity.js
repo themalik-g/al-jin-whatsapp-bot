@@ -1,5 +1,5 @@
 // ─────────────────────────────────────────────
-//  WRAITH · core/identity.js
+//  Al-Jin · core/identity.js
 //  Owner identification & multi-owner helpers.
 // ─────────────────────────────────────────────
 import fs from 'fs';

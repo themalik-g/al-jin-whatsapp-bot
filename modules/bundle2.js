@@ -1,5 +1,5 @@
 // ─────────────────────────────────────────────
-// WRAITH · modules/bundle2.js
+// Al-Jin · modules/bundle2.js
 // One entry point for the new commands, so router.js needs a single lazy() line.
 // Each command file is only loaded when one of its commands is first used.
 // ─────────────────────────────────────────────

@@ -1,5 +1,5 @@
 // ─────────────────────────────────────────────
-//  WRAITH · modules/admin.js
+//  Al-Jin · modules/admin.js
 //  Group admin tools — LID-aware for Baileys v7.
 // ─────────────────────────────────────────────
 import fs from 'fs';

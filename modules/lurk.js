@@ -81,7 +81,7 @@ export async function lurkCommand(sock, chat, msg, args) {
                 `auto-react · ${s.react ? 'ON' : 'OFF'}\n` +
                 `download   · ${s.download ? 'ON' : 'OFF'}\n` +
                 `emoji      · ${s.emoji}\n`,
-            footer: 'Provided by 𝗪𝗥𝗔𝗜𝗧🇭 · Select an option below',
+            footer: 'Provided by 𝐀𝐥-𝐉𝐢𝐧 · Select an option below',
             buttons: [
                 createQuickReply(s.on ? 'Auto-View OFF' : 'Auto-View ON', `${p}lurk ${s.on ? 'off' : 'on'}`),
                 createQuickReply(s.react ? 'Auto-React OFF' : 'Auto-React ON', `${p}lurk react ${s.react ? 'off' : 'on'}`),
@@ -109,7 +109,7 @@ export async function lurkCommand(sock, chat, msg, args) {
                       `auto-react · ${s.react ? 'ON' : 'OFF'}\n` +
                       `download   · ${s.download ? 'ON' : 'OFF'}\n` +
                       `emoji      · ${s.emoji}\n`,
-                footer: 'Provided by 𝗪𝗥𝗔𝗜𝗧🇭 · Select an option below',
+                footer: 'Provided by 𝐀𝐥-𝐉𝐢𝐧 · Select an option below',
                 buttons: [
                     createQuickReply(s.on ? 'Auto-View OFF' : 'Auto-View ON', `${p}lurk ${s.on ? 'off' : 'on'}`),
                     createQuickReply(s.react ? 'Auto-React OFF' : 'Auto-React ON', `${p}lurk react ${s.react ? 'off' : 'on'}`),
@@ -125,7 +125,7 @@ export async function lurkCommand(sock, chat, msg, args) {
                   `auto-react · ${s.react ? 'ON' : 'OFF'}\n` +
                   `download   · ${s.download ? 'ON' : 'OFF'}\n` +
                   `emoji      · ${s.emoji}\n`,
-            footer: 'Provided by 𝗪𝗥𝗔𝗜𝗧🇭 · Select an option below',
+            footer: 'Provided by 𝐀𝐥-𝐉𝐢𝐧 · Select an option below',
             buttons: [
                 createQuickReply(s.on ? 'Auto-View OFF' : 'Auto-View ON', `${p}lurk ${s.on ? 'off' : 'on'}`),
                 createQuickReply(s.react ? 'Auto-React OFF' : 'Auto-React ON', `${p}lurk react ${s.react ? 'off' : 'on'}`),
@@ -146,7 +146,7 @@ export async function lurkCommand(sock, chat, msg, args) {
                       `auto-react · ${s.react ? 'ON' : 'OFF'}\n` +
                       `download   · ${s.download ? 'ON' : 'OFF'}\n` +
                       `emoji      · ${s.emoji}\n`,
-                footer: 'Provided by 𝗪𝗥𝗔𝗜𝗧🇭 · Select an option below',
+                footer: 'Provided by 𝐀𝐥-𝐉𝐢𝐧 · Select an option below',
                 buttons: [
                     createQuickReply(s.on ? 'Auto-View OFF' : 'Auto-View ON', `${p}lurk ${s.on ? 'off' : 'on'}`),
                     createQuickReply(s.react ? 'Auto-React OFF' : 'Auto-React ON', `${p}lurk react ${s.react ? 'off' : 'on'}`),
@@ -162,7 +162,7 @@ export async function lurkCommand(sock, chat, msg, args) {
                   `auto-react · ${s.react ? 'ON' : 'OFF'}\n` +
                   `download   · ${s.download ? 'ON' : 'OFF'}\n` +
                   `emoji      · ${s.emoji}\n`,
-            footer: 'Provided by 𝗪𝗥𝗔𝗜𝗧🇭 · Select an option below',
+            footer: 'Provided by 𝐀𝐥-𝐉𝐢𝐧 · Select an option below',
             buttons: [
                 createQuickReply(s.on ? 'Auto-View OFF' : 'Auto-View ON', `${p}lurk ${s.on ? 'off' : 'on'}`),
                 createQuickReply(s.react ? 'Auto-React OFF' : 'Auto-React ON', `${p}lurk react ${s.react ? 'off' : 'on'}`),
@@ -183,7 +183,7 @@ export async function lurkCommand(sock, chat, msg, args) {
                       `auto-react · ${s.react ? 'ON' : 'OFF'}\n` +
                       `download   · ${s.download ? 'ON' : 'OFF'}\n` +
                       `emoji      · ${s.emoji}\n`,
-                footer: 'Provided by 𝗪𝗥𝗔𝗜𝗧🇭 · Select an option below',
+                footer: 'Provided by 𝐀𝐥-𝐉𝐢𝐧 · Select an option below',
                 buttons: [
                     createQuickReply(s.on ? 'Auto-View OFF' : 'Auto-View ON', `${p}lurk ${s.on ? 'off' : 'on'}`),
                     createQuickReply(s.react ? 'Auto-React OFF' : 'Auto-React ON', `${p}lurk react ${s.react ? 'off' : 'on'}`),
@@ -199,7 +199,7 @@ export async function lurkCommand(sock, chat, msg, args) {
                   `auto-react · ${s.react ? 'ON' : 'OFF'}\n` +
                   `download   · ${s.download ? 'ON' : 'OFF'}\n` +
                   `emoji      · ${s.emoji}\n`,
-            footer: 'Provided by 𝗪𝗥𝗔𝗜𝗧🇭 · Select an option below',
+            footer: 'Provided by 𝐀𝐥-𝐉𝐢𝐧 · Select an option below',
             buttons: [
                 createQuickReply(s.on ? 'Auto-View OFF' : 'Auto-View ON', `${p}lurk ${s.on ? 'off' : 'on'}`),
                 createQuickReply(s.react ? 'Auto-React OFF' : 'Auto-React ON', `${p}lurk react ${s.react ? 'off' : 'on'}`),

@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // ─────────────────────────────────────────────
-// WRAITH · bootstrap launcher (standalone, zero-dep)
+// Al-Jin · bootstrap launcher (standalone, zero-dep)
 // ─────────────────────────────────────────────
 
 import { spawn, spawnSync } from 'node:child_process';
@@ -37,11 +37,19 @@ function loadEnvFile(file) {
       if (!(key in process.env)) process.env[key] = val;
     }
   } catch (e) {
-    console.warn('[wraith] .env load skipped:', e.message);
+    console.warn('[al-jin] .env load skipped:', e.message);
   }
 }
 
 loadEnvFile(path.join(__dirname, '.env'));
+
+// Al-Jin: AL_JIN_* variables are aliases for the legacy WRAITH_* names.
+for (const k of Object.keys(process.env)) {
+  if (k.startsWith('AL_JIN_')) {
+    const legacy = 'WRAITH_' + k.slice(7);
+    if (process.env[legacy] === undefined) process.env[legacy] = process.env[k];
+  }
+}
 
 // ─────────────────────────────────────────────
 // 2. Container-safe default
@@ -53,7 +61,7 @@ if (!process.env.UV_THREADPOOL_SIZE) {
 // ─────────────────────────────────────────────
 // 3. Constants
 // ─────────────────────────────────────────────
-const SOURCE = 'https://github.com/themalik-g/wraith.git';
+const SOURCE = 'https://github.com/themalik-g/al-jin-whatsapp-bot.git';
 const BRANCH = process.env.WRAITH_BRANCH || 'main';
 const HARDCODED_BOT_NUMBER = '';
 const CLONE_TIMEOUT = 180_000;
@@ -82,7 +90,7 @@ const say = (...p) => console.log(clock(), violet('❯'), ...p);
 const veil = () => {
   console.log();
   console.log(violet(' · · · · · · · · · · ·'));
-  console.log(violet(' w r a i t h'));
+  console.log(violet(' a l - j i n'));
   console.log(violet(' · · · · · · · · · · ·'));
   console.log();
 };
@@ -128,7 +136,7 @@ function repoRoot() {
 
   const dir = path.join(__dirname, 'wraith');
   if (!fs.existsSync(path.join(dir, 'start.js'))) {
-    say(yellow('fetching wraith from origin…'));
+    say(yellow('fetching al-jin from origin…'));
     const res = spawnSync(
       'git',
       ['clone', '--depth', '1', '-b', BRANCH, SOURCE, dir],
@@ -556,7 +564,7 @@ async function linkOne(root, label, presetNumber = null) {
 async function wizard(root) {
   console.log();
   console.log(violet(' ╭───────────────────────────────────────╮'));
-  console.log(violet(' │') + ' WRAITH · pairing wizard ' + violet('│'));
+  console.log(violet(' │') + ' Al-Jin · pairing wizard ' + violet('│'));
   console.log(violet(' ╰───────────────────────────────────────╯'));
 
   const firstLabel = ADD_MODE ? 'new number' : 'first number';

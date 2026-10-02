@@ -1,5 +1,5 @@
 // ─────────────────────────────────────────────
-// WRAITH · modules/fun.js
+// Al-Jin · modules/fun.js
 //   .fancy <text>   fancy Unicode fonts        .dice [2d6+1]   roll dice        .coin [n]   flip coins
 // No dependencies, no network, nothing kept in memory.
 // ─────────────────────────────────────────────

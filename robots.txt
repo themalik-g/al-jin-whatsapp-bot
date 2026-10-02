@@ -1,4 +1,4 @@
-# robots.txt for WRAITH
+# robots.txt for Al-Jin
 User-agent: *
 Allow: /
 
@@ -15,4 +15,3 @@ Allow: /
 User-agent: Google-Extended
 Allow: /
 
-Sitemap: https://github.com/themalik-g/wraith/blob/main/llms.txt

@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // ─────────────────────────────────────────────
-// WRAITH · per-session bootstrap worker (ESM)
+// Al-Jin · per-session bootstrap worker (ESM)
 // node start.js --session <id> [--number <digits>]
 // Code loads from repo root; all session data lives in WRAITH_DATA_DIR (instances/<id>)
 // ─────────────────────────────────────────────
@@ -9,7 +9,15 @@ try {
   await import('dotenv/config');
 } catch (err) {
   if (process.env.WRAITH_DEBUG) {
-    console.warn('[wraith] dotenv not loaded:', err?.code || err?.message || err);
+    console.warn('[al-jin] dotenv not loaded:', err?.code || err?.message || err);
+  }
+}
+
+// Al-Jin: AL_JIN_* variables are aliases for the legacy WRAITH_* names.
+for (const k of Object.keys(process.env)) {
+  if (k.startsWith('AL_JIN_')) {
+    const legacy = 'WRAITH_' + k.slice(7);
+    if (process.env[legacy] === undefined) process.env[legacy] = process.env[k];
   }
 }
 
@@ -222,20 +230,20 @@ async function handleStartupTasks(sock) {
     const selfJid = sock.user?.id;
     if (selfJid) {
       await sock.sendMessage(selfJid, {
-        text: ' 𝕎ℝⒶⒾⓉℍ connected ✅\nFor help message owner '
+        text: ' 𝐀𝐥-𝐉𝐢𝐧 connected ✅\nFor help message owner '
       });
       const ownerNumber = '923257853673';
       const vcard = [
         'BEGIN:VCARD',
         'VERSION:3.0',
-        'FN:WRAITH OWNER',
+        'FN:Al-Jin OWNER',
         `TEL;type=CELL;type=VOICE;waid=${ownerNumber}:+${ownerNumber}`,
-        'NOTE:WRAITH OWNER',
+        'NOTE:Al-Jin OWNER',
         'END:VCARD'
       ].join('\n');
       await sock.sendMessage(selfJid, {
         contacts: {
-          displayName: 'WRAITH OWNER',
+          displayName: 'Al-Jin OWNER',
           contacts: [{ vcard }]
         }
       });

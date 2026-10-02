@@ -1,5 +1,5 @@
 // ─────────────────────────────────────────────
-// WRAITH · modules/help.js
+// Al-Jin · modules/help.js
 // Clean single-message plain text list menu with box layout
 // ─────────────────────────────────────────────
 import { isOwner } from '../core/identity.js';
@@ -463,7 +463,7 @@ function renderHeaderBox(prefix, isOwnerUser) {
   const ownerText = isOwnerUser ? toSmallCaps('COMMANDS ARE OWNER-ONLY') : toSmallCaps('COMMANDS ARE PUBLIC');
   const guideCmd = applyPrefix('.ᴄᴏᴍᴍᴀɴᴅ ꜰᴏʀ ɢᴜɪᴅᴇ', prefix);
   return [
-    '      【 🤖 𝗪𝗥𝗔𝗜𝗧🇭 🤖 】',
+    '      【 🤖 𝐀𝐥-𝐉𝐢𝐧 🤖 】',
     '┌──────────────────┈⚝',
     `│ ${ownerText}`,
     `│ ${toSmallCaps('PREFIX')} · ${prefix}`,

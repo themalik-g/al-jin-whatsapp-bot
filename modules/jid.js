@@ -1,5 +1,5 @@
 // ─────────────────────────────────────────────
-//  WRAITH · modules/jid.js
+//  Al-Jin · modules/jid.js
 //  .getjid — resolve JIDs, list channels, get current chat JID.
 // ─────────────────────────────────────────────
 import { isOwner } from '../core/identity.js';
@@ -46,7 +46,7 @@ function formatResult(res, inputLabel) {
         if (res.subscribers) lines.push(`👥 *Subscribers:* ${res.subscribers}`);
     }
     lines.push('');
-    lines.push('Provided by 𝗪𝗥𝗔𝗜𝗧🇭');
+    lines.push('Provided by 𝐀𝐥-𝐉𝐢𝐧');
     return lines.join('\n');
 }
 
@@ -60,7 +60,7 @@ function formatChannels(channels, note) {
     }
     if (note) lines.push(`_${note}_`);
     lines.push('');
-    lines.push('Provided by 𝗪𝗥𝗔𝗜𝗧🇭');
+    lines.push('Provided by 𝐀𝐥-𝐉𝐢𝐧');
     return lines.join('\n');
 }
 
@@ -76,7 +76,7 @@ function formatGroupMembers(members, subject) {
         if (m.lid) lines.push(`  LID: *${m.lid}*`);
     }
     lines.push('');
-    lines.push('Provided by 𝗪𝗥𝗔𝗜𝗧🇭');
+    lines.push('Provided by 𝐀𝐥-𝐉𝐢𝐧');
     return lines.join('\n');
 }
 

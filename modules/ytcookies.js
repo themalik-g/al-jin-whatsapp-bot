@@ -1,5 +1,5 @@
 // ─────────────────────────────────────────────
-// WRAITH · modules/ytcookies.js
+// Al-Jin · modules/ytcookies.js
 // .ytcookies — YouTube Cookies setup and management
 // ─────────────────────────────────────────────
 import fs from 'node:fs';
@@ -113,7 +113,7 @@ YouTube frequently blocks bot downloads or demands sign-in. Setting YouTube cook
 • \`${p}ytcookies status\` — Check active cookies
 • \`${p}ytcookies clear\` — Clear stored cookies
 
-Provided by 𝗪𝗥𝗔𝗜𝗧🇭`;
+Provided by 𝐀𝐥-𝐉𝐢𝐧`;
 
   return sendWithCta(sock, chat, guideText, { quoted: msg });
 }

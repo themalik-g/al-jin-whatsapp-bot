@@ -1,5 +1,5 @@
 // ─────────────────────────────────────────────
-// WRAITH · modules/usermanual.js
+// Al-Jin · modules/usermanual.js
 // Dynamic PDF downloader for official bot user manual
 // ─────────────────────────────────────────────
 import { fetchBuffer } from '../lib/net.js';
@@ -8,7 +8,7 @@ const MANUAL_URL = 'https://raw.githubusercontent.com/themalik-g/wraith_manual/m
 
 export async function usermanualCommand(sock, chat, msg) {
   const statusMsg = await sock.sendMessage(chat, {
-    text: '📄 *Fetching WRAITH User Manual PDF…*'
+    text: '📄 *Fetching Al-Jin Manual PDF…*'
   }, { quoted: msg });
 
   try {
@@ -23,8 +23,8 @@ export async function usermanualCommand(sock, chat, msg) {
       {
         document: pdfBuffer,
         mimetype: 'application/pdf',
-        fileName: 'wraith_manual.pdf',
-        caption: '📄 *WRAITH Bot — Official User Manual*\n\nDownloaded from: `https://github.com/themalik-g/wraith_manual.git`\n\nProvided by 𝗪𝗥𝗔𝗜𝗧🇭',
+        fileName: 'Al-Jin_Manual.pdf',
+        caption: '📄 *Al-Jin Bot — Official User Manual*\n\nDownloaded from: `https://github.com/themalik-g/wraith_manual.git`\n\nProvided by 𝐀𝐥-𝐉𝐢𝐧',
       },
       { quoted: msg }
     );

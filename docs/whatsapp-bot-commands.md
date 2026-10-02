@@ -214,7 +214,7 @@ URLs containing picture posts or carousels (e.g. Instagram `/p/`, TikTok `/photo
 
 | Command | Description |
 |---|---|
-| `.usermanual` | Generate and receive PDF user manual document (`WRAITH_User_Manual.pdf`) |
+| `.usermanual` | Generate and receive PDF user manual document (`Al-Jin_Manual.pdf`) |
 | `.weather <city>` | Fetch weather forecast and storm alerts |
 | `.currency <amount> <from> <to>` | Real-time currency conversion |
 | `.define <word>` | Dictionary definition lookup |
@@ -241,9 +241,9 @@ URLs containing picture posts or carousels (e.g. Instagram `/p/`, TikTok `/photo
 |---|---|
 | `.activity` | Show chat activity dashboard (messages, media, top senders) |
 | `.ping` | Measure RTT latency, memory usage, and uptime |
-| `.alive` | Check if WRAITH is alive (`𝗪𝗥𝗔𝗜𝗧𝗛 𝗜𝗦 𝗔𝗟𝗜𝗩𝗘 ✅`) |
+| `.alive` | Check if Al-Jin is alive (`𝐀𝐥-𝐉𝐢𝐧 𝗜𝗦 𝗔𝗟𝗜𝗩𝗘 ✅`) |
 | `.uptime` | Check current bot uptime |
-| `.restart` | Restart WRAITH server process (owner only) |
+| `.restart` | Restart Al-Jin server process (owner only) |
 | `.help` / `.menu` | Render command help menu |
 
 ## 🎨 Themes, Wallpapers & Chat Bubbles

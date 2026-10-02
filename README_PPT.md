@@ -1,6 +1,6 @@
 # PowerPoint AI Generation (.ppt)
 
-WRAITH includes an AI-powered PowerPoint generation module driven by Gemini API (`gemini-2.5-flash` / `gemini-1.5-flash`) and rendered directly in memory using `pptxgenjs`.
+Al-Jin includes an AI-powered PowerPoint generation module driven by Gemini API (`gemini-2.5-flash` / `gemini-1.5-flash`) and rendered directly in memory using `pptxgenjs`.
 
 ## Setup
 Ensure `GEMINI_API_KEY` is set in your environment or `.env` / `keys.env`:
@@ -43,4 +43,4 @@ Generates a 6-slide dark neon styled technical deck focusing on key microservice
 ## Features & System Rules
 - **Non-overridable Gemini System Prompt**: Always returns structured JSON (`responseSchema`) adhering strictly to presentation rules.
 - **In-Memory Rendering**: `.pptx` presentations are built entirely in Node memory (`Buffer`) with no temporary files written to disk.
-- **Attribution**: Every presentation includes clean headers/footers and `Provided by 𝗪𝗥𝗔𝗜𝗧🇭` attribution.
+- **Attribution**: Every presentation includes clean headers/footers and `Provided by 𝐀𝐥-𝐉𝐢𝐧` attribution.

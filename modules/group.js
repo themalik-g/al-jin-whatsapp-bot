@@ -1,5 +1,5 @@
 // ─────────────────────────────────────────────
-// WRAITH · modules/group.js
+// Al-Jin · modules/group.js
 // Phase 3: Group management commands
 // ─────────────────────────────────────────────
 import fs from 'node:fs';
