@@ -192,6 +192,7 @@ const watchCommand = lazy('./modules/spy.js', 'watchCommand');
 const ginfoCommand = lazy('./modules/spy.js', 'ginfoCommand');
 const stickerCommand = lazy('./modules/stickers.js', 'stickerCommand');
 const toimgCommand = lazy('./modules/stickers.js', 'toimgCommand');
+const tovidCommand = lazy('./modules/stickers.js', 'tovidCommand');
 const fancyCommand = lazy('./modules/fun.js', 'fancyCommand');
 const diceCommand = lazy('./modules/fun.js', 'diceCommand');
 const coinCommand = lazy('./modules/fun.js', 'coinCommand');
@@ -836,8 +837,8 @@ export async function dispatch(sock, update, sessionId = 'main') {
           case 'ginfo': await ginfoCommand(csock, chat, msg, rest); break;
           case 'sticker':
           case 's': await stickerCommand(csock, chat, msg, rest); break;
-          case 'toimg':
-          case 'tovid': await toimgCommand(csock, chat, msg, rest); break;
+          case 'toimg': await toimgCommand(csock, chat, msg, rest); break;
+          case 'tovid': await tovidCommand(csock, chat, msg, rest); break;
           case 'fancy': await fancyCommand(csock, chat, msg, rest); break;
           case 'dice': await diceCommand(csock, chat, msg, rest); break;
           case 'coin': await coinCommand(csock, chat, msg, rest); break;
