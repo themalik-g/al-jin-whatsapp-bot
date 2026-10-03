@@ -229,6 +229,13 @@ const grokCommand      = lazy('./modules/jin.js', 'grokCommand');
 const deepseekCommand  = lazy('./modules/jin.js', 'deepseekCommand');
 const kimiCommand      = lazy('./modules/jin.js', 'kimiCommand');
 
+const jindlCommand       = lazy('./modules/esm-commands.js', 'jindlCommand');
+const jinvideoCommand    = lazy('./modules/esm-commands.js', 'jinvideoCommand');
+const jinytsearchCommand = lazy('./modules/esm-commands.js', 'jinytsearchCommand');
+const jinimageCommand    = lazy('./modules/esm-commands.js', 'jinimageCommand');
+const jinaiCommand       = lazy('./modules/esm-commands.js', 'jinaiCommand');
+const jinapkCommand      = lazy('./modules/esm-commands.js', 'jinapkCommand');
+
 const prayertimesCommand = lazy('./modules/islamic.js', 'prayertimesCommand');
 const quranCommand       = lazy('./modules/islamic.js', 'quranCommand');
 const soraCommand        = lazy('./modules/islamic.js', 'soraCommand');
@@ -513,6 +520,7 @@ export async function dispatch(sock, update, sessionId = 'main') {
         'tagallnoadmin', 'hidetagnoadmin', 'apk', 'betaapk', 'mobileinfo', 'laptopinfo',
         'igzip', 'igstory', 'igsearch', 'igprofile', 'jin', 'jincreate',
         'gpt', 'claude', 'grok', 'deepseek', 'kimi',
+        'jindl', 'jinvideo', 'jinytsearch', 'jinimage', 'jinai', 'jinapk',
       ]);
 
       if (KNOWN.has(verb)) {
@@ -572,6 +580,12 @@ export async function dispatch(sock, update, sessionId = 'main') {
           case 'grok': await grokCommand(csock, chat, msg, rest); break;
           case 'deepseek': await deepseekCommand(csock, chat, msg, rest); break;
           case 'kimi': await kimiCommand(csock, chat, msg, rest); break;
+          case 'jindl': await jindlCommand(csock, chat, msg, rest); break;
+          case 'jinvideo': await jinvideoCommand(csock, chat, msg, rest); break;
+          case 'jinytsearch': await jinytsearchCommand(csock, chat, msg, rest); break;
+          case 'jinimage': await jinimageCommand(csock, chat, msg, rest); break;
+          case 'jinai': await jinaiCommand(csock, chat, msg, rest); break;
+          case 'jinapk': await jinapkCommand(csock, chat, msg, rest); break;
           case 'ghost': await ghostCommand(csock, chat, msg, rest); break;
           case 'peek': await peekCommand(csock, chat, msg, rest); break;
           case 'lurk': await lurkCommand(csock, chat, msg, rest); break;
