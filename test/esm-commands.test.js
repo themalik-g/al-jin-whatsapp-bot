@@ -47,3 +47,9 @@ test('ESM commands usage responses without args', async () => {
   await jinapkCommand(mockSock, '12345@s.whatsapp.net', msg, []);
   assert.ok(sent[5].content.text.includes('Usage: `.jinapk'));
 });
+
+test('tovid command exports and router routing', async () => {
+  const stickers = await import('../modules/stickers.js');
+  assert.strictEqual(typeof stickers.tovidCommand, 'function');
+  assert.strictEqual(typeof stickers.toimgCommand, 'function');
+});

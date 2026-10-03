@@ -49,13 +49,27 @@ export async function jinvideoCommand(sock, chat, msg, args) {
   if (!query) return sock.sendMessage(chat, { text: '🎬 Usage: `.jinvideo <url or search query>`' }, { quoted: msg });
   const st = await sock.sendMessage(chat, { text: '🎬 *Jinvideo:* fetching video via ESM API…' }, { quoted: msg });
   try {
-    const res = await fetchEsmApi('/youtube/ytvid', { url: query, q: query });
-    if (!res.ok || !res.data || !res.data.status) {
-      throw new Error(res.data?.error || `HTTP ${res.status}`);
+    const endpoints = ['/youtube/ytdl', '/youtube/ytvid', '/downloader/aio'];
+    let lastErr = null;
+    let data = null;
+    let dlUrl = null;
+
+    for (const ep of endpoints) {
+      try {
+        const res = await fetchEsmApi(ep, { url: query, q: query });
+        if (res.ok && res.data && res.data.status) {
+          data = res.data.data || res.data.result || res.data;
+          dlUrl = data?.downloadUrl || data?.download_url || data?.url || data?.video || (Array.isArray(data) ? data[0]?.url : null) || (data?.medias ? data.medias[0]?.url : null);
+          if (dlUrl) break;
+        } else {
+          lastErr = new Error(res.data?.error || `HTTP ${res.status}`);
+        }
+      } catch (err) {
+        lastErr = err;
+      }
     }
-    const data = res.data.data;
-    const dlUrl = data?.url || data?.video || data?.download || (Array.isArray(data) ? data[0]?.url : null);
-    if (!dlUrl) throw new Error('No video URL returned.');
+
+    if (!dlUrl) throw lastErr || new Error('No video URL returned.');
 
     const dest = path.join(getTmpDir(), `jinvideo_${Date.now()}.mp4`);
     await downloadToFile(dlUrl, dest, 80 * 1024 * 1024);
@@ -129,12 +143,26 @@ export async function jinaiCommand(sock, chat, msg, args) {
   if (!prompt) return sock.sendMessage(chat, { text: '🤖 Usage: `.jinai <prompt>`' }, { quoted: msg });
   const st = await sock.sendMessage(chat, { text: '🤖 *Jinai:* thinking…' }, { quoted: msg });
   try {
-    const res = await fetchEsmApi('/ai/blackbox', { q: prompt, prompt });
-    if (!res.ok || !res.data || !res.data.status) {
-      throw new Error(res.data?.error || `HTTP ${res.status}`);
+    const endpoints = ['/ai/blackbox/web', '/ai/gpt', '/ai/chat', '/ai/blackbox'];
+    let lastErr = null;
+    let reply = null;
+
+    for (const ep of endpoints) {
+      try {
+        const res = await fetchEsmApi(ep, { q: prompt, prompt });
+        if (res.ok && res.data && res.data.status) {
+          const d = res.data.data || res.data.result || res.data;
+          reply = typeof d === 'string' ? d : (d?.response || d?.text || d?.result || d?.output);
+          if (reply) break;
+        } else {
+          lastErr = new Error(res.data?.error || `HTTP ${res.status}`);
+        }
+      } catch (err) {
+        lastErr = err;
+      }
     }
-    const reply = res.data.data?.response || res.data.data?.text || res.data.response || res.data.text;
-    if (!reply) throw new Error('Empty response from AI.');
+
+    if (!reply) throw lastErr || new Error('Empty response from AI.');
 
     await sock.sendMessage(chat, { text: `🤖 *Jin AI Response:*\n\n${reply}\n\nProvided by 𝐀λ-𝐉𝐢𝐧 (ESM)` }, { quoted: msg });
     await sock.sendMessage(chat, { text: '✅ *Jinai:* complete', edit: st.key }).catch(() => {});
