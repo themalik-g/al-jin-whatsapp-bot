@@ -15,6 +15,9 @@ import { CONFIG } from './config.js';
 import { reqlocationCommand, handleIncomingLocation } from './modules/location.js';
 import { WAMessageStubType } from '@whiskeysockets/baileys';
 import { extractInteractiveResponse, matchChoice } from './lib/buttons.js';
+// extras pack (modules/x-*.js)
+import { onMessage as xOnMessage, resolveAlias as xResolveAlias } from './modules/x-hooks.js';
+import { hasExtra as xHasExtra, runExtra as xRunExtra } from './modules/x-registry.js';
 
 // ─────────────────────────────────────────────
 //  Lazy loader for cold command handlers
@@ -423,6 +426,10 @@ export async function dispatch(sock, update, sessionId = 'main') {
         if (blocked) continue;
       } catch (e) { console.error('[router] handleProtection', e.message); }
 
+      try {
+        if (await xOnMessage(sock, chat, msg, plainText(msg))) continue;
+      } catch (e) { console.error('[router] extras hook', e.message); }
+
       if (msg.message?.locationMessage || msg.message?.liveLocationMessage) {
         try { await handleIncomingLocation(sock, chat, msg); } catch (e) { console.error('[router] handleIncomingLocation', e.message); }
       }
@@ -444,8 +451,12 @@ export async function dispatch(sock, update, sessionId = 'main') {
       if (msg.key?.id && markCommandProcessed(msg.key.id)) continue;
 
       const firstSpace = withoutPrefix.indexOf(' ');
-      const verb = (firstSpace === -1 ? withoutPrefix : withoutPrefix.slice(0, firstSpace)).toLowerCase();
-      const rest = firstSpace === -1 ? [] : withoutPrefix.slice(firstSpace + 1).trim().split(/\s+/);
+      let verb = (firstSpace === -1 ? withoutPrefix : withoutPrefix.slice(0, firstSpace)).toLowerCase();
+      let rest = firstSpace === -1 ? [] : withoutPrefix.slice(firstSpace + 1).trim().split(/\s+/);
+      try {
+        const al = xResolveAlias(verb, rest);   // owner-defined aliases (.setcmd)
+        if (al) { verb = al.verb; rest = al.args; }
+      } catch {}
 
       let mode = 'public';
       try { mode = await getModeLazy(); } catch { mode = 'public'; }
@@ -497,6 +508,16 @@ export async function dispatch(sock, update, sessionId = 'main') {
       if (/^wp\d+$/i.test(verb)) {
         const num = verb.replace(/\D/g, '');
         await wpCommand(csock, chat, msg, rest, num);
+        continue;
+      }
+
+      if (xHasExtra(verb)) {
+        try { await sock.sendMessage(chat, { react: { text: '⌛', key: msg.key } }); } catch {}
+        try { await xRunExtra(csock, chat, msg, verb, rest); }
+        catch (e) {
+          console.error('[extras]', verb, e);
+          try { await sock.sendMessage(chat, { text: `⚠️ *command failed*\n\n\`${verb}\` — ${e.message}` }, { quoted: msg }); } catch {}
+        }
         continue;
       }
 

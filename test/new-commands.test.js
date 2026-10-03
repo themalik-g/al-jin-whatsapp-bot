@@ -4,10 +4,23 @@
 // ─────────────────────────────────────────────
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import bwipjs from 'bwip-js';
+
+// bwip-js is a declared dependency (npm install). If it is missing, skip the
+// barcode tests with a clear message instead of crashing the whole file.
+let bwipjs = null;
+try { bwipjs = (await import('bwip-js')).default; } catch {}
+const noBwip = bwipjs ? false : 'bwip-js not installed — run npm install';
+
+// Network tests only make sense when the internet is reachable.
+let online = false;
+try {
+  const r = await fetch('https://registry.npmjs.org/express', { method: 'HEAD', signal: AbortSignal.timeout(5000) });
+  online = r.ok;
+} catch {}
+const offline = online ? false : 'network unavailable';
 import { createCtaUrl } from '../lib/buttons.js';
 
-test('Barcode generation test', async () => {
+test('Barcode generation test', { skip: noBwip }, async () => {
   const buf = await bwipjs.toBuffer({
     bcid: 'code128',
     text: '123456789',
@@ -19,7 +32,7 @@ test('Barcode generation test', async () => {
   assert.ok(buf.length > 100);
 });
 
-test('Barcode QR generation test', async () => {
+test('Barcode QR generation test', { skip: noBwip }, async () => {
   const buf = await bwipjs.toBuffer({
     bcid: 'qrcode',
     text: 'https://github.com/themalik-g/al-jin-whatsapp-bot',
@@ -31,7 +44,7 @@ test('Barcode QR generation test', async () => {
   assert.ok(buf.length > 100);
 });
 
-test('NPM Registry API test', async () => {
+test('NPM Registry API test', { skip: offline }, async () => {
   const res = await fetch('https://registry.npmjs.org/express');
   assert.equal(res.ok, true);
   const json = await res.json();
@@ -39,7 +52,7 @@ test('NPM Registry API test', async () => {
   assert.ok(json['dist-tags']?.latest);
 });
 
-test('Unroll redirect tracker test', async () => {
+test('Unroll redirect tracker test', { skip: offline }, async () => {
   const targetUrl = 'https://tinyurl.com/2p8v25tw';
   let currentUrl = targetUrl;
   const redirectChain = [currentUrl];

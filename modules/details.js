@@ -5,6 +5,7 @@
 // ─────────────────────────────────────────────
 import { sendWithCta } from '../lib/buttons.js';
 import { getPrefix } from '../core/settings.js';
+import { X_DETAILS } from './x-details.js';
 
 const BASE_COMMAND_DETAILS = {
   // ── CORE ──
@@ -835,6 +836,7 @@ const BASE_COMMAND_DETAILS = {
 // Map Command Aliases so .details works for all synonym command names
 const COMMAND_DETAILS = {
   ...BASE_COMMAND_DETAILS,
+  ...X_DETAILS,
   // Aliases
   menu: BASE_COMMAND_DETAILS.help,
   s: BASE_COMMAND_DETAILS.sticker,
