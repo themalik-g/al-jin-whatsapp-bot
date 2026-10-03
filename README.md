@@ -1,4 +1,4 @@
-# Open-Source WhatsApp MD User Bot (Al-Jin) powered by Baileys v7.0.0-rc.14 & Node.js
+# Open-Source WhatsApp MD User Bot (al-jin-whatsapp-bot) powered by Baileys v7.0.0-rc.14 & Node.js
 
 **Al-Jin is a free, open-source WhatsApp multi-device (MD) bot built on official whiskeysockets Baileys v7.0.0-rc.14 (no custom fork)and Node.js 20+,having all features which payed forks do offer, featuring anti-delete message recovery, view-once media reveal, status auto-save,Native full dp and hd dp support along with interactive buttons,YouTube and other social media downloading system,Books downloader, Ephoto 360 features, full text and media scheduling for groups, communities,1on1 chats and channels, Gemini AI, PPT synthetic system, Quran & Hadith search, Bukhari, Muslim Hadith extractors,group admin commonds and 150+ more commands for WhatsApp automation and group management — all self-hosted with no QR scan and no WhatsApp Business API.**
 
