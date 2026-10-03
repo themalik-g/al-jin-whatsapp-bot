@@ -166,7 +166,11 @@ export async function mobileinfoCommand(sock, chat, msg, rest) {
     if (/^pick\d+$/i.test(q)) {
       const it = takePick('mobile', chat, q);
       if (!it) return sock.sendMessage(chat, { text: '⌛ That list expired — run `.mobileinfo <model>` again.' }, { quoted: msg });
-      return await sendDetail(sock, chat, msg, it.slug);
+      if (it.slug) {
+        return await sendDetail(sock, chat, msg, it.slug);
+      } else {
+        return await aiPhoneCard(sock, chat, msg, it.name, 'Search Selection');
+      }
     }
     let items = []; let trusted = false; let blocked = null;
     for (const variant of queryVariants(q)) {
@@ -177,13 +181,19 @@ export async function mobileinfoCommand(sock, chat, msg, rest) {
       if (items.length) break;
       trusted = trusted || looksLikeSearchPage(html);
     }
-    if (items.length === 1) return await sendDetail(sock, chat, msg, items[0].slug);
-    if (items.length) return await offerChoices(sock, chat, msg, 'mobile', 'mobileinfo', items, `📱 *${items.length} matches for "${q}"*`);
+    if (items.length) {
+      items = items.slice(0, 3);
+      if (items.length === 1) return await sendDetail(sock, chat, msg, items[0].slug);
+      return await offerChoices(sock, chat, msg, 'mobile', 'mobileinfo', items, `📱 *${items.length} matches for "${q}"*`);
+    }
 
-    // GSMArena blocked us, changed its layout, or truly has no such phone → AI-compiled card instead of a dead end.
-    const why = blocked ? blocked.message : trusted ? 'not listed on GSMArena' : 'GSMArena returned an unexpected page';
-    try { return await aiPhoneCard(sock, chat, msg, q, why); }
-    catch { return sock.sendMessage(chat, { text: `❌ No phone found for *${q}* (${why}).\nTry the exact name, e.g. \`.mobileinfo zero 40\`.` }, { quoted: msg }); }
+    // GSMArena blocked us or returned no results → AI search for top 3 mobile models matching query
+    const raw = await aiJson(`List top 3 exact real mobile phone model names that match "${q}". Include brand and model name (e.g. "Samsung Galaxy S23", "Samsung Galaxy S23 Ultra", "Samsung Galaxy S23 FE"). Reply with ONLY a JSON array of strings.`);
+    let aiNames = [];
+    try { aiNames = JSON.parse(raw.match(/\[[\s\S]*\]/)?.[0] || '[]').filter((s) => typeof s === 'string').slice(0, 3); } catch {}
+    if (!aiNames.length) return sock.sendMessage(chat, { text: `❌ No phone found for *${q}*.` }, { quoted: msg });
+    if (aiNames.length === 1) return await aiPhoneCard(sock, chat, msg, aiNames[0], 'AI-compiled');
+    return await offerChoices(sock, chat, msg, 'mobile', 'mobileinfo', aiNames.map((name) => ({ name })), `📱 *Top ${aiNames.length} matches for "${q}"*`);
   } catch (e) {
     await sock.sendMessage(chat, { text: `⚠️ mobileinfo failed: ${e.message}` }, { quoted: msg }).catch(() => {});
   }
