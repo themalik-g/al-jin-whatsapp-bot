@@ -21,6 +21,9 @@ export function handleGroupParticipantUpdate(sock, update) {
     if (!chat || !action || !participants.length) return;
     if (!String(chat).endsWith('@g.us')) return;
 
+    // extras pack: antifake + "who left" log (async, never blocks the handlers below)
+    import('../modules/x-hooks.js').then((m) => m.onParticipants(sock, update)).catch((e) => console.error('[groupEvents:extras]', e.message));
+
     const welcomeCfg = getWelcomeConfig()[chat];
     const pddCfg = getPddConfig()[chat];
     const protRolesCfg = getProtRolesConfig()[chat];

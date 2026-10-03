@@ -1,4 +1,14 @@
-import {
+import assert from 'assert';
+import fs from 'node:fs';
+import os from 'node:os';
+import path from 'node:path';
+
+// Isolate from the real project data/ folder so a saved reply-mode setting
+// (or WRAITH_REPLY_MODE) can never change the result of this test.
+process.env.WRAITH_DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), 'aljin-btn-'));
+delete process.env.WRAITH_REPLY_MODE;
+
+const {
   createQuickReply,
   createCtaUrl,
   createCtaCopy,
@@ -7,8 +17,8 @@ import {
   createLocationRequest,
   extractInteractiveResponse,
   sendInteractive,
-} from '../lib/buttons.js';
-import assert from 'assert';
+} = await import('../lib/buttons.js');
+const { setReplyMode, getReplyMode } = await import('../core/settings.js');
 
 console.log('--- Testing lib/buttons.js ---');
 
@@ -61,32 +71,38 @@ const msg3 = {
 };
 assert.strictEqual(extractInteractiveResponse(msg3), 'menu_ghost');
 
-// 3. Test sendInteractive mock socket
-let calledRelay = false;
-let mockJid = null;
-let mockMsg = null;
-let mockOptions = null;
-
-const mockSock = {
-  relayMessage: async (jid, msg, options) => {
-    calledRelay = true;
-    mockJid = jid;
-    mockMsg = msg;
-    mockOptions = options;
-  },
-  sendMessage: async (jid, content, options) => {}
+// 3. Test sendInteractive with a mock socket
+function makeSock() {
+  const sock = { relayCalls: [], sendCalls: [] };
+  sock.relayMessage = async (jid, msg, options) => { sock.relayCalls.push({ jid, msg, options }); };
+  sock.sendMessage = async (jid, content, options) => { sock.sendCalls.push({ jid, content, options }); };
+  return sock;
+}
+const JID = '1234567890@s.whatsapp.net';
+const payload = {
+  body: 'Hello world',
+  buttons: [createQuickReply('Ping', '.ping'), createLocationRequest('Share Location')],
 };
 
-await sendInteractive(mockSock, '1234567890@s.whatsapp.net', {
-  body: 'Hello world',
-  buttons: [
-    createQuickReply('Ping', '.ping'),
-    createLocationRequest('Share Location')
-  ]
-});
+// 3a. Default reply mode is plain text (buttons are opt-in): one text message, no relay.
+assert.strictEqual(getReplyMode(), 'text');
+const textSock = makeSock();
+await sendInteractive(textSock, JID, payload);
+assert.strictEqual(textSock.relayCalls.length, 0);
+assert.strictEqual(textSock.sendCalls.length, 1);
+assert.strictEqual(textSock.sendCalls[0].jid, JID);
+assert.ok(textSock.sendCalls[0].content.text.includes('Hello world'));
 
-assert.strictEqual(calledRelay, true);
-assert.strictEqual(mockJid, '1234567890@s.whatsapp.net');
-assert.ok(mockOptions?.additionalNodes?.length > 0);
+// 3b. Buttons mode: the message must actually go out through the socket.
+setReplyMode('buttons');
+assert.strictEqual(getReplyMode(), 'buttons');
+const btnSock = makeSock();
+await sendInteractive(btnSock, JID, payload);
+assert.ok(btnSock.relayCalls.length + btnSock.sendCalls.length > 0, 'buttons mode sent nothing');
+if (btnSock.relayCalls.length) {
+  assert.strictEqual(btnSock.relayCalls[0].jid, JID);
+  assert.ok(btnSock.relayCalls[0].options?.additionalNodes?.length > 0);
+}
+setReplyMode('text');
 
 console.log('✅ All lib/buttons.js tests passed successfully!');

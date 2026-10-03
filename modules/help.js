@@ -5,33 +5,32 @@
 import { isOwner } from '../core/identity.js';
 import { getPrefix } from '../core/settings.js';
 import { NEWSLETTER_CONTEXT, sendWithCta } from '../lib/buttons.js';
+import { X_MENU } from './x-details.js';
 
 const MENU_IMAGE = process.env.WRAITH_MENU_IMAGE || 'https://i.picrd.com/images/YZUezOztDow.jpg';
 const CAPTION_MAX = 3000;
 
-// Sends the menu with the banner image. Falls back to the plain text menu
-// if the image cannot be fetched/sent, so .menu always answers.
+// Sends the menu as ONE message. If it fits in an image caption, the banner is
+// attached; otherwise the whole menu goes out as a single text message
+// (never split into two). Falls back to plain text if the image fails.
 async function sendMenu(sock, chat, text, msg) {
-  try {
-    if (text.length <= CAPTION_MAX) {
+  if (text.length <= CAPTION_MAX) {
+    try {
       return await sock.sendMessage(
         chat,
         { image: { url: MENU_IMAGE }, caption: text, contextInfo: NEWSLETTER_CONTEXT },
         { quoted: msg }
       );
+    } catch (e) {
+      try { console.error('[menu:image]', e?.message); } catch {}
     }
-    const cut = text.lastIndexOf('\n', CAPTION_MAX);
-    const head = text.slice(0, cut > 0 ? cut : CAPTION_MAX);
-    const tail = text.slice(head.length).trim();
-    const sent = await sock.sendMessage(
-      chat,
-      { image: { url: MENU_IMAGE }, caption: head, contextInfo: NEWSLETTER_CONTEXT },
-      { quoted: msg }
-    );
-    if (tail) await sock.sendMessage(chat, { text: tail, contextInfo: NEWSLETTER_CONTEXT }, { quoted: msg });
-    return sent;
+  }
+  // Long menu (or image failed): one plain text message — WhatsApp allows far
+  // longer text than an image caption, so nothing needs to be split.
+  try {
+    return await sock.sendMessage(chat, { text, contextInfo: NEWSLETTER_CONTEXT }, { quoted: msg });
   } catch (e) {
-    try { console.error('[menu:image]', e?.message); } catch {}
+    try { console.error('[menu:text]', e?.message); } catch {}
     return sendWithCta(sock, chat, text, { quoted: msg });
   }
 }
@@ -443,6 +442,9 @@ const REGISTRY = [
     ],
   },
 ];
+
+// extras pack categories (modules/x-details.js)
+REGISTRY.push(...X_MENU);
 
 function applyPrefix(cmd, prefix) {
   if (prefix === '.') return cmd;
