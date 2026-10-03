@@ -261,7 +261,18 @@ export const decryptMessageNode = (stanza, meId, meLid, repository, logger) => {
                         catch (firstErr) {
                             const { senderAlt } = extractAddressingContext(stanza);
                             const candidates = [];
-                            for (const jid of [author, withDeviceOf(author, senderAlt)]) {
+                            const rawCandidates = [
+                                author,
+                                withDeviceOf(author, senderAlt),
+                                meId,
+                                meLid,
+                                withDeviceOf(author, meId),
+                                withDeviceOf(author, meLid),
+                                stanza.attrs.participant,
+                                stanza.attrs.from,
+                                withDeviceOf(stanza.attrs.from, senderAlt)
+                            ];
+                            for (const jid of rawCandidates) {
                                 if (jid && jid !== decryptionJid && !candidates.includes(jid)) {
                                     candidates.push(jid);
                                 }

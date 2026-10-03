@@ -70,10 +70,12 @@ const REGISTRY = [
   {
     id: 'ai2',
     icon: '🧞',
-    title: 'JIN AI',
+    title: 'JIN AI & ESM',
     commands: [
       c('.jin <q>'), c('.jin2 <q>'), c('.jin create <prompt>'), c('.jincreate2 <prompt>'),
       c('.gpt <q>'), c('.claude <q>'), c('.grok <q>'), c('.deepseek <q>'), c('.kimi <q>'),
+      c('.jindl <url>'), c('.jinvideo <url/query>'), c('.jinytsearch <query>'),
+      c('.jinimage <prompt>'), c('.jinai <prompt>'), c('.jinapk <app>'),
       c('.gpt models'), c('.gpt use <id>', true),
     ],
   },

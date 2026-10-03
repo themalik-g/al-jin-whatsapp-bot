@@ -124,7 +124,7 @@ export function formatSpecs(name, specs) {
     const v = specs[key];
     if (v && v !== '-') lines.push(`${icon} *${label}* · ${v.length > 220 ? v.slice(0, 217) + '…' : v}`);
   }
-  lines.push('', 'Source: GSMArena · Provided by 𝐀𝐥-𝐉𝐢𝐧');
+  lines.push('', 'Provided by 𝐀𝐥-𝐉𝐢𝐧');
   return lines.join('\n');
 }
 
@@ -208,9 +208,9 @@ async function aiPhoneCard(sock, chat, msg, q, why) {
       'Write "unknown" for anything you are not sure about. Never guess numbers. If this phone does not exist reply only: NOT FOUND' },
   ], { maxTokens: 500 });
   if (/^\s*NOT FOUND/i.test(text)) throw new Error('unknown phone');
-  const link = `${GSM}/results.php3?sQuickSearch=yes&sName=${encodeURIComponent(q)}`;
+  const link = `https://priceoye.pk/search?q=${encodeURIComponent(q)}`;
   return sock.sendMessage(chat, {
-    text: `📱 *${q}*\n\n${text.slice(0, 1800)}\n\n⚠️ _AI-compiled (${why}) — verify on GSMArena:_\n${link}\n\nProvided by 𝐀𝐥-𝐉𝐢𝐧`,
+    text: `📱 *${q}*\n\n${text.slice(0, 1800)}\n\nCheck Price & Specs on PriceOye / WhatMobile:\n${link}\n\nProvided by 𝐀𝐥-𝐉𝐢𝐧`,
   }, { quoted: msg });
 }
 

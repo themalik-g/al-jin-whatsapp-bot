@@ -54,11 +54,37 @@ async function downloadFb(sock, chat, msg, raw) {
     ytErr = e; console.warn('[fb] yt-dlp failed:', e.message);
   } finally { cleanPrefix(prefix, dir); }
 
-  // fallback: postfetch (photos / posts)
+  // fallback 1: postfetch (photos / posts)
   if (isPostUrl(url)) {
     await edit(sock, chat, st, '🖼️ *Facebook:* trying post fetcher…');
-    return downloadPostMediaDirect(sock, chat, msg, url, false);
+    try {
+      await downloadPostMediaDirect(sock, chat, msg, url, false);
+      return;
+    } catch (pfErr) {
+      console.warn('[fb] postfetch failed:', pfErr.message);
+    }
   }
+
+  // fallback 2: ESM API fbdl
+  try {
+    await edit(sock, chat, st, '🌐 *Facebook:* trying ESM API…');
+    const { fetchEsmApi } = await import('../lib/esm.js');
+    const res = await fetchEsmApi('/facebook/fbdl', { url });
+    if (res.data && res.data.status && res.data.data) {
+      const media = res.data.data;
+      const dlUrl = media.high || media.hd || media.sd || media.url || (Array.isArray(media) ? media[0]?.url : null);
+      if (dlUrl) {
+        const dest = path.join(dir, `${prefix}_esm.mp4`);
+        await downloadToFile(dlUrl, dest, MAX_MB * 1048576);
+        await sock.sendMessage(chat, { video: { url: dest }, mimetype: 'video/mp4', caption: 'Provided by 𝐀𝐥-𝐉𝐢𝐧' }, { quoted: msg });
+        await edit(sock, chat, st, '✅ *Facebook:* done');
+        return sock.sendMessage(chat, { react: { text: '☑', key: msg.key } }).catch(() => {});
+      }
+    }
+  } catch (esmErr) {
+    console.warn('[fb] esm api fallback failed:', esmErr.message);
+  }
+
   const hint = /login|private|cookie|sign in|rate/i.test(ytErr?.message || '')
     ? '\n\n_Looks like a private / login-only post. Export Facebook cookies with `.ytcookies` and try again._' : '';
   await edit(sock, chat, st, `❌ *Facebook download failed:* ${(ytErr?.message || 'unknown error').slice(0, 220)}${hint}`);
