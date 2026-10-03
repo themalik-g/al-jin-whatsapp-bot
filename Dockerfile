@@ -7,6 +7,11 @@ WORKDIR /app
 # Copy dependency manifests first for better layer caching
 COPY package*.json ./
 
+# The postinstall step applies the small Baileys decrypt fix, so its files
+# must exist before `npm install` runs.
+COPY scripts ./scripts
+COPY patches ./patches
+
 # Install only production dependencies
 # Using npm install instead of npm ci to resolve Linux-specific binaries
 RUN npm install --omit=dev
