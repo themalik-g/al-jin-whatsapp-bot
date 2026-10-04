@@ -6,6 +6,7 @@
 import { downloadContentFromMessage } from '@whiskeysockets/baileys';
 import { isOwner } from '../core/identity.js';
 import { uploadImage } from '../lib/uploadImage.js';
+import { reactMsg, editStatus, EMOJIS } from '../lib/reaction-helper.js';
 
 export async function urlCommand(sock, chat, msg, args) {
     const from = msg.key.participant || msg.key.remoteJid;
@@ -30,14 +31,19 @@ export async function urlCommand(sock, chat, msg, args) {
             }, { quoted: msg });
         }
 
-        await sock.sendMessage(chat, { text: '🔗 Uploading image…' }, { quoted: msg });
+        await reactMsg(sock, chat, msg.key, EMOJIS.UPLOAD);
+        const status = await sock.sendMessage(chat, { text: '📤 Uploading image... 0% done...' }, { quoted: msg });
 
         const stream = await downloadContentFromMessage(imgNode, 'image');
         const chunks = [];
         for await (const c of stream) chunks.push(c);
         const buffer = Buffer.concat(chunks);
 
+        await editStatus(sock, chat, status, '📤 Uploading image... 50% done...');
+
         const url = await uploadImage(buffer);
+
+        await editStatus(sock, chat, status, '📤 Uploading complete ✅ now generating link...');
 
         await sock.sendMessage(chat, {
             text:
@@ -46,7 +52,11 @@ export async function urlCommand(sock, chat, msg, args) {
                 `_size: ${(buffer.length / 1024).toFixed(1)} KB_\n\n` +
                 'Provided by 𝐀𝐥-𝐉𝐢𝐧'
         }, { quoted: msg });
+
+        await editStatus(sock, chat, status, '✅ *Upload complete*');
+        await reactMsg(sock, chat, msg.key, EMOJIS.SUCCESS);
     } catch (e) {
+        await reactMsg(sock, chat, msg.key, EMOJIS.FAILED);
         await sock.sendMessage(chat, { text: `⚠️ url failed: ${e.message}` }, { quoted: msg }).catch(() => {});
     }
 }

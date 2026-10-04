@@ -12,6 +12,7 @@ import { postfetch, download as pfDownload, archive as pfArchive, detect as pfDe
 import { sendInteractive, createQuickReply, sendWithCta } from '../lib/buttons.js';
 import { getPrefix } from '../core/settings.js';
 import { getTmpDir, runYtdlp, cleanPrefix, cleanOldTmpFiles } from '../lib/ytdlp.js';
+import { reactMsg, editStatus, EMOJIS } from '../lib/reaction-helper.js';
 
 const MAX_BYTES       = 15 * 1024 * 1024;
 const MAX_VIDEO       = 60 * 1024 * 1024;
@@ -57,12 +58,6 @@ function isYtDlpSupportedUrl(url) {
   } catch { return false; }
 }
 
-async function react(sock, chat, msg, emoji) {
-  try { await sock.sendMessage(chat, { react: { text: emoji, key: msg.key } }); } catch {}
-}
-async function edit(sock, chat, key, text) {
-  try { await sock.sendMessage(chat, { text, edit: key.key }); } catch {}
-}
 function withTimeout(promise, ms, label) {
   let timer;
   const timeout = new Promise((_, reject) => {
@@ -183,7 +178,8 @@ async function deliverPostItems(sock, chat, msg, status, items) {
   {
     for (let i = 0; i < total; i++) {
       const item = items[i];
-      await edit(sock, chat, status, `⬇️ *Downloading ${i + 1}/${total}…*`);
+      const pct = Math.round(((i) / total) * 100);
+      await editStatus(sock, chat, status, `📥 Downloading ${pct}% done... (${i + 1}/${total})`);
       let buffer;
       try {
         const res = await withTimeout(pfDownload(item), ITEM_DL_TIMEOUT, `item ${i + 1}`);
@@ -196,7 +192,8 @@ async function deliverPostItems(sock, chat, msg, status, items) {
       }
       if (buffer.length < 512) { failed.push({ n: i + 1, reason: 'empty file' }); continue; }
 
-      await edit(sock, chat, status, `📤 *Sending ${i + 1}/${total}…*`);
+      await reactMsg(sock, chat, msg.key, EMOJIS.UPLOAD);
+      await editStatus(sock, chat, status, `Downloading complete ✅ now sending item ${i + 1}/${total}`);
       const r = await sendPostfetchItem(sock, chat, msg, buffer, item, i);
       if (r.ok) sent++; else failed.push({ n: i + 1, reason: r.reason || 'send failed' });
       buffer = null;
@@ -209,13 +206,13 @@ async function deliverPostItems(sock, chat, msg, status, items) {
 // Final status + reaction. Green tick ONLY when everything was really delivered.
 async function finishPostDelivery(sock, chat, msg, status, r, extra = '') {
   if (r.failed.length === 0) {
-    await edit(sock, chat, status, `✅ *Download complete* (${r.sent}/${r.total} sent)${extra}\n\nProvided by 𝐀𝐥-𝐉𝐢𝐧`);
-    await react(sock, chat, msg, '☑');
+    await editStatus(sock, chat, status, `✅ *Download complete* (${r.sent}/${r.total} sent)${extra}\n\nProvided by 𝐀𝐥-𝐉𝐢𝐧`);
+    await reactMsg(sock, chat, msg.key, EMOJIS.SUCCESS);
     return;
   }
   const why = r.failed.slice(0, 5).map((f) => `• #${f.n}: ${f.reason}`).join('\n');
-  await edit(sock, chat, status, `⚠️ *Sent ${r.sent}/${r.total}*\n${why}\n\nProvided by 𝐀𝐥-𝐉𝐢𝐧`);
-  await react(sock, chat, msg, '⚠️');
+  await editStatus(sock, chat, status, `⚠️ *Sent ${r.sent}/${r.total}*\n${why}\n\nProvided by 𝐀𝐥-𝐉𝐢𝐧`);
+  await reactMsg(sock, chat, msg.key, EMOJIS.FAILED);
 }
 
 export async function downloadPostMediaDirect(sock, chat, msg, url, asZip = false) {
@@ -230,16 +227,18 @@ export async function downloadPostMediaDirect(sock, chat, msg, url, asZip = fals
     if (!result?.items?.length) throw new Error('No media items found in this post');
 
     if (asZip) {
-      await edit(sock, chat, status, `📦 *Archiving ${result.items.length} items into ZIP…*`);
+      await editStatus(sock, chat, status, `📥 Downloading 50% done... Archiving ${result.items.length} items into ZIP...`);
       const zip = await withTimeout(pfArchive(result), YTDLP_TIMEOUT, 'postfetch archive');
+      await reactMsg(sock, chat, msg.key, EMOJIS.UPLOAD);
+      await editStatus(sock, chat, status, `Downloading complete ✅ now sending zip...`);
       await sock.sendMessage(chat, {
         document: Buffer.from(zip.bytes),
         fileName: zip.filename || 'post.zip',
         mimetype: zip.mime || 'application/zip',
         caption: `📦 *Post Archive* (${result.items.length} items)\n\nProvided by 𝐀𝐥-𝐉𝐢𝐧`,
       }, { quoted: msg });
-      await edit(sock, chat, status, `✅ *ZIP complete*\n\nProvided by 𝐀𝐥-𝐉𝐢𝐧`);
-      await react(sock, chat, msg, '☑');
+      await editStatus(sock, chat, status, `✅ *ZIP complete*\n\nProvided by 𝐀𝐥-𝐉𝐢𝐧`);
+      await reactMsg(sock, chat, msg.key, EMOJIS.SUCCESS);
       return;
     }
 
@@ -319,20 +318,29 @@ async function downloadMedia(sock, chat, msg, query, audioOnly) {
     const outputTemplate = path.join(outputDir, `${filePrefix}_%(title).60s.%(ext)s`);
     const target = resolveYtdlpTarget(query);
 
-    await edit(sock, chat, status, audioOnly ? '🎵 *Extracting audio…*' : '⬇️ *Downloading…*');
+    await reactMsg(sock, chat, msg.key, EMOJIS.DOWNLOAD);
+    await editStatus(sock, chat, status, audioOnly ? '🎵 Downloading 0% done...' : '📥 Downloading 0% done...');
+
+    let lastPercent = -1;
+    const onProgress = async (percent) => {
+      if (percent - lastPercent >= 10 || percent === 100) {
+        lastPercent = percent;
+        await editStatus(sock, chat, status, `Downloading ${percent}% done...`);
+      }
+    };
 
     let downloadedFiles = [];
     try {
       const p = await withTimeout(
         runYtdlp(target, outputDir, filePrefix, (dl) => audioOnly
           ? dl.extractAudio().audioFormat('mp3').audioQuality('0').output(outputTemplate)
-          : dl.addArgs('-f', 'bestvideo[height<=480][ext=mp4]+bestaudio[ext=m4a]/best[height<=480][ext=mp4]/best[height<=480]/best[ext=mp4]/best', '--merge-output-format', 'mp4', '-o', outputTemplate)),
+          : dl.addArgs('-f', 'bestvideo[height<=480][ext=mp4]+bestaudio[ext=m4a]/best[height<=480][ext=mp4]/best[height<=480]/best[ext=mp4]/best', '--merge-output-format', 'mp4', '-o', outputTemplate), onProgress),
         YTDLP_TIMEOUT, audioOnly ? 'ytdlp audio' : 'ytdlp video'
       );
       if (p && fs.existsSync(p)) downloadedFiles = [p];
     } catch (e) {
-      await edit(sock, chat, status, `❌ *Download failed:* ${e.message}`);
-      await react(sock, chat, msg, '❌');
+      await editStatus(sock, chat, status, `❌ *Download failed:* ${e.message}`);
+      await reactMsg(sock, chat, msg.key, EMOJIS.FAILED);
       cleanPrefix(filePrefix, outputDir);
       return;
     }
@@ -351,6 +359,9 @@ async function downloadMedia(sock, chat, msg, query, audioOnly) {
     const totalFiles = Math.min(downloadedFiles.length, 20);
     let sentCount = 0;
 
+    await reactMsg(sock, chat, msg.key, EMOJIS.UPLOAD);
+    await editStatus(sock, chat, status, `Downloading complete ✅ now sending`);
+
     for (let i = 0; i < totalFiles; i++) {
       const file = downloadedFiles[i];
       if (!fs.existsSync(file)) continue;
@@ -359,7 +370,7 @@ async function downloadMedia(sock, chat, msg, query, audioOnly) {
       let type = await classifyBuffer(buffer);
 
       if (audioOnly && !(type.kind === 'audio' && type.ext === 'mp3')) {
-        await edit(sock, chat, status, '⚙️ *Converting to mp3…*');
+        await editStatus(sock, chat, status, '⚙️ *Converting to mp3…*');
         try {
           buffer = await withTimeout(bufferToMp3(buffer, 192), CONVERT_TIMEOUT, 'mp3 conversion');
           type = { kind: 'audio', ext: 'mp3', mime: 'audio/mpeg' };
@@ -377,20 +388,20 @@ async function downloadMedia(sock, chat, msg, query, audioOnly) {
       } finally { cleanFile(file); }
 
       if (totalFiles > 1) {
-        await edit(sock, chat, status, `⬇️ *Downloading…* (${sentCount}/${totalFiles})`).catch(() => {});
+        await editStatus(sock, chat, status, `Downloading complete ✅ now sending (${sentCount}/${totalFiles})`).catch(() => {});
       }
     }
 
     cleanPrefix(filePrefix, outputDir);
 
     if (sentCount === 0) {
-      await edit(sock, chat, status, '❌ *Downloaded files were empty or exceeded size limits.*');
-      await react(sock, chat, msg, '❌');
+      await editStatus(sock, chat, status, '❌ *Downloaded files were empty or exceeded size limits.*');
+      await reactMsg(sock, chat, msg.key, EMOJIS.FAILED);
       return;
     }
 
-    await edit(sock, chat, status, `✅ *Download complete*\n_${safeName}_\n\nProvided by 𝐀𝐥-𝐉𝐢𝐧`);
-    await react(sock, chat, msg, '☑');
+    await editStatus(sock, chat, status, `✅ *Download complete*\n_${safeName}_\n\nProvided by 𝐀𝐥-𝐉𝐢𝐧`);
+    await reactMsg(sock, chat, msg.key, EMOJIS.SUCCESS);
   } catch (e) {
     console.error('[download]', e.message);
     await edit(sock, chat, status, `❌ *Failed:* ${e.message}`).catch(() => {});

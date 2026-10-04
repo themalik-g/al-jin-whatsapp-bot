@@ -8,18 +8,11 @@ import PQueue from 'p-queue';
 import { getTmpDir, runYtdlp, cleanPrefix, cleanOldTmpFiles } from '../lib/ytdlp.js';
 import { sendWithCta } from '../lib/buttons.js';
 import { ensurePlayable, ensureAudio, isPlayable } from '../lib/video-converter.js';
+import { reactMsg, editStatus, EMOJIS } from '../lib/reaction-helper.js';
 
 const queue = new PQueue({ concurrency: 2 });
 const MAX_VIDEO_BYTES = 400 * 1024 * 1024; // 400 MB cap
 const MAX_AUDIO_BYTES = 50 * 1024 * 1024;  // 50 MB cap for WhatsApp audio
-
-async function react(sock, chat, msg, emoji) {
-  try { await sock.sendMessage(chat, { react: { text: emoji, key: msg.key } }); } catch {}
-}
-
-async function edit(sock, chat, key, text) {
-  try { await sock.sendMessage(chat, { text, edit: key.key }); } catch {}
-}
 
 function resolveTarget(input) {
   const isUrl = /^https?:\/\//i.test(input);
@@ -40,7 +33,8 @@ export async function playCommand(sock, chat, msg, args) {
 
   return queue.add(async () => {
     cleanOldTmpFiles();
-    const status = await sock.sendMessage(chat, { text: `🎵 *Searching:* ${query}` }, { quoted: msg });
+    await reactMsg(sock, chat, msg.key, EMOJIS.SEARCH);
+    const status = await sock.sendMessage(chat, { text: `🔍 *Searching:* ${query}` }, { quoted: msg });
     const filePrefix = `play_${Date.now()}_${Math.floor(Math.random() * 1000)}`;
     const outputDir = getTmpDir();
     const outputTemplate = path.join(outputDir, `${filePrefix}_%(title).50s.%(ext)s`);
@@ -50,15 +44,24 @@ export async function playCommand(sock, chat, msg, args) {
       const targets = isUrl ? [query] : [`ytsearch1:${query}`, `scsearch1:${query}`];
       let downloaded = null, lastErr = null;
 
+      let lastPercent = -1;
+      const onProgress = async (percent) => {
+        if (percent - lastPercent >= 10 || percent === 100) {
+          lastPercent = percent;
+          await editStatus(sock, chat, status, `📥 Downloading ${percent}% done...`);
+        }
+      };
+
       for (const target of targets) {
         try {
+          await reactMsg(sock, chat, msg.key, EMOJIS.DOWNLOAD);
           // Native m4a/aac audio — no mp3 re-encode.
           downloaded = await runYtdlp(target, outputDir, filePrefix, (dl) =>
-            dl.addArgs('-f', AUDIO_FORMAT, '-o', outputTemplate));
+            dl.addArgs('-f', AUDIO_FORMAT, '-o', outputTemplate), onProgress);
           break;
         } catch (err) {
           lastErr = err;
-          if (target.startsWith('ytsearch1:')) await edit(sock, chat, status, '🎵 *YouTube failed; trying SoundCloud…*');
+          if (target.startsWith('ytsearch1:')) await editStatus(sock, chat, status, '🎵 *YouTube failed; trying SoundCloud…*');
         }
       }
       if (!downloaded || !fs.existsSync(downloaded)) throw lastErr || new Error('No audio file created');
@@ -67,6 +70,9 @@ export async function playCommand(sock, chat, msg, args) {
       const size = fs.statSync(audio.path).size;
       if (size > MAX_AUDIO_BYTES) throw new Error(`Audio (${MB(size)} MB) exceeds the 50 MB limit`);
 
+      await reactMsg(sock, chat, msg.key, EMOJIS.UPLOAD);
+      await editStatus(sock, chat, status, `Downloading complete ✅ now sending`);
+
       await sock.sendMessage(chat, {
         audio: { url: audio.path },   // streamed from disk, not loaded into RAM
         mimetype: audio.mimetype,
@@ -74,12 +80,12 @@ export async function playCommand(sock, chat, msg, args) {
         ptt: false,
       }, { quoted: msg });
 
-      await edit(sock, chat, status, `✅ *Audio sent*\n\nProvided by 𝐀𝐥-𝐉𝐢𝐧`);
-      await react(sock, chat, msg, '☑');
+      await editStatus(sock, chat, status, `✅ *Audio sent*\n\nProvided by 𝐀𝐥-𝐉𝐢𝐧`);
+      await reactMsg(sock, chat, msg.key, EMOJIS.SUCCESS);
     } catch (e) {
       console.error('[playCommand]', e);
-      await edit(sock, chat, status, `❌ *Play failed:* ${e.message}`);
-      await react(sock, chat, msg, '❌');
+      await editStatus(sock, chat, status, `❌ *Play failed:* ${e.message}`);
+      await reactMsg(sock, chat, msg.key, EMOJIS.FAILED);
     } finally {
       cleanPrefix(filePrefix, outputDir);
     }
@@ -90,20 +96,32 @@ export async function playCommand(sock, chat, msg, args) {
 async function videoJob(sock, chat, msg, { target, tag, icon, label }) {
   return queue.add(async () => {
     cleanOldTmpFiles();
-    const status = await sock.sendMessage(chat, { text: `${icon} *Downloading…*` }, { quoted: msg });
+    await reactMsg(sock, chat, msg.key, EMOJIS.DOWNLOAD);
+    const status = await sock.sendMessage(chat, { text: `${icon} Downloading 0% done...` }, { quoted: msg });
     const filePrefix = `${tag}_${Date.now()}_${Math.floor(Math.random() * 1000)}`;
     const outputDir = getTmpDir();
     const outputTemplate = path.join(outputDir, `${filePrefix}_%(title).50s.%(ext)s`);
 
     try {
+      let lastPercent = -1;
+      const onProgress = async (percent) => {
+        if (percent - lastPercent >= 10 || percent === 100) {
+          lastPercent = percent;
+          await editStatus(sock, chat, status, `Downloading ${percent}% done...`);
+        }
+      };
+
       const downloaded = await runYtdlp(target, outputDir, filePrefix, (dl) =>
         dl.addArgs('-f', VIDEO_FORMAT, '--merge-output-format', 'mp4',
-          '--postprocessor-args', 'Merger+ffmpeg:-movflags +faststart', '-o', outputTemplate));
+          '--postprocessor-args', 'Merger+ffmpeg:-movflags +faststart', '-o', outputTemplate), onProgress);
 
       // Converts only if the file isn't already WhatsApp-compatible.
       const finalPath = await ensurePlayable(downloaded, path.join(outputDir, `${filePrefix}_playable.mp4`));
       const size = fs.statSync(finalPath).size;
       if (size > MAX_VIDEO_BYTES) throw new Error(`Video (${MB(size)} MB) exceeds the 400 MB cap`);
+
+      await reactMsg(sock, chat, msg.key, EMOJIS.UPLOAD);
+      await editStatus(sock, chat, status, `Downloading complete ✅ now sending`);
 
       // Final safety net: if it still isn't WhatsApp-playable, send as a document so it never arrives broken.
       const playable = await isPlayable(finalPath).catch(() => false);
@@ -114,12 +132,12 @@ async function videoJob(sock, chat, msg, { target, tag, icon, label }) {
         await sock.sendMessage(chat, { document: { url: finalPath }, mimetype: 'video/mp4', fileName: path.basename(finalPath), caption }, { quoted: msg });
       }
 
-      await edit(sock, chat, status, `✅ *Sent (${MB(size)} MB)*\n\nProvided by 𝐀𝐥-𝐉𝐢𝐧`);
-      await react(sock, chat, msg, '☑');
+      await editStatus(sock, chat, status, `✅ *Sent (${MB(size)} MB)*\n\nProvided by 𝐀𝐥-𝐉𝐢𝐧`);
+      await reactMsg(sock, chat, msg.key, EMOJIS.SUCCESS);
     } catch (e) {
       console.error(`[${tag}]`, e);
-      await edit(sock, chat, status, `❌ *${label} failed:* ${e.message}`);
-      await react(sock, chat, msg, '❌');
+      await editStatus(sock, chat, status, `❌ *${label} failed:* ${e.message}`);
+      await reactMsg(sock, chat, msg.key, EMOJIS.FAILED);
     } finally {
       cleanPrefix(filePrefix, outputDir);
     }

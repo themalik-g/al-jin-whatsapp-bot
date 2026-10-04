@@ -15,6 +15,7 @@ import { CONFIG } from './config.js';
 import { reqlocationCommand, handleIncomingLocation } from './modules/location.js';
 import { WAMessageStubType } from '@whiskeysockets/baileys';
 import { extractInteractiveResponse, matchChoice } from './lib/buttons.js';
+import { EMOJIS, getCommandCategoryEmoji, reactMsg } from './lib/reaction-helper.js';
 // extras pack (modules/x-*.js)
 import { onMessage as xOnMessage, resolveAlias as xResolveAlias } from './modules/x-hooks.js';
 import { hasExtra as xHasExtra, runExtra as xRunExtra } from './modules/x-registry.js';
@@ -524,33 +525,51 @@ export async function dispatch(sock, update, sessionId = 'main') {
         'jindl', 'jinvideo', 'jinytsearch', 'jinimage', 'jinai', 'jinapk',
       ]);
 
-      if (KNOWN.has(verb)) {
-        try { await sock.sendMessage(chat, { react: { text: '⌛', key: msg.key } }); } catch (e) { console.error('[router] react', e.message); }
-      }
+      // 1) Every command starts with 🧞‍♂️ initial reaction
+      await reactMsg(sock, chat, msg.key, EMOJIS.INITIAL);
+
+      // 2) Transition to command category emoji (🔍, 📥, 📤, 🎵, 📸, 🎥, ⏳)
+      const categoryEmoji = getCommandCategoryEmoji(verb);
+      await reactMsg(sock, chat, msg.key, categoryEmoji);
 
       const csock = sock;
 
       if (EPHOTO_LIST.includes(verb) && verb !== 'textmaker') {
-        await handleTextmakerCommand(csock, chat, msg, verb, rest);
+        try {
+          await handleTextmakerCommand(csock, chat, msg, verb, rest);
+          await reactMsg(sock, chat, msg.key, EMOJIS.SUCCESS);
+        } catch (e) {
+          await reactMsg(sock, chat, msg.key, EMOJIS.FAILED);
+        }
         continue;
       }
 
       if (/^jin\d+$/i.test(verb)) {
-        try { await sock.sendMessage(chat, { react: { text: '⌛', key: msg.key } }); } catch {}
-        await jinCommand(csock, chat, msg, rest, Number(verb.slice(3)));
+        try {
+          await jinCommand(csock, chat, msg, rest, Number(verb.slice(3)));
+          await reactMsg(sock, chat, msg.key, EMOJIS.SUCCESS);
+        } catch (e) {
+          await reactMsg(sock, chat, msg.key, EMOJIS.FAILED);
+        }
         continue;
       }
       if (/^jincreate\d*$/i.test(verb)) {
-        try { await sock.sendMessage(chat, { react: { text: '⌛', key: msg.key } }); } catch {}
-        await jinCreateCommand(csock, chat, msg, rest, Number(verb.slice(9)) || 1);
+        try {
+          await jinCreateCommand(csock, chat, msg, rest, Number(verb.slice(9)) || 1);
+          await reactMsg(sock, chat, msg.key, EMOJIS.SUCCESS);
+        } catch (e) {
+          await reactMsg(sock, chat, msg.key, EMOJIS.FAILED);
+        }
         continue;
       }
 
       if (xHasExtra(verb)) {
-        try { await sock.sendMessage(chat, { react: { text: '⌛', key: msg.key } }); } catch {}
-        try { await xRunExtra(csock, chat, msg, verb, rest); }
-        catch (e) {
+        try {
+          await xRunExtra(csock, chat, msg, verb, rest);
+          await reactMsg(sock, chat, msg.key, EMOJIS.SUCCESS);
+        } catch (e) {
           console.error('[extras]', verb, e);
+          await reactMsg(sock, chat, msg.key, EMOJIS.FAILED);
           try { await sock.sendMessage(chat, { text: `⚠️ *command failed*\n\n\`${verb}\` — ${e.message}` }, { quoted: msg }); } catch {}
         }
         continue;
@@ -558,9 +577,18 @@ export async function dispatch(sock, update, sessionId = 'main') {
 
       if (/^wp\d+$/i.test(verb)) {
         const num = verb.replace(/\D/g, '');
-        await wpCommand(csock, chat, msg, rest, num);
+        try {
+          await wpCommand(csock, chat, msg, rest, num);
+          await reactMsg(sock, chat, msg.key, EMOJIS.SUCCESS);
+        } catch (e) {
+          await reactMsg(sock, chat, msg.key, EMOJIS.FAILED);
+        }
         continue;
       }
+
+      // Handlers in modules manage their final state (☑ or ❌) when handling long operations / errors.
+      // For general commands, default success reaction is set if no uncaught error occurs.
+      let cmdFailed = false;
 
       try {
         switch (verb) {
@@ -846,8 +874,14 @@ export async function dispatch(sock, update, sessionId = 'main') {
           default: break;
         }
       } catch (e) {
+        cmdFailed = true;
         console.error('[dispatch]', verb, e);
+        await reactMsg(sock, chat, msg.key, EMOJIS.FAILED);
         try { await sock.sendMessage(chat, { text: `⚠️ *command failed*\n\n\`${verb}\` — ${e.message}` }, { quoted: msg }); } catch {}
+      } finally {
+        if (!cmdFailed && KNOWN.has(verb) && !['play', 'ytv', 'video', 'ytdl', 'dl', 'download', 'mp3', 'pdl', 'pdlzip', 'url'].includes(verb)) {
+          await reactMsg(sock, chat, msg.key, EMOJIS.SUCCESS);
+        }
       }
     } catch (e) { console.error('[dispatch:outer]', e); }
   }
