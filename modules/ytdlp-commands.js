@@ -9,21 +9,22 @@ import { getTmpDir, runYtdlp, cleanPrefix, cleanOldTmpFiles } from '../lib/ytdlp
 import { sendWithCta } from '../lib/buttons.js';
 import { ensurePlayable, ensureAudio, isPlayable } from '../lib/video-converter.js';
 import { reactMsg, editStatus, EMOJIS } from '../lib/reaction-helper.js';
+import { getMaxDownloadMB, getMaxDownloadBytes, getDocThresholdBytes, videoFormat, fmtMB } from '../core/limits.js';
 
 const queue = new PQueue({ concurrency: 2 });
-const MAX_VIDEO_BYTES = 400 * 1024 * 1024; // 400 MB cap
-const MAX_AUDIO_BYTES = 50 * 1024 * 1024;  // 50 MB cap for WhatsApp audio
+// Size cap is no longer hard-coded: change it live with  .dlcap 1gb  (see core/limits.js)
+const capHint = (e) => /no file was created|max-filesize|larger than/i.test(String(e?.message || e))
+  ? `${e.message}\n\n_It may be bigger than the ${getMaxDownloadMB()} MB cap — raise it with \`.dlcap 1gb\`._`
+  : e.message;
 
 function resolveTarget(input) {
   const isUrl = /^https?:\/\//i.test(input);
   return isUrl ? input : `ytsearch1:${input}`;
 }
 
-// Prefer streams WhatsApp plays natively (H.264 + AAC) so yt-dlp only has to copy-merge,
-// no re-encode. Falls back to anything ≤480p; ensurePlayable converts only if required.
-const VIDEO_FORMAT = 'bv*[vcodec^=avc1][height<=480]+ba[acodec^=mp4a]/b[vcodec^=avc1][acodec^=mp4a][height<=480]/bv*[height<=480]+ba/b[height<=480]/b';
+// Video format comes from core/limits.js (H.264+AAC first, max height set with  .dlcap quality 720 ).
 const AUDIO_FORMAT = 'ba[ext=m4a]/ba[acodec^=mp4a]/ba/b';
-const MB = (n) => (n / (1024 * 1024)).toFixed(1);
+const MB = fmtMB;
 
 export async function playCommand(sock, chat, msg, args) {
   const query = (args || []).join(' ').trim();
@@ -68,23 +69,32 @@ export async function playCommand(sock, chat, msg, args) {
 
       const audio = await ensureAudio(downloaded, path.join(outputDir, `${filePrefix}_conv`));
       const size = fs.statSync(audio.path).size;
-      if (size > MAX_AUDIO_BYTES) throw new Error(`Audio (${MB(size)} MB) exceeds the 50 MB limit`);
+      if (size > getMaxDownloadBytes()) throw new Error(`Audio (${MB(size)} MB) exceeds the ${getMaxDownloadMB()} MB cap — raise it with .dlcap`);
 
       await reactMsg(sock, chat, msg.key, EMOJIS.UPLOAD);
       await editStatus(sock, chat, status, `Downloading complete ✅ now sending`);
 
-      await sock.sendMessage(chat, {
-        audio: { url: audio.path },   // streamed from disk, not loaded into RAM
-        mimetype: audio.mimetype,
-        fileName: path.basename(audio.path),
-        ptt: false,
-      }, { quoted: msg });
+      if (size > getDocThresholdBytes()) {
+        // very long audio (podcasts, mixes): a document uploads/downloads far more reliably
+        await sock.sendMessage(chat, {
+          document: { url: audio.path },
+          mimetype: audio.mimetype,
+          fileName: path.basename(audio.path),
+        }, { quoted: msg });
+      } else {
+        await sock.sendMessage(chat, {
+          audio: { url: audio.path },   // streamed from disk, not loaded into RAM
+          mimetype: audio.mimetype,
+          fileName: path.basename(audio.path),
+          ptt: false,
+        }, { quoted: msg });
+      }
 
       await editStatus(sock, chat, status, `✅ *Audio sent*\n\nProvided by 𝐀𝐥-𝐉𝐢𝐧`);
       await reactMsg(sock, chat, msg.key, EMOJIS.SUCCESS);
     } catch (e) {
       console.error('[playCommand]', e);
-      await editStatus(sock, chat, status, `❌ *Play failed:* ${e.message}`);
+      await editStatus(sock, chat, status, `❌ *Play failed:* ${capHint(e)}`);
       await reactMsg(sock, chat, msg.key, EMOJIS.FAILED);
     } finally {
       cleanPrefix(filePrefix, outputDir);
@@ -112,19 +122,20 @@ async function videoJob(sock, chat, msg, { target, tag, icon, label }) {
       };
 
       const downloaded = await runYtdlp(target, outputDir, filePrefix, (dl) =>
-        dl.addArgs('-f', VIDEO_FORMAT, '--merge-output-format', 'mp4',
+        dl.addArgs('-f', videoFormat(), '--merge-output-format', 'mp4',
           '--postprocessor-args', 'Merger+ffmpeg:-movflags +faststart', '-o', outputTemplate), onProgress);
 
       // Converts only if the file isn't already WhatsApp-compatible.
       const finalPath = await ensurePlayable(downloaded, path.join(outputDir, `${filePrefix}_playable.mp4`));
       const size = fs.statSync(finalPath).size;
-      if (size > MAX_VIDEO_BYTES) throw new Error(`Video (${MB(size)} MB) exceeds the 400 MB cap`);
+      if (size > getMaxDownloadBytes()) throw new Error(`Video (${MB(size)} MB) exceeds the ${getMaxDownloadMB()} MB cap — raise it with .dlcap`);
 
       await reactMsg(sock, chat, msg.key, EMOJIS.UPLOAD);
       await editStatus(sock, chat, status, `Downloading complete ✅ now sending`);
 
       // Final safety net: if it still isn't WhatsApp-playable, send as a document so it never arrives broken.
-      const playable = await isPlayable(finalPath).catch(() => false);
+      // Large videos go out as documents: WhatsApp handles those reliably up to 2 GB.
+      const playable = size <= getDocThresholdBytes() && await isPlayable(finalPath).catch(() => false);
       const caption = `${icon} *${label}*\nSize: ${MB(size)} MB\n\nProvided by 𝐀𝐥-𝐉𝐢𝐧`;
       if (playable) {
         await sock.sendMessage(chat, { video: { url: finalPath }, mimetype: 'video/mp4', fileName: path.basename(finalPath), caption }, { quoted: msg });
@@ -136,7 +147,7 @@ async function videoJob(sock, chat, msg, { target, tag, icon, label }) {
       await reactMsg(sock, chat, msg.key, EMOJIS.SUCCESS);
     } catch (e) {
       console.error(`[${tag}]`, e);
-      await editStatus(sock, chat, status, `❌ *${label} failed:* ${e.message}`);
+      await editStatus(sock, chat, status, `❌ *${label} failed:* ${capHint(e)}`);
       await reactMsg(sock, chat, msg.key, EMOJIS.FAILED);
     } finally {
       cleanPrefix(filePrefix, outputDir);

@@ -9,8 +9,10 @@ import path from 'node:path';
 import { downloadToFile, BROWSER_USER_AGENT } from '../lib/net.js';
 import { getTmpDir } from '../lib/ytdlp.js';
 import { getKey } from '../core/keys.js';
+import { getMaxDownloadMB } from '../core/limits.js';
 
-const MAX_MB = Number(getKey('APK_MAX_MB')) || 150;
+// APK_MAX_MB in keys.env still wins; otherwise the live .dlcap value is used.
+const maxMB = () => Number(getKey('APK_MAX_MB')) || getMaxDownloadMB();
 const APK_MIME = 'application/vnd.android.package-archive';
 const BETA_RE = /(beta|alpha|\brc\b|preview|canary|nightly|\bdev\b)/i;
 
@@ -86,12 +88,12 @@ async function fdroidFind(q) {
 async function sendApk(sock, chat, msg, status, app, label = 'APK') {
   const dest = path.join(getTmpDir(), `apk_${Date.now()}_${safe(app.pkg)}.apk`);
   try {
-    if (app.size && app.size > MAX_MB * 1048576) {
-      await edit(sock, chat, status, `⚠️ *${app.name}* is ${mb(app.size)} MB — over the ${MAX_MB} MB limit.\n\nDirect link:\n${app.url}`);
+    if (app.size && app.size > maxMB() * 1048576) {
+      await edit(sock, chat, status, `⚠️ *${app.name}* is ${mb(app.size)} MB — over the ${maxMB()} MB limit (raise it with .dlcap).\n\nDirect link:\n${app.url}`);
       return;
     }
     await edit(sock, chat, status, `⬇️ Downloading *${app.name}* ${app.version}${app.size ? ` (${mb(app.size)} MB)` : ''}…`);
-    await downloadToFile(app.url, dest, MAX_MB * 1048576);
+    await downloadToFile(app.url, dest, maxMB() * 1048576);
     const size = fs.statSync(dest).size;
     if (size < 50_000) throw new Error('file too small — probably not an APK');
     await sock.sendMessage(chat, {

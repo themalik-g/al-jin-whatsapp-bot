@@ -13,6 +13,7 @@ import { sendInteractive, createQuickReply, sendWithCta } from '../lib/buttons.j
 import { getPrefix } from '../core/settings.js';
 import { getTmpDir, runYtdlp, cleanPrefix, cleanOldTmpFiles } from '../lib/ytdlp.js';
 import { reactMsg, editStatus, EMOJIS } from '../lib/reaction-helper.js';
+import { getMaxDownloadMB, getMaxDownloadBytes, getDocThresholdBytes, getDownloadTimeoutMs, videoHeightForDl } from '../core/limits.js';
 
 const MAX_BYTES       = 15 * 1024 * 1024;
 const MAX_VIDEO       = 60 * 1024 * 1024;
@@ -334,8 +335,8 @@ async function downloadMedia(sock, chat, msg, query, audioOnly) {
       const p = await withTimeout(
         runYtdlp(target, outputDir, filePrefix, (dl) => audioOnly
           ? dl.extractAudio().audioFormat('mp3').audioQuality('0').output(outputTemplate)
-          : dl.addArgs('-f', 'bestvideo[height<=480][ext=mp4]+bestaudio[ext=m4a]/best[height<=480][ext=mp4]/best[height<=480]/best[ext=mp4]/best', '--merge-output-format', 'mp4', '-o', outputTemplate), onProgress),
-        YTDLP_TIMEOUT, audioOnly ? 'ytdlp audio' : 'ytdlp video'
+          : dl.addArgs('-f', `bestvideo[height<=${videoHeightForDl()}][ext=mp4]+bestaudio[ext=m4a]/best[height<=${videoHeightForDl()}][ext=mp4]/best[height<=${videoHeightForDl()}]/best[ext=mp4]/best`, '--merge-output-format', 'mp4', '-o', outputTemplate), onProgress),
+        Math.max(YTDLP_TIMEOUT, getDownloadTimeoutMs()), audioOnly ? 'ytdlp audio' : 'ytdlp video'
       );
       if (p && fs.existsSync(p)) downloadedFiles = [p];
     } catch (e) {
@@ -365,26 +366,43 @@ async function downloadMedia(sock, chat, msg, query, audioOnly) {
     for (let i = 0; i < totalFiles; i++) {
       const file = downloadedFiles[i];
       if (!fs.existsSync(file)) continue;
-      let buffer = fs.readFileSync(file);
-      if (buffer.length < 1024) { cleanFile(file); continue; }
+      const fileSize = fs.statSync(file).size;
+      if (fileSize < 1024) { cleanFile(file); continue; }
+      // Big files are streamed from disk (never loaded into RAM); only the first bytes are read to detect the type.
+      let streamed = fileSize > 20 * 1024 * 1024;
+      let buffer;
+      if (streamed) {
+        const fd = fs.openSync(file, 'r');
+        try { const head = Buffer.alloc(4100); const n = fs.readSync(fd, head, 0, 4100, 0); buffer = head.subarray(0, n); }
+        finally { fs.closeSync(fd); }
+      } else {
+        buffer = fs.readFileSync(file);
+      }
       let type = await classifyBuffer(buffer);
 
       if (audioOnly && !(type.kind === 'audio' && type.ext === 'mp3')) {
         await editStatus(sock, chat, status, '⚙️ *Converting to mp3…*');
         try {
+          if (streamed) { buffer = fs.readFileSync(file); streamed = false; }   // conversion works in memory
           buffer = await withTimeout(bufferToMp3(buffer, 192), CONVERT_TIMEOUT, 'mp3 conversion');
           type = { kind: 'audio', ext: 'mp3', mime: 'audio/mpeg' };
         } catch (convErr) { console.warn('[download:mp3-convert]', convErr.message); }
       }
 
-      const limit = type.kind === 'video' ? MAX_VIDEO : MAX_BYTES;
-      if (buffer.length > limit) { cleanFile(file); continue; }
+      const size = streamed ? fileSize : buffer.length;
+      const limit = type.kind === 'image' ? MAX_BYTES : getMaxDownloadBytes();
+      if (size > limit) {
+        await editStatus(sock, chat, status, `⚠️ *File is ${(size / 1048576).toFixed(0)} MB* — over the ${getMaxDownloadMB()} MB cap. Raise it with \`.dlcap 1gb\``).catch(() => {});
+        cleanFile(file); continue;
+      }
 
+      const src = streamed ? { url: file } : buffer;
+      const asDoc = size > getDocThresholdBytes();   // large media → document (reliable up to 2 GB)
       try {
-        if (type.kind === 'image') { await sock.sendMessage(chat, { image: buffer, mimetype: type.mime }, { quoted: msg }); sentCount++; }
-        else if (type.kind === 'video') { await sock.sendMessage(chat, { video: buffer, mimetype: type.mime || 'video/mp4', fileName: `${safeName}.${type.ext}` }, { quoted: msg }); sentCount++; }
-        else if (type.kind === 'audio') { await sock.sendMessage(chat, { audio: buffer, mimetype: type.mime || 'audio/mpeg', fileName: `${safeName}.${type.ext}`, ptt: false }, { quoted: msg }); sentCount++; }
-        else { await sock.sendMessage(chat, { document: buffer, mimetype: type.mime, fileName: `${safeName}.${type.ext}` }, { quoted: msg }); sentCount++; }
+        if (type.kind === 'image') { await sock.sendMessage(chat, { image: src, mimetype: type.mime }, { quoted: msg }); sentCount++; }
+        else if (type.kind === 'video' && !asDoc) { await sock.sendMessage(chat, { video: src, mimetype: type.mime || 'video/mp4', fileName: `${safeName}.${type.ext}` }, { quoted: msg }); sentCount++; }
+        else if (type.kind === 'audio' && !asDoc) { await sock.sendMessage(chat, { audio: src, mimetype: type.mime || 'audio/mpeg', fileName: `${safeName}.${type.ext}`, ptt: false }, { quoted: msg }); sentCount++; }
+        else { await sock.sendMessage(chat, { document: src, mimetype: type.mime, fileName: `${safeName}.${type.ext}` }, { quoted: msg }); sentCount++; }
       } finally { cleanFile(file); }
 
       if (totalFiles > 1) {
@@ -395,7 +413,7 @@ async function downloadMedia(sock, chat, msg, query, audioOnly) {
     cleanPrefix(filePrefix, outputDir);
 
     if (sentCount === 0) {
-      await editStatus(sock, chat, status, '❌ *Downloaded files were empty or exceeded size limits.*');
+      await editStatus(sock, chat, status, `❌ *Downloaded files were empty or over the ${getMaxDownloadMB()} MB cap* (raise it with \`.dlcap 1gb\`).`);
       await reactMsg(sock, chat, msg.key, EMOJIS.FAILED);
       return;
     }

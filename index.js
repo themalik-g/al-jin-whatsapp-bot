@@ -33,6 +33,10 @@ function loadEnvFile(file) {
         (val.startsWith("'") && val.endsWith("'"))
       ) {
         val = val.slice(1, -1);
+      } else {
+        // KEY=value   # comment  → drop the trailing comment (it used to turn
+        // numbers into NaN, e.g. WRAITH_PROMPT_TIMEOUT_MS=5000 # 5s)
+        val = val.replace(/\s+#.*$/, '').trim();
       }
       if (!(key in process.env)) process.env[key] = val;
     }
@@ -70,9 +74,10 @@ const LINK_WAIT_MS = 300_000;
 const MAX_RESTARTS = 10;
 const ADD_MODE =
   process.argv.includes('--add') || process.argv.includes('--setup');
-const PROMPT_TIMEOUT_MS = Number(
-  process.env.WRAITH_PROMPT_TIMEOUT_MS || 20_000
-);
+const PROMPT_TIMEOUT_MS = (() => {
+  const n = Number(String(process.env.WRAITH_PROMPT_TIMEOUT_MS ?? '').trim());
+  return Number.isFinite(n) && n >= 0 ? n : 20_000;
+})();
 
 // ─────────────────────────────────────────────
 // 4. Styling helpers

@@ -21,6 +21,7 @@ for (const k of Object.keys(process.env)) {
   }
 }
 
+import './core/bootstrap-env.js'; // MUST stay first: pins one data folder for every launch method
 import makeWASocket, {
   useMultiFileAuthState,
   makeCacheableSignalKeyStore,
@@ -47,6 +48,7 @@ import { revealDelete } from './modules/ghost.js';
 import { startPpsSync, stopPpsSync } from './modules/pps.js';
 import { sessionPath, statePath, inState } from './core/paths.js';
 import { loadVars } from './core/vars.js';
+import { hasPrimaryOwner, setPrimaryOwner, getOwnerDetails } from './core/identity.js';
 import { NEWSLETTER_CONTEXT } from './lib/buttons.js';
 
 // ── CLI Arg Parsing ──
@@ -79,7 +81,9 @@ if (pairingNumber) {
     console.error(`[${sessionId}] invalid number: ${rawNumber}`);
     process.exit(1);
   }
-  fs.writeFileSync(OWNER_FILE, JSON.stringify({ owner: pairingNumber }, null, 2));
+  let prevOwnerData = {};
+  try { prevOwnerData = JSON.parse(fs.readFileSync(OWNER_FILE, 'utf-8')) || {}; } catch {}
+  fs.writeFileSync(OWNER_FILE, JSON.stringify({ ...prevOwnerData, owner: pairingNumber }, null, 2));
   CONFIG.owner = pairingNumber;
 } else if (!CONFIG.owner && fs.existsSync(OWNER_FILE)) {
   try {
@@ -213,6 +217,21 @@ async function requestPairingCode(sock, number, attempt = 0) {
 function notifyLinked() {
   try { process.send?.({ type: 'wraith:linked', sessionId }); } catch (e) {
     try { console.error('[notifyLinked]', e?.message); } catch {}
+  }
+}
+
+// Prints where data lives and who receives alerts; binds an owner if none is set.
+function reportOwnerBinding(sock) {
+  const linked = String(sock.user?.id || '').split(':')[0].split('@')[0].replace(/\D/g, '');
+  console.log(tag, grey(`data dir  : ${process.env.WRAITH_DATA_DIR}`));
+  if (!hasPrimaryOwner() && linked) {
+    const r = setPrimaryOwner(linked);
+    if (r.ok) console.log(tag, yellow(`no owner was set — using the linked number +${linked}`));
+  }
+  const { owner } = getOwnerDetails();
+  console.log(tag, grey(`alerts to : +${owner || '(none)'}`));
+  if (owner && linked && owner !== linked) {
+    console.log(tag, yellow(`owner (+${owner}) is NOT the linked account (+${linked}). If that is not what you want, send  .setowner me  from the linked account.`));
   }
 }
 
@@ -380,6 +399,7 @@ async function ignite() {
         notifyLinked();
       }
 
+      try { reportOwnerBinding(sock); }     catch (e) { try { console.error('[ignite:owner]', e?.message); } catch {} }
       try { startScheduler(sock); }         catch (e) { try { console.error('[ignite:scheduler]', e?.message); } catch {} }
       try { startPresenceHeartbeat(sock); } catch (e) { try { console.error('[ignite:presence]', e?.message); } catch {} }
       try { startPpsSync(sock); }           catch (e) { try { console.error('[ignite:pps]', e?.message); } catch {} }

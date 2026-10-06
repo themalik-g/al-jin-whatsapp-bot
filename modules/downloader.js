@@ -6,7 +6,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { isOwner } from '../core/identity.js';
-import { CONFIG } from '../config.js';
+import { getMaxDownloadMB } from '../core/limits.js';
 import { downloadToFile, withTempFile, chunkText } from '../lib/net.js';
 import { sendWithCta } from '../lib/buttons.js';
 
@@ -33,7 +33,7 @@ export async function gitdlCommand(sock, chat, msg, args) {
 
     const [, owner, repo] = match;
     const zipUrl = `https://api.github.com/repos/${owner}/${repo}/zipball`;
-    const maxMB = CONFIG.media?.maxDownloadMB || 100;
+    const maxMB = getMaxDownloadMB();
 
     await sock.sendMessage(chat, { text: `📥 Downloading *${owner}/${repo}*…` }, { quoted: msg });
 
@@ -41,7 +41,7 @@ export async function gitdlCommand(sock, chat, msg, args) {
       await downloadToFile(zipUrl, dest, maxMB * 1024 * 1024, 10);
       const stat = fs.statSync(dest);
       await sock.sendMessage(chat, {
-        document: fs.readFileSync(dest),
+        document: { url: dest },   // streamed from disk, not loaded into RAM
         fileName: `${repo}.zip`,
         mimetype: 'application/zip',
         caption: `📦 *${owner}/${repo}*\n_${(stat.size / 1024 / 1024).toFixed(1)} MB_`,
@@ -61,7 +61,7 @@ export async function mfdlCommand(sock, chat, msg, args) {
       return sendWithCta(sock, chat, '📥 *mfdl*\n\nUsage: `.mfdl <mediafire-url>`', { quoted: msg });
     }
 
-    const maxMB = CONFIG.media?.maxDownloadMB || 100;
+    const maxMB = getMaxDownloadMB();
     await sock.sendMessage(chat, { text: '📥 Resolving MediaFire link…' }, { quoted: msg });
 
     // ★ FIX: the page fetch now has a hard timeout — a hung MediaFire page
@@ -95,7 +95,7 @@ export async function mfdlCommand(sock, chat, msg, args) {
       await downloadToFile(directUrl, dest, maxMB * 1024 * 1024, 10);
       const stat = fs.statSync(dest);
       await sock.sendMessage(chat, {
-        document: fs.readFileSync(dest),
+        document: { url: dest },   // streamed from disk, not loaded into RAM
         fileName,
         mimetype: 'application/octet-stream',
         caption: `📥 *${fileName}*\n_${(stat.size / 1024 / 1024).toFixed(1)} MB_`,

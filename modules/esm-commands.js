@@ -15,10 +15,12 @@ import { fetchEsmApi, esmErrorMessage, esmYoutubeDownload, fetchEsmInstagram, in
 import { ytSearch, isYoutubeUrl } from '../lib/ytsearch.js';
 import { getTmpDir } from '../lib/ytdlp.js';
 import { downloadToFile } from '../lib/net.js';
+import { getMaxDownloadBytes, getDocThresholdBytes, getDownloadTimeoutMs } from '../core/limits.js';
 
 const BRAND = 'Provided by 𝐀𝐥-𝐉𝐢𝐧';
-const MAX_VIDEO = 80 * 1024 * 1024;
-const MAX_APK = 100 * 1024 * 1024;
+// size caps follow the live  .dlcap  setting (core/limits.js)
+const maxVideo = () => getMaxDownloadBytes();
+const maxApk = () => getMaxDownloadBytes();
 const MAX_IMAGE = 10 * 1024 * 1024;
 const isUrl = (s) => /^https?:\/\//i.test(String(s || ''));
 const isInstagramUrl = (s) => /^https?:\/\/((www|m)\.)?instagram\.com\//i.test(String(s || ''));
@@ -59,6 +61,12 @@ async function esmJson(endpoint, params) {
 }
 
 async function sendVideo(sock, chat, msg, file, caption) {
+  let size = 0;
+  try { size = fs.statSync(file).size; } catch {}
+  if (size > getDocThresholdBytes()) {
+    // large videos go out as documents — far more reliable than a video message
+    return sock.sendMessage(chat, { document: { url: file }, mimetype: 'video/mp4', fileName: path.basename(file), caption }, { quoted: msg });
+  }
   await sock.sendMessage(chat, { video: { url: file }, mimetype: 'video/mp4', caption }, { quoted: msg });
 }
 
@@ -72,7 +80,7 @@ export async function jindlCommand(sock, chat, msg, args) {
 
     if (isYoutubeUrl(url)) {
       dest = path.join(getTmpDir(), `jindl_${Date.now()}.mp4`);
-      const info = await esmYoutubeDownload(url, dest, { type: 'video', maxBytes: MAX_VIDEO });
+      const info = await esmYoutubeDownload(url, dest, { type: 'video', maxBytes: maxVideo(), budgetMs: getDownloadTimeoutMs() });
       await sendVideo(sock, chat, msg, dest, `${info.title ? `🎬 *${info.title}*\n\n` : ''}${BRAND}`);
     } else if (isInstagramUrl(url)) {
       const media = (await fetchEsmInstagram(url)).slice(0, MAX_IG_ITEMS);
@@ -80,7 +88,7 @@ export async function jindlCommand(sock, chat, msg, args) {
       for (const item of media) {
         const file = path.join(getTmpDir(), `jindl_ig_${Date.now()}_${sent}.${item.isVideo ? 'mp4' : 'jpg'}`);
         try {
-          await downloadToFile(item.url, file, MAX_VIDEO, 5, instagramDownloadHeaders());
+          await downloadToFile(item.url, file, maxVideo(), 5, instagramDownloadHeaders());
           const content = item.isVideo
             ? { video: { url: file }, mimetype: 'video/mp4', caption: BRAND }
             : { image: { url: file }, caption: BRAND };
@@ -103,7 +111,7 @@ export async function jindlCommand(sock, chat, msg, args) {
       for (const item of items.slice(0, 3)) {
         const file = path.join(getTmpDir(), `jindl_${Date.now()}.${item.isVideo ? 'mp4' : 'jpg'}`);
         try {
-          await downloadToFile(item.url, file, MAX_VIDEO);
+          await downloadToFile(item.url, file, maxVideo());
           if (item.isVideo && isErrorPage(file)) throw new Error('download was an error page, not media');
           if (item.isVideo) await sendVideo(sock, chat, msg, file, BRAND);
           else await sock.sendMessage(chat, { image: { url: file }, caption: BRAND }, { quoted: msg });
@@ -153,7 +161,7 @@ export async function jinvideoCommand(sock, chat, msg, args) {
     }
 
     dest = path.join(getTmpDir(), `jinvideo_${Date.now()}.mp4`);
-    const info = await esmYoutubeDownload(target, dest, { type: 'video', maxBytes: MAX_VIDEO });
+    const info = await esmYoutubeDownload(target, dest, { type: 'video', maxBytes: maxVideo(), budgetMs: getDownloadTimeoutMs() });
     const lines = [`🎬 *${info.title || title || 'YouTube Video'}*`];
     if (info.author) lines.push(`👤 ${info.author}`);
     if (info.duration) lines.push(`⏱ ${info.duration}`);
@@ -314,7 +322,7 @@ export async function jinapkCommand(sock, chat, msg, args) {
     if (!apkUrl) throw lastDl || new Error('No APK download link returned.');
 
     dest = path.join(getTmpDir(), `jinapk_${Date.now()}.apk`);
-    await downloadToFile(apkUrl, dest, MAX_APK);
+    await downloadToFile(apkUrl, dest, maxApk());
     await sock.sendMessage(chat, {
       document: { url: dest },
       mimetype: 'application/vnd.android.package-archive',
