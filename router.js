@@ -180,6 +180,8 @@ const delvarCommand     = lazy('./modules/owner.js', 'delvarCommand');
 const addownerCommand   = lazy('./modules/owner.js', 'addownerCommand');
 const delownerCommand   = lazy('./modules/owner.js', 'delownerCommand');
 const ownerlistCommand  = lazy('./modules/owner.js', 'ownerlistCommand');
+const setownerCommand   = lazy('./modules/owner.js', 'setownerCommand');
+const dlcapCommand      = lazy('./modules/dlcap.js', 'dlcapCommand');
 
 const gitdlCommand = lazy('./modules/downloader.js', 'gitdlCommand');
 const mfdlCommand  = lazy('./modules/downloader.js', 'mfdlCommand');
@@ -279,7 +281,7 @@ const CRITICAL_COMMANDS = new Set([
   'rejectcalls', 'setpp', 'setabout', 'chatstats', 'setsession',
   'addsession', 'delsession', 'replymode',
   'setvar', 'getvar', 'delvar',
-  'addowner', 'delowner', 'ownerlist',
+  'addowner', 'delowner', 'ownerlist', 'setowner', 'dlcap',
   'gitdl', 'mfdl', 'url', 'pdl', 'pdlzip', 'restart', 'pinchat', 'unpinchat', 'pdd', 'tag',
   'ytcookies', 'igzip', 'igstory', 'igsearch', 'igprofile',
 ]);
@@ -781,6 +783,8 @@ export async function dispatch(sock, update, sessionId = 'main') {
           case 'addowner': await addownerCommand(csock, chat, msg, rest); break;
           case 'delowner': await delownerCommand(csock, chat, msg, rest); break;
           case 'ownerlist': await ownerlistCommand(csock, chat, msg); break;
+          case 'setowner': await setownerCommand(csock, chat, msg, rest); break;
+          case 'dlcap': await dlcapCommand(csock, chat, msg, rest); break;
           case 'script':
           case 'repo': await scriptCommand(csock, chat, msg); break;
           case 'mode': await modeCommand(csock, chat, msg, rest); break;

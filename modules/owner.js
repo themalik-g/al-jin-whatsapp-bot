@@ -5,7 +5,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { downloadContentFromMessage } from '@whiskeysockets/baileys';
-import { isOwner, isPrimaryOwner, addSecondaryOwner, delSecondaryOwner, getOwnerDetails, registerOwnerLid } from '../core/identity.js';
+import { isOwner, isPrimaryOwner, addSecondaryOwner, delSecondaryOwner, getOwnerDetails, registerOwnerLid, setPrimaryOwner } from '../core/identity.js';
 import { getBestUserJid } from '../core/jid-resolver.js';
 import { readJson } from '../core/state-io.js';
 import { CONFIG } from '../config.js';
@@ -673,6 +673,26 @@ function primaryOwnerOnly(sock, chat, msg) {
         return true;
     }
     return false;
+}
+
+// .setowner <number> | me  — change WHO RECEIVES the alerts (anti-delete, anti-edit, view-once, statuses…)
+export async function setownerCommand(sock, chat, msg, args) {
+    if (primaryOwnerOnly(sock, chat, msg)) return;
+    try {
+        const arg = String(args?.[0] || '').trim().toLowerCase();
+        if (!arg) {
+            const { owner } = getOwnerDetails();
+            return sock.sendMessage(chat, { text: `👑 *Primary owner:* ${owner ? '+' + owner : '_not set_'}\n\nChange it:\n• \`.setowner me\` — the number this bot is linked to\n• \`.setowner 923001234567\`\n\n_All ghost / peek / lurk alerts are sent to the primary owner._` }, { quoted: msg });
+        }
+        const linked = String(sock.user?.id || '').split(':')[0].split('@')[0].replace(/\D/g, '');
+        const digits = (arg === 'me' || arg === 'self') ? linked : arg.replace(/\D/g, '');
+        if (!digits) return sock.sendMessage(chat, { text: '❌ Could not work out that number. Use: .setowner 923001234567' }, { quoted: msg });
+        const res = setPrimaryOwner(digits);
+        if (!res.ok) return sock.sendMessage(chat, { text: `❌ ${res.reason}` }, { quoted: msg });
+        await sock.sendMessage(chat, { text: `✅ Primary owner is now @${res.number}.\nAlerts go to this number from now on.${res.previous && res.previous !== res.number ? `\n_(was +${res.previous})_` : ''}`, mentions: [`${res.number}@s.whatsapp.net`] }, { quoted: msg });
+    } catch (e) {
+        await sock.sendMessage(chat, { text: `⚠️ setowner failed: ${e.message}` }, { quoted: msg }).catch(() => {});
+    }
 }
 
 export async function addownerCommand(sock, chat, msg, args) {

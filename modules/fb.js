@@ -13,8 +13,11 @@ import { downloadToFile, BROWSER_USER_AGENT } from '../lib/net.js';
 import { isOwner } from '../core/identity.js';
 import { downloadPostMediaDirect, isPostUrl } from './download.js';
 import { getKey } from '../core/keys.js';
+import { getMaxDownloadMB, getMaxDownloadBytes, getDocThresholdBytes, getVideoHeight } from '../core/limits.js';
 
-const MAX_MB = Number(getKey('FB_MAX_MB')) || 100;
+// FB_MAX_MB in keys.env still wins if you set it; otherwise the live .dlcap value is used.
+const maxMB = () => Number(getKey('FB_MAX_MB')) || getMaxDownloadMB();
+const maxBytes = () => Number(getKey('FB_MAX_MB')) ? Number(getKey('FB_MAX_MB')) * 1048576 : getMaxDownloadBytes();
 const edit = (sock, chat, st, text) => sock.sendMessage(chat, { text, edit: st.key }).catch(() => {});
 
 async function resolveUrl(raw) {
@@ -41,13 +44,15 @@ async function downloadFb(sock, chat, msg, raw) {
   try {
     await edit(sock, chat, st, '⬇️ *Facebook:* downloading…');
     const file = await runYtdlp(url, dir, prefix, (dl) => dl.addArgs(
-      '-f', 'bv*[height<=720]+ba/b[height<=720]/b', '--merge-output-format', 'mp4', '-o', tmpl));
+      '-f', `bv*[height<=${Math.max(720, getVideoHeight())}]+ba/b[height<=${Math.max(720, getVideoHeight())}]/b`, '--merge-output-format', 'mp4', '-o', tmpl));
     const size = fs.statSync(file).size;
-    if (size > MAX_MB * 1048576) throw new Error(`file is ${(size / 1048576).toFixed(0)} MB (limit ${MAX_MB} MB)`);
+    if (size > maxBytes()) throw new Error(`file is ${(size / 1048576).toFixed(0)} MB (limit ${maxMB()} MB — raise it with .dlcap)`);
     const isImg = /\.(jpe?g|png|webp)$/i.test(file);
     await sock.sendMessage(chat, isImg
       ? { image: { url: file }, caption: 'Provided by 𝐀𝐥-𝐉𝐢𝐧' }
-      : { video: { url: file }, mimetype: 'video/mp4', caption: 'Provided by 𝐀𝐥-𝐉𝐢𝐧' }, { quoted: msg });
+      : (size > getDocThresholdBytes()
+          ? { document: { url: file }, mimetype: 'video/mp4', fileName: path.basename(file), caption: 'Provided by 𝐀𝐥-𝐉𝐢𝐧' }
+          : { video: { url: file }, mimetype: 'video/mp4', caption: 'Provided by 𝐀𝐥-𝐉𝐢𝐧' }), { quoted: msg });
     await edit(sock, chat, st, '✅ *Facebook:* done');
     return sock.sendMessage(chat, { react: { text: '☑', key: msg.key } }).catch(() => {});
   } catch (e) {
@@ -73,7 +78,7 @@ async function downloadFb(sock, chat, msg, raw) {
     const dlUrl = (items.find((i) => i.isVideo) || items[0])?.url;
     if (dlUrl) {
       const dest = path.join(dir, `${prefix}_esm.mp4`);
-      await downloadToFile(dlUrl, dest, MAX_MB * 1048576);
+      await downloadToFile(dlUrl, dest, maxBytes());
       await sock.sendMessage(chat, { video: { url: dest }, mimetype: 'video/mp4', caption: 'Provided by 𝐀𝐥-𝐉𝐢𝐧' }, { quoted: msg });
       await edit(sock, chat, st, '✅ *Facebook:* done');
       return sock.sendMessage(chat, { react: { text: '☑', key: msg.key } }).catch(() => {});

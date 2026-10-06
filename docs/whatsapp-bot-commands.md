@@ -74,9 +74,10 @@ All commands use the configurable prefix (default: `.`). In **private mode**, co
 | Command | Description |
 |---|---|
 | `.play <query>` | Search YouTube and download audio in MP3 format using `ytdlp-nodejs` |
-| `.ytv <query\|url>` | Search or download video from YouTube in 360p/480p SD format (up to 400 MB cap) using `ytdlp-nodejs` |
+| `.ytv <query\|url>` | Search or download video from YouTube in 360p/480p SD format (size cap adjustable with `.dlcap`, default 500 MB) using `ytdlp-nodejs` |
 | `.video <query\|url>` | Alias for `.ytv` — search or download video from YouTube in 360p/480p SD format |
 | `.ytdl <url>` | Direct YouTube video/audio downloader using `ytdlp-nodejs` |
+| `.dlcap` | Show download limits. `.dlcap 1gb` / `.dlcap 800` sets the max size per download (up to 2000 MB), `.dlcap reset` restores 500 MB, `.dlcap quality 720` sets the max video height (owner only) |
 | `.dl <url>` | Download video, audio, or post carousel (`@postfetch/core` + `yt-dlp`) |
 | `.pdl <post-url>` | Download post/carousel media items directly via `@postfetch/core` |
 | `.pdlzip <post-url>` | Download post/carousel items as a single ZIP archive |
@@ -162,6 +163,7 @@ URLs containing picture posts or carousels (e.g. Instagram `/p/`, TikTok `/photo
 | `.setabout <text>` | Change bot WhatsApp about bio |
 | `.chatstats` | Show chat statistics |
 | `.stalk <number>` | Track user online presence updates |
+| `.setowner <number\|me>` | Change the primary owner — the number that receives ghost/peek/lurk alerts (primary owner only) |
 | `.addowner <number>` | Add secondary owner (primary owner only) |
 | `.delowner <number>` | Remove secondary owner (primary owner only) |
 | `.owner list` / `.ownerlist` | List all configured bot owners |

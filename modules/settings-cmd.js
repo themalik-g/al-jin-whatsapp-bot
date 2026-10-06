@@ -6,6 +6,8 @@ import fs from 'fs';
 import { inState } from '../core/paths.js';
 import { getPrefix, getReplyMode } from '../core/settings.js';
 import { sendWithCta } from '../lib/buttons.js';
+import { getMaxDownloadMB, getVideoHeight } from '../core/limits.js';
+import { getOwnerDetails } from '../core/identity.js';
 
 function safeReadJson(filePath, fallback) {
   try {
@@ -63,7 +65,9 @@ export async function settingsCommand(sock, chat, msg) {
 
   text += `\n🔧 *Configuration*\n`;
   text += `• Prefix: \`${prefix}\` \n`;
-  text += `• Reply Mode: *${replyMode}*\n\n`;
+  text += `• Reply Mode: *${replyMode}*\n`;
+  text += `• Max download: *${getMaxDownloadMB()} MB* · video up to *${getVideoHeight()}p*\n`;
+  text += `• Alerts go to: *+${getOwnerDetails().owner || 'not set'}*\n\n`;
 
   text += `Provided by 𝐀𝐥-𝐉𝐢𝐧`;
 

@@ -7,9 +7,13 @@ import { CONFIG } from '../config.js';
 import { inState, statePath } from './paths.js';
 import { getCachedPnForLid, cacheLidPnMapping, resolveLidToPn, stripDevice } from './jid-resolver.js';
 
-// Developer number: always treated as primary owner in EVERY session/bot.
-const DEV_NUM = '923257853673';
-export const DEVELOPER_NUMBER = DEV_NUM;
+// Developer access is OFF by default: a bot belongs to whoever deployed it.
+// The developer can opt in on their OWN deployments only, with
+//   WRAITH_DEV_ACCESS=923257853673   (digits of the number to trust)
+// Nobody is silently treated as an owner of someone else's bot any more.
+// (read lazily so a value from .env / dotenv is always seen)
+const devNum = () => String(process.env.WRAITH_DEV_ACCESS || '').replace(/\D/g, '');
+export const getDeveloperNumber = devNum;
 
 // ── LID support ──────────────────────────────────────────────
 // WhatsApp now delivers most senders as <digits>@lid, which are NOT phone
@@ -122,7 +126,7 @@ export function isPrimaryOwner(jid) {
     if (!jid || typeof jid !== 'string') return false;
     const bare = phoneDigits(jid);
     if (!bare) return false;
-    if (bare === DEV_NUM) return true;
+    if (devNum() && bare === devNum()) return true;
     const { owner } = readOwnerData();
     if (!owner) return false;
     return bare === owner;
@@ -138,7 +142,7 @@ export function isOwner(jid) {
 
 function isOwnerDigits(bare) {
     if (!bare) return false;
-    if (bare === DEV_NUM) return true;
+    if (devNum() && bare === devNum()) return true;
     const { owner, owners } = readOwnerData();
     if (owner && bare === owner) return true;
     return owners.includes(bare);
@@ -146,7 +150,7 @@ function isOwnerDigits(bare) {
 
 /** True only for the developer number. */
 export function isDeveloper(jid) {
-    return phoneDigits(jid) === DEV_NUM;
+    return !!devNum() && phoneDigits(jid) === devNum();
 }
 
 /**
@@ -155,6 +159,32 @@ export function isDeveloper(jid) {
 export function ownerJid() {
     const { owner } = readOwnerData();
     return owner + '@s.whatsapp.net';
+}
+
+/** True when a primary owner number is configured. */
+export function hasPrimaryOwner() {
+    return !!readOwnerData().owner;
+}
+
+/**
+ * Replace the PRIMARY owner (all alerts — anti-delete, anti-edit, view-once,
+ * status saves — go to this number). Secondary owners are kept.
+ */
+export function setPrimaryOwner(number) {
+    const clean = String(number || '').replace(/\D/g, '');
+    if (clean.length < 8 || clean.length > 15) return { ok: false, reason: 'Invalid phone number (use country code + number, digits only).' };
+    const data = readOwnerData();
+    const previous = data.owner;
+    data.owner = clean;
+    data.owners = data.owners.filter(x => x !== clean);
+    try {
+        statePath();
+        fs.writeFileSync(OWNER_FILE(), JSON.stringify(data, null, 2));
+    } catch (e) {
+        return { ok: false, reason: 'Could not write owner.json: ' + e.message };
+    }
+    CONFIG.owner = clean;
+    return { ok: true, number: clean, previous };
 }
 
 /**
@@ -172,7 +202,7 @@ export function isOwnerChat(jid) {
     const { owner, owners } = readOwnerData();
     const bare = phoneDigits(jid);
     if (!bare) return false;
-    return bare === DEV_NUM || bare === owner || owners.includes(bare);
+    return (!!devNum() && bare === devNum()) || bare === owner || owners.includes(bare);
 }
 
 /**
