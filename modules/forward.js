@@ -71,7 +71,7 @@ export async function forwardCommand(sock, chat, msg, args) {
         const writeStream = fs.createWriteStream(fp);
         await pipeline(stream, writeStream);
 
-        await sock.sendMessage(targetJid, { image: { url: fp }, caption });
+        await sock.sendMessage(targetJid, { image: { url: fp }, caption }, { channelCtx: false });
         dropFromVault(fp);
       }
       // 2. Quoted Video
@@ -83,7 +83,7 @@ export async function forwardCommand(sock, chat, msg, args) {
         const writeStream = fs.createWriteStream(fp);
         await pipeline(stream, writeStream);
 
-        await sock.sendMessage(targetJid, { video: { url: fp }, caption });
+        await sock.sendMessage(targetJid, { video: { url: fp }, caption }, { channelCtx: false });
         dropFromVault(fp);
       }
       // 3. Quoted Audio
@@ -97,9 +97,9 @@ export async function forwardCommand(sock, chat, msg, args) {
         await pipeline(stream, writeStream);
 
         if (customText) {
-          await sock.sendMessage(targetJid, { text: customText });
+          await sock.sendMessage(targetJid, { text: customText }, { channelCtx: false });
         }
-        await sock.sendMessage(targetJid, { audio: { url: fp }, mimetype: mime, ptt: false });
+        await sock.sendMessage(targetJid, { audio: { url: fp }, mimetype: mime, ptt: false }, { channelCtx: false });
         dropFromVault(fp);
       }
       // 4. Quoted Text
@@ -108,14 +108,14 @@ export async function forwardCommand(sock, chat, msg, args) {
         if (!textToForward) {
           throw new Error('Unable to extract text from quoted message.');
         }
-        await sock.sendMessage(targetJid, { text: textToForward });
+        await sock.sendMessage(targetJid, { text: textToForward }, { channelCtx: false });
       }
     } else {
       // Direct text forward
       if (!customText) {
         throw new Error('No text or quoted message provided to forward.');
       }
-      await sock.sendMessage(targetJid, { text: customText });
+      await sock.sendMessage(targetJid, { text: customText }, { channelCtx: false });
     }
 
     await sock.sendMessage(chat, {

@@ -49,10 +49,45 @@ const BASE_COMMAND_DETAILS = {
     description: 'Toggles bot operation mode between public and private (owner-only).',
     usage: ['.mode public', '.mode private'],
   },
+  imenu: {
+    title: '🖼️ Image Menu Command',
+    description: 'Menu image mode. on (default): banner image with the menu as caption. off: text only. preview: text menu with the banner as a large preview card. Always one message.',
+    usage: ['.imenu on', '.imenu off', '.imenu preview'],
+  },
+  cpu: {
+    title: '🧠 CPU Command',
+    description: 'Shows the processor model, available cores and live load.',
+    usage: ['.cpu'],
+  },
+  gpu: {
+    title: '🎮 GPU Command',
+    description: 'Shows the graphics card(s) of the server, if any.',
+    usage: ['.gpu'],
+  },
+  ram: {
+    title: '💾 RAM Command',
+    description: 'Shows memory used / total (container-aware) and bot process memory.',
+    usage: ['.ram'],
+  },
+  rom: {
+    title: '🗄️ ROM Command',
+    description: 'Shows storage used / free and the size of the bot files.',
+    usage: ['.rom'],
+  },
+  cpulimit: {
+    title: '⚙️ CPU Limit Command',
+    description: 'Caps how much CPU the bot (and its ffmpeg / yt-dlp jobs) may use. Heavy jobs run in short slices — they take longer but never spike above the limit. 0.30 = 0.30 cores = 30% of one core. "auto" follows the server quota.',
+    usage: ['.cpulimit', '.cpulimit 0.30', '.cpulimit 30%', '.cpulimit auto', '.cpulimit off'],
+  },
+  ramlimit: {
+    title: '💾 RAM Limit Command',
+    description: 'Sets a memory ceiling for the bot and its child jobs. 75%: caches trimmed. 90%: new commands wait. 100%: the biggest runaway job is stopped; add "restart" to also restart the bot if it stays over.',
+    usage: ['.ramlimit', '.ramlimit 512', '.ramlimit 1gb', '.ramlimit 512 restart', '.ramlimit off'],
+  },
   replymode: {
-    title: '💬 Reply Mode Command',
-    description: 'Switches bot reply interface between interactive buttons and formatted plain text.',
-    usage: ['.replymode buttons', '.replymode text'],
+    title: '🔘 Reply Mode Command',
+    description: 'Switches the reply interface: plain text with numbered replies (default), a multi-select poll (every newly ticked option runs, the poll stays open until its time is up), or native buttons.',
+    usage: ['.replymode text', '.replymode poll', '.replymode buttons'],
   },
   update: {
     title: '🆙 Update Command',

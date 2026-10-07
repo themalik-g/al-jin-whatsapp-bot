@@ -13,7 +13,7 @@ import {
   fetchLyrics,
 } from '../lib/apis.js';
 import { chunkText, downloadToFile } from '../lib/net.js';
-import { sendInteractive, createQuickReply, NEWSLETTER_CONTEXT, sendWithCta } from '../lib/buttons.js';
+import { sendInteractive, createQuickReply, newsletterContext, sendWithCta } from '../lib/buttons.js';
 import { getPrefix } from '../core/settings.js';
 
 // ─── Book cache ───
@@ -168,7 +168,7 @@ export async function bookCommand(sock, chat, msg, args) {
         chat,
         {
           text: lines.join('\n'),
-          contextInfo: NEWSLETTER_CONTEXT,
+          contextInfo: newsletterContext(),
         },
         { quoted: msg }
       );
