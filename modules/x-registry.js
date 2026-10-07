@@ -19,6 +19,7 @@ const LOADERS = {
     media: () => import('./x-media.js'),
     guard: () => import('./x-guard.js'),
     effects: () => import('./x-effects.js'),
+    subtitle: () => import('./x-subtitle.js'),
 };
 
 // [verb, module, export, perm, ...aliases]
@@ -123,6 +124,8 @@ const TABLE = [
     ['pitch', 'media', 'pitch', 'all'],
     ['avm', 'media', 'avm', 'all'],
     ['pdf', 'media', 'pdf', 'all', 'topdf'],
+    // subtitles (speech-to-text + ffmpeg)
+    ['subtitle', 'subtitle', 'subtitle', 'all', 'subtitles', 'subs', 'sub', 'addsub'],
     // voice effects (ffmpeg)
     ['fx', 'effects', 'fx', 'all', 'effects'],
     ['echo', 'effects', 'echo', 'all'],
