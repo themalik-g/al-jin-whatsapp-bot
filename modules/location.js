@@ -1,5 +1,5 @@
 // modules/location.js — location request + handler
-import { sendInteractive, createLocationRequest, NEWSLETTER_CONTEXT } from '../lib/buttons.js';
+import { sendInteractive, createLocationRequest, newsletterContext } from '../lib/buttons.js';
 import { digitsOf } from '../core/identity.js';
 
 export async function reqlocationCommand(sock, chat, msg) {
@@ -19,7 +19,7 @@ export async function reqlocationCommand(sock, chat, msg) {
   } catch (e) {
     await sock.sendMessage(chat, {
       text: `⚠️ reqlocation failed: ${e.message}`,
-      contextInfo: NEWSLETTER_CONTEXT,
+      contextInfo: newsletterContext(),
     }, { quoted: msg }).catch(() => {});
   }
 }
@@ -46,7 +46,7 @@ export async function handleIncomingLocation(sock, chat, msg) {
 
     await sock.sendMessage(
       chat,
-      { text, mentions: [sender], contextInfo: NEWSLETTER_CONTEXT },
+      { text, mentions: [sender], contextInfo: newsletterContext() },
       { quoted: msg }
     );
   } catch (e) {

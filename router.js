@@ -4,6 +4,7 @@ import { logMessageHistory } from './modules/logger.js';
 import { peekCommand, autoPeek, watchQuotedViewOnce } from './modules/peek.js';
 import { lurkCommand, lurkTick } from './modules/lurk.js';
 import { captureStatusStory } from './core/status-store.js';
+import { gate as limiterGate } from './core/limiter.js';
 import { adminAction, toggleProtection, handleProtection } from './modules/admin.js';
 import { presenceCommand, shouldReadReceipts, applyAutoPresence } from './modules/presence.js';
 import { activityCommand, trackActivity } from './modules/activity.js';
@@ -182,6 +183,13 @@ const delownerCommand   = lazy('./modules/owner.js', 'delownerCommand');
 const ownerlistCommand  = lazy('./modules/owner.js', 'ownerlistCommand');
 const setownerCommand   = lazy('./modules/owner.js', 'setownerCommand');
 const dlcapCommand      = lazy('./modules/dlcap.js', 'dlcapCommand');
+const cpulimitCommand   = lazy('./modules/limits.js', 'cpulimitCommand');
+const ramlimitCommand   = lazy('./modules/limits.js', 'ramlimitCommand');
+const cpuCommand        = lazy('./modules/ping.js', 'cpuCommand');
+const gpuCommand        = lazy('./modules/ping.js', 'gpuCommand');
+const ramCommand        = lazy('./modules/ping.js', 'ramCommand');
+const romCommand        = lazy('./modules/ping.js', 'romCommand');
+const imenuCommand      = lazy('./modules/help.js', 'imenuCommand');
 
 const gitdlCommand = lazy('./modules/downloader.js', 'gitdlCommand');
 const mfdlCommand  = lazy('./modules/downloader.js', 'mfdlCommand');
@@ -282,9 +290,13 @@ const CRITICAL_COMMANDS = new Set([
   'addsession', 'delsession', 'replymode',
   'setvar', 'getvar', 'delvar',
   'addowner', 'delowner', 'ownerlist', 'setowner', 'dlcap',
+  'cpulimit', 'ramlimit', 'cpu', 'gpu', 'ram', 'rom', 'imenu',
   'gitdl', 'mfdl', 'url', 'pdl', 'pdlzip', 'restart', 'pinchat', 'unpinchat', 'pdd', 'tag',
   'ytcookies', 'igzip', 'igstory', 'igsearch', 'igprofile',
 ]);
+
+// commands that must answer instantly even while the bot is being throttled
+const LIMITER_EXEMPT = new Set(['cpulimit', 'ramlimit', 'cpu', 'gpu', 'ram', 'rom', 'ping', 'alive', 'uptime', 'restart', 'replymode', 'imenu']);
 
 const attachedSockets = new WeakSet();
 
@@ -536,6 +548,9 @@ export async function dispatch(sock, update, sessionId = 'main') {
 
       const csock = sock;
 
+      // CPU / RAM limits (.cpulimit / .ramlimit): wait here while the bot is over budget.
+      if (!LIMITER_EXEMPT.has(verb)) { try { await limiterGate(); } catch {} }
+
       if (EPHOTO_LIST.includes(verb) && verb !== 'textmaker') {
         try {
           await handleTextmakerCommand(csock, chat, msg, verb, rest);
@@ -786,18 +801,25 @@ export async function dispatch(sock, update, sessionId = 'main') {
           case 'ownerlist': await ownerlistCommand(csock, chat, msg); break;
           case 'setowner': await setownerCommand(csock, chat, msg, rest); break;
           case 'dlcap': await dlcapCommand(csock, chat, msg, rest); break;
+          case 'cpulimit': await cpulimitCommand(csock, chat, msg, rest); break;
+          case 'ramlimit': await ramlimitCommand(csock, chat, msg, rest); break;
+          case 'imenu': await imenuCommand(csock, chat, msg, rest); break;
+          case 'cpu': await cpuCommand(csock, chat, msg); break;
+          case 'gpu': await gpuCommand(csock, chat, msg); break;
+          case 'ram': await ramCommand(csock, chat, msg); break;
+          case 'rom': await romCommand(csock, chat, msg); break;
           case 'script':
           case 'repo': await scriptCommand(csock, chat, msg); break;
           case 'mode': await modeCommand(csock, chat, msg, rest); break;
           case 'replymode': {
             if (!senderIsOwner) { await sock.sendMessage(chat, { text: '⛔ Owner only.' }, { quoted: msg }); break; }
             const modeArg = (rest[0] || '').toLowerCase();
-            if (modeArg === 'text' || modeArg === 'buttons') {
+            if (modeArg === 'text' || modeArg === 'buttons' || modeArg === 'poll') {
               setReplyMode(modeArg);
               await sock.sendMessage(chat, { text: `✅ Reply mode set to *${modeArg}*` }, { quoted: msg });
             } else {
               const cur = getReplyMode();
-              await sock.sendMessage(chat, { text: `ℹ️ Current reply mode: *${cur}*\n\nUsage:\n• \`${prefix}replymode buttons\`\n• \`${prefix}replymode text\`` }, { quoted: msg });
+              await sock.sendMessage(chat, { text: `ℹ️ Current reply mode: *${cur}*\n\nUsage:\n• \`${prefix}replymode text\` — numbered replies (default)\n• \`${prefix}replymode poll\` — multi-select poll: every newly ticked option runs; the poll stays open and is deleted when its time is up\n• \`${prefix}replymode buttons\` — native buttons (may show "Waiting for this message" on some clients)` }, { quoted: msg });
             }
             break;
           }
