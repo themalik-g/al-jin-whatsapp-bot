@@ -110,6 +110,7 @@ const MEDIA = [
     ['reverse', '⏪ Reverse', 'Plays audio/video backwards (short clips).', ['Reply to media: .reverse']],
     ['pitch', '🎶 Pitch Shift', 'Changes pitch, keeps speed.', ['Reply to audio: .pitch 4']],
     ['avm', '🎬 Audio → Video', 'Waveform video from a voice note.', ['Reply to audio: .avm']],
+    ['subtitle', '💬 Auto Subtitles', 'Transcribes the speech in a video and burns subtitles into it (styles: youtube, netflix, bold). Add srt for just the .srt file, or a 2-letter language code (ur, en, hi…). Needs a free GROQ_API_KEY, GEMINI_API_KEY or DEEPGRAM_API_KEY — the bot falls back between them. Aliases: subtitles, subs, sub.', ['Reply to a video: .subtitle', '.subtitle netflix', '.subtitle bold ur', '.subtitle srt']],
     ['pdf', '📄 PDF Maker', 'Text, one photo, or many photos → PDF. Alias: topdf.', ['.pdf <text>', 'Reply to a photo: .pdf', '.pdf add … .pdf make [name]']],
 ];
 
@@ -139,6 +140,7 @@ const ALIASES = {
     antibadword: 'antiword', antifw: 'antiforward', afw: 'antiforward', donotdisturb: 'dnd', effects: 'fx', antigstatus: 'antigm', autoreact: 'areact', listadmin: 'admins', invitelink: 'link', delete: 'del', roast: 'insult', ttt: 'tictactoe',
     calculate: 'calc', colour: 'color', b64: 'base64', genpass: 'password', todo: 'task', trt: 'translate', git: 'github', pokemon: 'pokedex',
     steal: 'take', scrop: 'stickercrop', grayscale: 'greyscale', bw: 'greyscale', topdf: 'pdf',
+    subtitles: 'subtitle', subs: 'subtitle', sub: 'subtitle', addsub: 'subtitle',
 };
 for (const [a, v] of Object.entries(ALIASES)) X_DETAILS[a] = X_DETAILS[v];
 
