@@ -316,7 +316,7 @@ async function downloadStatus(sock, key, statusMsg) {
         }
 
         dropFromVault(fp);
-        if (DEBUG) console.log(`[lurk:download] captured ${type} from ${sender}`);
+        if (DEBUG) console.log(`[lurk:download] captured ${type} from ${bestSender}`);
     } catch (e) {
         if (DEBUG) console.log('[lurk:download] error:', e.message);
     }

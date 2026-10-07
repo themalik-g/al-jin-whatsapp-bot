@@ -45,7 +45,7 @@ function toSmallCaps(str) {
   return str.toLowerCase().split('').map((ch) => SMALL_CAPS[ch] || ch).join('');
 }
 
-const REGISTRY = [
+export const REGISTRY = [
   {
     id: 'core',
     icon: '🛡️',
@@ -261,6 +261,8 @@ const REGISTRY = [
       c('.dl audio <url>'),
       c('.dl mp3 <url>'),
       c('.play <query>'),
+      c('.yt <query/url>'),
+      c('.yta <query/url>'),
       c('.ytv <query/url>'),
       c('.video <query/url>'),
       c('.ytdl <url>'),
@@ -272,7 +274,6 @@ const REGISTRY = [
       c('.pinterest <url>'),
       c('.threads <url>'),
       c('.reddit <url>'),
-      c('.youtube <url>'),
       c('.gitdl <github-url>', true),
       c('.mfdl <mediafire-url>', true),
     ],
@@ -350,7 +351,7 @@ const REGISTRY = [
     icon: '📥',
     title: 'SEARCH|DL',
     commands: [
-      c('.ig <username/url>'),
+      c('.ig <username/url>  (.insta / .instagram)'),
       c('.tiktok <username/url>'),
       c('.fb <username/url>'),
     ],

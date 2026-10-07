@@ -347,6 +347,45 @@ export async function tagallCommand(sock, chat, msg, args) {
   }
 }
 
+// ── .tagallnoadmin / .hidetagnoadmin — same as tagall/hidetag but only NON-admin members ──
+async function nonAdminMembers(sock, chat) {
+  const meta = await sock.groupMetadata(chat);
+  const norm = (j) => String(j || '').split(':')[0].replace(/\D/g, '');
+  const me = norm(sock.user?.id);
+  return (meta.participants || []).filter((p) => p.admin == null && norm(p.id) !== me);
+}
+
+export async function tagallnoadminCommand(sock, chat, msg, args) {
+  if (!isGroup(chat)) return sock.sendMessage(chat, { text: '❌ Group only.' }, { quoted: msg });
+  if (ownerOnly(sock, chat, msg)) return;
+  try {
+    const members = await nonAdminMembers(sock, chat);
+    if (!members.length) return sock.sendMessage(chat, { text: '❌ No non-admin members found.' }, { quoted: msg });
+    const textArg = (args || []).join(' ').trim();
+    let body = `📢 *Attention Members!*${textArg ? `\n\n💬 _${textArg}_` : ''}\n\n`;
+    members.forEach((p, i) => { body += `${i + 1}. @${p.id.split('@')[0]}\n`; });
+    await sock.sendMessage(chat, { text: body, mentions: members.map((p) => p.id) }, { quoted: msg });
+  } catch (e) {
+    await sock.sendMessage(chat, { text: `⚠️ tagallnoadmin failed: ${e.message}` }, { quoted: msg }).catch(() => {});
+  }
+}
+
+export async function hidetagnoadminCommand(sock, chat, msg, args) {
+  if (!isGroup(chat)) return sock.sendMessage(chat, { text: '❌ Group only.' }, { quoted: msg });
+  if (ownerOnly(sock, chat, msg)) return;
+  try {
+    const members = await nonAdminMembers(sock, chat);
+    if (!members.length) return sock.sendMessage(chat, { text: '❌ No non-admin members found.' }, { quoted: msg });
+    let text = (args || []).join(' ').trim();
+    const quoted = msg.message?.extendedTextMessage?.contextInfo?.quotedMessage;
+    if (!text && quoted) text = quoted.conversation || quoted.extendedTextMessage?.text || '';
+    if (!text) text = '📢 Notification for Members';
+    await sock.sendMessage(chat, { text, mentions: members.map((p) => p.id) }, { quoted: msg });
+  } catch (e) {
+    await sock.sendMessage(chat, { text: `⚠️ hidetagnoadmin failed: ${e.message}` }, { quoted: msg }).catch(() => {});
+  }
+}
+
 export async function hidetagCommand(sock, chat, msg, args) {
   if (!isGroup(chat)) return sock.sendMessage(chat, { text: '❌ Group only.' }, { quoted: msg });
   if (ownerOnly(sock, chat, msg)) return;
