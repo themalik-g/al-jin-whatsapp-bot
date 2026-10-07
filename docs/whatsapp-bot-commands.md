@@ -262,3 +262,31 @@ URLs containing picture posts or carousels (e.g. Instagram `/p/`, TikTok `/photo
 | `.reset wp` / `.resetwp` | Reset chat wallpaper to default |
 | `.chatbubble1` ... `.chatbubble10` | Set chat bubble color style preset (1-10) |
 | `.reset bubble` / `.resetbubble` | Reset chat bubble style to default |
+
+---
+
+## 🛡️ Guard+ — mutes, forwards, DND & action ladder (admins)
+
+| Command | Description |
+|---|---|
+| `.muteuser @user [30m\|2h\|1d\|1w]` | Delete everything a member sends for a set time (or until unmuted). Admins/owners can't be muted |
+| `.unmuteuser @user` | Let a muted member talk again |
+| `.mutelist` | Muted members, time left, banned-sticker count |
+| `.mutesticker` (reply to sticker) | Ban that exact sticker in this group (`list`, `clear`) |
+| `.unmutesticker` (reply to sticker) | Allow it again |
+| `.antiforward on\|off` | Remove forwarded messages from non-admins (aliases `.antifw`, `.afw`) |
+| `.dnd on\|off\|<message>` | Delete non-admin messages that tag the bot and reply with your message |
+
+**Action ladder** — `.antiword`, `.antitag` and `.antiforward` all accept:
+`.<cmd> action delete\|warn\|kick\|tkick [30m]` and `.<cmd> limit <1-10>`
+
+- `delete` — just delete the message
+- `warn` — strikes (default 3), then kick
+- `kick` — kick immediately
+- `tkick` — kick now, re-add automatically after the duration (default 1h)
+
+The bot must be a group admin to delete messages and remove members.
+
+## 🎛️ Voice effects (reply to a voice note, audio or video)
+
+`.fx` lists them: `.echo` `.reverb` `.nightcore` `.chipmunk` `.slowed` `.deep` `.drunk` `.fast` `.tremolo` `.distort`

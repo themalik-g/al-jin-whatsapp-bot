@@ -17,6 +17,8 @@ const LOADERS = {
     tools: () => import('./x-tools.js'),
     web: () => import('./x-web.js'),
     media: () => import('./x-media.js'),
+    guard: () => import('./x-guard.js'),
+    effects: () => import('./x-effects.js'),
 };
 
 // [verb, module, export, perm, ...aliases]
@@ -42,6 +44,14 @@ const TABLE = [
     ['poll', 'group', 'poll', 'group'],
     ['vote', 'group', 'vote', 'group'],
     ['afk', 'group', 'afk', 'all'],
+    // guard (modules/x-guard.js)
+    ['muteuser', 'guard', 'muteuser', 'admin'],
+    ['unmuteuser', 'guard', 'unmuteuser', 'admin'],
+    ['mutelist', 'guard', 'mutelist', 'admin'],
+    ['mutesticker', 'guard', 'mutesticker', 'admin'],
+    ['unmutesticker', 'guard', 'unmutesticker', 'admin'],
+    ['antiforward', 'guard', 'antiforward', 'admin', 'antifw', 'afw'],
+    ['dnd', 'guard', 'dnd', 'admin', 'donotdisturb'],
     // bot control
     ['ban', 'bot', 'ban', 'owner'],
     ['unban', 'bot', 'unban', 'owner'],
@@ -113,6 +123,18 @@ const TABLE = [
     ['pitch', 'media', 'pitch', 'all'],
     ['avm', 'media', 'avm', 'all'],
     ['pdf', 'media', 'pdf', 'all', 'topdf'],
+    // voice effects (ffmpeg)
+    ['fx', 'effects', 'fx', 'all', 'effects'],
+    ['echo', 'effects', 'echo', 'all'],
+    ['reverb', 'effects', 'reverb', 'all'],
+    ['nightcore', 'effects', 'nightcore', 'all'],
+    ['chipmunk', 'effects', 'chipmunk', 'all'],
+    ['slowed', 'effects', 'slowed', 'all'],
+    ['deep', 'effects', 'deep', 'all'],
+    ['drunk', 'effects', 'drunk', 'all'],
+    ['fast', 'effects', 'fast', 'all'],
+    ['tremolo', 'effects', 'tremolo', 'all'],
+    ['distort', 'effects', 'distort', 'all'],
 ];
 
 const BY_VERB = new Map();

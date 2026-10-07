@@ -8,6 +8,8 @@
 //                 · filters · auto-react · per-member message stats
 //  member hook  : antifake · "who left" log
 // ─────────────────────────────────────────────
+import { guardMessage, enforce } from './x-guard.js';
+import { migrateAction } from '../lib/guard-core.js';
 import { store, isGroup, senderIds, isOwnerMsg, prefix, isSenderAdmin, isBotAdmin, tag, duration, contextOf, unwrap, pick } from '../lib/x.js';
 
 export const groupCfg = () => store('group', {});
@@ -107,6 +109,9 @@ export async function onMessage(sock, chat, msg, text) {
         st.save();
     }
 
+    // guard: muted users · banned stickers · antiforward · dnd (modules/x-guard.js)
+    try { if (await guardMessage(sock, chat, msg, text)) return true; } catch (e) { console.error('[x-guard]', e?.message); }
+
     // afk: owner of the status returns / someone pings an afk user
     {
         const afk = g.afk;
@@ -144,31 +149,17 @@ export async function onMessage(sock, chat, msg, text) {
         if (cfg.antitag?.on) {
             const n = (ctx?.mentionedJid?.length || 0) + (ctx?.nonJidMentions ? 1000 : 0);
             if (n > (cfg.antitag.max || 5)) {
-                if (await del(sock, chat, msg)) {
-                    try { await sock.sendMessage(chat, { text: `🚫 ${tag(ids[0])} mass-tagging is not allowed here.`, mentions: [ids[0]] }); } catch {}
-                    return true;
-                }
+                migrateAction(cfg.antitag);
+                await enforce(sock, chat, msg, cfg.antitag, ids[0], 'mass-tagging is not allowed here', { noticeOnDelete: true });
+                return true;
             }
         }
         // antiword
         if (cfg.antiword?.on && text && cfg.antiword.words?.length) {
             const bad = cfg.antiword.words.find((w) => textHasWord(text, w));
             if (bad) {
-                await del(sock, chat, msg);
-                const aw = cfg.antiword;
-                aw.strikes ||= {};
-                aw.strikes[key] = (aw.strikes[key] || 0) + 1;
-                const left = (aw.limit || 3) - aw.strikes[key];
-                groupCfg().save();
-                if (aw.action === 'kick' && left <= 0) {
-                    aw.strikes[key] = 0;
-                    if (await isBotAdmin(sock, chat)) {
-                        try { await sock.groupParticipantsUpdate(chat, [ids[0]], 'remove'); } catch {}
-                        try { await sock.sendMessage(chat, { text: `⛔ ${tag(ids[0])} removed for repeated banned words.`, mentions: [ids[0]] }); } catch {}
-                    }
-                } else if (aw.action === 'kick') {
-                    try { await sock.sendMessage(chat, { text: `⚠️ ${tag(ids[0])} banned word detected — ${left} strike(s) left.`, mentions: [ids[0]] }); } catch {}
-                }
+                const aw = migrateAction(cfg.antiword);
+                await enforce(sock, chat, msg, aw, ids[0], 'used a banned word');
                 return true;
             }
         }
