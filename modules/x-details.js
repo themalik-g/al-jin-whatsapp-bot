@@ -110,7 +110,7 @@ const MEDIA = [
     ['reverse', '⏪ Reverse', 'Plays audio/video backwards (short clips).', ['Reply to media: .reverse']],
     ['pitch', '🎶 Pitch Shift', 'Changes pitch, keeps speed.', ['Reply to audio: .pitch 4']],
     ['avm', '🎬 Audio → Video', 'Waveform video from a voice note.', ['Reply to audio: .avm']],
-    ['subtitle', '💬 Auto Subtitles', 'Transcribes the speech in a video and burns subtitles into it (styles: youtube, netflix, bold). Add srt for just the .srt file, or a 2-letter language code (ur, en, hi…). Needs a free GROQ_API_KEY, GEMINI_API_KEY or DEEPGRAM_API_KEY — the bot falls back between them. Aliases: subtitles, subs, sub.', ['Reply to a video: .subtitle', '.subtitle netflix', '.subtitle bold ur', '.subtitle srt']],
+    ['subtitle', '💬 Auto Subtitles', 'Transcribes the speech in a video and burns subtitles into it. Styles: youtube, netflix, bold, neon, redbox, gold, comic, minimal. Fonts: F1–F8 (see .subtitle fonts). Also top/mid/bottom, small/big, a 2-letter language code (ur, en, hi…), or srt for just the .srt file. Needs a free GROQ_API_KEY, GEMINI_API_KEY or DEEPGRAM_API_KEY — the bot falls back between them. Aliases: subtitles, subs, sub.', ['Reply to a video: .subtitle', '.subtitle netflix F2', '.subtitle neon F3 top big', '.subtitle bold ur', '.subtitle srt', '.subtitle fonts']],
     ['pdf', '📄 PDF Maker', 'Text, one photo, or many photos → PDF. Alias: topdf.', ['.pdf <text>', 'Reply to a photo: .pdf', '.pdf add … .pdf make [name]']],
 ];
 

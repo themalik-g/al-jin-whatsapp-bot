@@ -4,13 +4,18 @@ Reply to a video with `.subtitle` and the bot transcribes the speech and burns t
 
 | Command | Result |
 |---|---|
-| `.subtitle` | YouTube-style subtitles (white text, soft box) |
-| `.subtitle netflix` | Clean bold white text with a soft shadow |
-| `.subtitle bold` | Large yellow text with a thick outline |
+| `.subtitle` | YouTube style, font F1 |
+| `.subtitle netflix F2` | Style + font (any order) |
+| `.subtitle neon F3 top big` | Style, font, position (`top` `mid` `bottom`) and size (`small` `big`) |
 | `.subtitle ur` | Force the spoken language (2-letter code: en, ur, hi, ar …) |
 | `.subtitle srt` | Only the `.srt` file — no re-encoding, lightest option |
+| `.subtitle fonts` | Lists all styles and fonts |
 
-Aliases: `.subtitles`, `.subs`, `.sub`, `.addsub`. Styles and a language can be combined: `.subtitle bold ur`.
+Aliases: `.subtitles`, `.subs`, `.sub`, `.addsub`.
+
+**Styles:** `youtube` · `netflix` · `bold` · `neon` · `redbox` · `gold` · `comic` (meme) · `minimal`
+
+**Fonts** (all bundled in `fonts/`): F1 DejaVu Sans (default, Arabic/Urdu) · F2 Poppins · F3 Liberation Sans (Arial look) · F4 Liberation Serif (Times look) · F5 Carlito (Calibri look) · F6 Caladea (Cambria look) · F7 DejaVu Condensed (Arabic/Urdu) · F8 Liberation Mono
 
 ## One-time setup (free keys — add at least one)
 
@@ -33,5 +38,5 @@ Optional: `.setvar SUBTITLE_MAX_MINUTES 30` (default 15, max 60).
 
 ## Fonts
 
-`fonts/DejaVuSans-Bold.ttf` is bundled (Latin, Cyrillic, Greek, Arabic/Urdu, Hebrew). For other scripts
-(Hindi, Chinese, Thai …) drop a matching `.ttf` / `.otf` into `fonts/` — every font in that folder is available to the renderer.
+The eight fonts above are bundled (~3 MB). Whatever font you pick, Urdu/Arabic letters automatically fall back to DejaVu so mixed text still renders.
+For other scripts (Hindi, Chinese, Thai …) drop a matching `.ttf` / `.otf` into `fonts/` — it is used as a glyph fallback automatically.
