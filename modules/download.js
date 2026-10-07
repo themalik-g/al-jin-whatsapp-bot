@@ -23,6 +23,18 @@ const ITEM_DL_TIMEOUT  = 90_000;   // per post item download
 const ITEM_GAP_MS      = 700;      // pause between sends (avoids WA throttling)
 const queue = new PQueue({ concurrency: 1 });
 
+// Small helpers used all over this file (they were never defined → "edit is not defined").
+// Both swallow errors on purpose: a failed status edit must never break a download.
+async function edit(sock, chat, statusMsg, text) {
+  try {
+    if (statusMsg?.key) return await sock.sendMessage(chat, { text, edit: statusMsg.key });
+    return await sock.sendMessage(chat, { text });
+  } catch { return null; }
+}
+async function react(sock, chat, msg, emoji) {
+  try { await sock.sendMessage(chat, { react: { text: emoji, key: msg.key } }); } catch {}
+}
+
 // ── ytdlp-nodejs supported-host whitelist ──
 const YTDLP_SUPPORTED_HOSTS = new Set([
   'youtube.com', 'www.youtube.com', 'm.youtube.com', 'music.youtube.com', 'youtu.be',

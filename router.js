@@ -504,10 +504,10 @@ export async function dispatch(sock, update, sessionId = 'main') {
         'dl', 'download', 'mp3', 'songinfo', 'help', 'menu', 'ping', 'usermanual',
         'currency', 'qr', 'define', 'weather', 'pwned', 'owner', 'script', 'repo',
         'book', 'books', 'img', 'image', 'movie', 'lyrics', 'ppt', 'couplepp',
-        'welcome', 'goodbye', 'getpp', 'ig', 'tiktok', 'fb',
+        'welcome', 'goodbye', 'getpp', 'ig', 'insta', 'instagram', 'tiktok', 'fb',
         'igpost', 'tiktokpost', 'fbpost', 'pdl', 'pdlzip', 'postdl',
         'alive', 'uptime', 'restart', 'replymode', 'reqlocation',
-        'twitter', 'tw', 'pinterest', 'pin', 'threads', 'reddit', 'youtube', 'yt',
+        'twitter', 'tw', 'pinterest', 'pin', 'threads', 'reddit', 'youtube', 'yt', 'yta',
         'gemini', 'scholar', 'scholor', 'photo', 'imagine', 'imagen', 'pinchat', 'unpinchat', 'disappearing', 'play', 'ytv', 'video', 'ytdl',
         'shorten', 'tinyurl', 'shorturl', 'news', 'hackernews', 'hn', 'wiki', 'wikipedia', 'joke', 'advice', 'fact',
         'wp', 'dp', 'resetwp',
@@ -666,7 +666,8 @@ export async function dispatch(sock, update, sessionId = 'main') {
           case 'threads': await threadsCommand(csock, chat, msg, rest); break;
           case 'reddit': await redditCommand(csock, chat, msg, rest); break;
           case 'youtube':
-          case 'yt': await youtubeCommand(csock, chat, msg, rest); break;
+          case 'yt': await ytvCommand(csock, chat, msg, rest); break;      // .yt <query/url> → video
+          case 'yta': await playCommand(csock, chat, msg, rest); break;    // .yta <query/url> → audio
           case 'textmaker': await textmakerCommand(csock, chat, msg, rest); break;
           case 'gemini': await geminiCommand(csock, chat, msg, rest); break;
           case 'scholar':
@@ -857,6 +858,8 @@ export async function dispatch(sock, update, sessionId = 'main') {
           case 'gitdl': await gitdlCommand(csock, chat, msg, rest); break;
           case 'mfdl': await mfdlCommand(csock, chat, msg, rest); break;
           case 'ig':
+          case 'insta':
+          case 'instagram':
           case 'igpost': await igCommand(csock, chat, msg, rest); break;
           case 'tiktok':
           case 'tiktokpost': await tiktokCommand(csock, chat, msg, rest); break;
@@ -883,7 +886,7 @@ export async function dispatch(sock, update, sessionId = 'main') {
         await reactMsg(sock, chat, msg.key, EMOJIS.FAILED);
         try { await sock.sendMessage(chat, { text: `⚠️ *command failed*\n\n\`${verb}\` — ${e.message}` }, { quoted: msg }); } catch {}
       } finally {
-        if (!cmdFailed && KNOWN.has(verb) && !['play', 'ytv', 'video', 'ytdl', 'dl', 'download', 'mp3', 'pdl', 'pdlzip', 'url'].includes(verb)) {
+        if (!cmdFailed && KNOWN.has(verb) && !['play', 'ytv', 'video', 'ytdl', 'yt', 'yta', 'youtube', 'dl', 'download', 'mp3', 'pdl', 'pdlzip', 'url'].includes(verb)) {
           await reactMsg(sock, chat, msg.key, EMOJIS.SUCCESS);
         }
       }

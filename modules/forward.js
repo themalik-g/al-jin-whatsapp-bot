@@ -3,7 +3,19 @@
 // .forward <custom text / JID> — Forwards text, quoted media, or quoted message to specified recipient JID/LID/phone
 // ─────────────────────────────────────────────
 import fs from 'fs';
-import { resolveJid, getBestUserJid } from '../core/jid-resolver.js';
+import { getBestUserJid } from '../core/jid-resolver.js';
+
+// Accepts a full JID (…@s.whatsapp.net / @g.us / @lid) or a phone number; returns a JID or null.
+function resolveJid(raw) {
+  const t = String(raw || '').trim();
+  if (!t) return null;
+  if (/^[^\s@]+@(s\.whatsapp\.net|g\.us|lid)$/.test(t)) return t;
+  if (/^[+\d\s()-]+$/.test(t)) {
+    const d = t.replace(/\D/g, '');
+    if (d.length >= 8 && d.length <= 15) return `${d}@s.whatsapp.net`;
+  }
+  return null;
+}
 import { sendWithCta } from '../lib/buttons.js';
 import { vaultPath, vaultMediaName, dropFromVault } from '../core/vault.js';
 import { downloadContentFromMessage } from '@whiskeysockets/baileys';

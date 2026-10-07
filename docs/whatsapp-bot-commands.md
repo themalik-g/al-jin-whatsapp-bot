@@ -76,6 +76,8 @@ All commands use the configurable prefix (default: `.`). In **private mode**, co
 | `.play <query>` | Search YouTube and download audio in MP3 format using `ytdlp-nodejs` |
 | `.ytv <query\|url>` | Search or download video from YouTube in 360p/480p SD format (size cap adjustable with `.dlcap`, default 500 MB) using `ytdlp-nodejs` |
 | `.video <query\|url>` | Alias for `.ytv` — search or download video from YouTube in 360p/480p SD format |
+| `.yt <query\|url>` | Download a YouTube video (alias `.youtube`; same engine as `.ytv`) |
+| `.yta <query\|url>` | Download YouTube audio (same engine as `.play`) |
 | `.ytdl <url>` | Direct YouTube video/audio downloader using `ytdlp-nodejs` |
 | `.dlcap` | Show download limits. `.dlcap 1gb` / `.dlcap 800` sets the max size per download (up to 2000 MB), `.dlcap reset` restores 500 MB, `.dlcap quality 720` sets the max video height (owner only) |
 | `.dl <url>` | Download video, audio, or post carousel (`@postfetch/core` + `yt-dlp`) |
@@ -85,7 +87,7 @@ All commands use the configurable prefix (default: `.`). In **private mode**, co
 | `.song <query>` | Download audio from SoundCloud, Apple Music, or Deezer |
 | `.gitdl <github-url>` | Download GitHub repository as a ZIP archive |
 | `.mfdl <mediafire-url>` | Resolve and download MediaFire files directly |
-| `.ig <username\|url>` | Fetch Instagram user profile or download post/carousel |
+| `.ig <username\|url>` | Fetch Instagram user profile or download post/carousel (aliases: `.insta`, `.instagram`) |
 | `.tiktok <username\|url>` | Fetch TikTok profile info or download photo post/video |
 | `.fb <username\|url>` | Fetch Facebook profile info or download video/post |
 
