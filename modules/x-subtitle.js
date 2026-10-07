@@ -23,7 +23,7 @@ import { ffmpegPath, ffprobePath } from '../lib/ffmpeg-resolver.js';
 import { getPrefix } from '../core/settings.js';
 import { transcribe, configuredProviders, MAX_UPLOAD_BYTES } from '../lib/stt.js';
 import { aiKey } from '../lib/ai.js';
-import { buildCues, cuesToSrt, cuesToAss, resolveStyle, STYLES } from '../lib/subtitle-render.js';
+import { buildCues, cuesToSrt, cuesToAss, resolveStyle, resolveFont, STYLES, FONTS, DEFAULT_FONT, POSITIONS } from '../lib/subtitle-render.js';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const FONT_DIR = path.resolve(HERE, '..', 'fonts');
@@ -53,15 +53,31 @@ function enqueue(job) {
 
 // ── helpers ───────────────────────────────────
 function parseArgs(args) {
-  const out = { style: 'youtube', srtOnly: false, language: '' };
+  const out = { style: 'youtube', font: DEFAULT_FONT, position: 'bottom', sizeMul: 1, srtOnly: false, language: '', list: false, badFont: '' };
   for (const raw of args) {
     const a = String(raw).toLowerCase().replace(/^lang=/, '');
     if (['srt', 'text', 'file'].includes(a)) out.srtOnly = true;
+    else if (['fonts', 'styles', 'list'].includes(a)) out.list = true;
+    else if (/^f\d+$/.test(a)) { if (resolveFont(a)) out.font = a.toUpperCase(); else out.badFont = a.toUpperCase(); }
+    else if (POSITIONS[a]) out.position = a === 'center' || a === 'middle' ? 'mid' : a;
+    else if (a === 'big' || a === 'large') out.sizeMul = 1.25;
+    else if (a === 'small') out.sizeMul = 0.8;
     else if (resolveStyle(a)) out.style = resolveStyle(a);
     else if (/^[a-z]{2}$/.test(a)) out.language = a;
   }
   return out;
 }
+
+const listText = (p) => [
+  '🎨 *Subtitle styles*',
+  Object.entries(STYLES).map(([k, v]) => `• ${v.label} — \`${k}\``).join('\n'),
+  '',
+  '🔤 *Fonts* (add F1–F8)',
+  Object.entries(FONTS).map(([k, v]) => `• *${k}* ${v.label}`).join('\n'),
+  '',
+  '📍 *Position:* top · mid · bottom     📏 *Size:* small · big',
+  `Example: \`${p}subtitle neon F2 top big\``,
+].join('\n');
 
 function sweepStale() {
   try {
@@ -154,7 +170,7 @@ export function burnSubtitles({ dir, input, output, W, H, timeoutMs }) {
       '-c:v', 'libx264', '-preset', 'veryfast', '-crf', '24', '-pix_fmt', 'yuv420p',
       '-c:a', 'aac', '-b:a', '128k', '-movflags', '+faststart', '-map', '0:v:0', '-map', '0:a:0?', '-dn', '-sn', output,
     ];
-    execFile(ffmpegPath, args, { cwd: dir, timeout: timeoutMs, maxBuffer: 8 * 1024 * 1024 }, (err, _o, stderr) => {
+    execFile(ffmpegPath, args, { cwd: dir, timeout: Math.round(timeoutMs), maxBuffer: 8 * 1024 * 1024 }, (err, _o, stderr) => {
       if (err) return reject(new Error(String(stderr || err.message).trim().split('\n').pop() || 'ffmpeg failed'));
       resolve();
     });
@@ -193,6 +209,8 @@ const NO_KEY_HELP = (p) => [
 // ── .subtitle ─────────────────────────────────
 export const subtitle = safe('subtitle', async (sock, chat, msg, args) => {
   const opts = parseArgs(args);
+  if (opts.list) return reply(sock, chat, msg, listText(P()));
+  if (opts.badFont) return reply(sock, chat, msg, `❌ No font ${opts.badFont}.\n\n${listText(P())}`);
   const media = findMedia(msg, ['video', 'audio', 'document']);
   const isMedia = media && (media.kind !== 'document' || /^(video|audio)\//.test(media.mime));
 
@@ -202,7 +220,9 @@ export const subtitle = safe('subtitle', async (sock, chat, msg, args) => {
       '🎬 *Subtitles*',
       '',
       `Reply to a video with \`${p}subtitle\``,
-      `• \`${p}subtitle netflix\` · \`${p}subtitle bold\` — other looks (default: youtube)`,
+      `• \`${p}subtitle netflix F2\` — pick a style and a font (default: youtube + F1)`,
+      `• \`${p}subtitle neon top big\` — position (top/mid/bottom) and size (small/big)`,
+      `• \`${p}subtitle fonts\` — all styles and fonts`,
       `• \`${p}subtitle ur\` — force the spoken language (en, ur, hi, ar…)`,
       `• \`${p}subtitle srt\` — only the .srt file, no re-encoding`,
       '',
@@ -260,14 +280,14 @@ export const subtitle = safe('subtitle', async (sock, chat, msg, args) => {
 
       await status('🎨 Burning subtitles…');
       const { W, H } = targetSize(info.width || 1280, info.height || 720);
-      fs.writeFileSync(path.join(dir, 'subs.ass'), cuesToAss(cues, { width: W, height: H, style: opts.style }), 'utf8');
+      fs.writeFileSync(path.join(dir, 'subs.ass'), cuesToAss(cues, { width: W, height: H, style: opts.style, font: FONTS[opts.font].family, position: opts.position, sizeMul: opts.sizeMul }), 'utf8');
       copyFonts(dir);
       const output = path.join(dir, 'subtitled.mp4');
-      await burnSubtitles({ dir, input, output, W, H, timeoutMs: Math.min(25 * 60_000, Math.max(180_000, (info.duration || 60) * 6000)) });
+      await burnSubtitles({ dir, input, output, W, H, timeoutMs: Math.round(Math.min(25 * 60_000, Math.max(180_000, (info.duration || 60) * 6000))) });
       try { fs.unlinkSync(input); } catch {}   // free disk before uploading
 
       const size = fs.statSync(output).size;
-      const caption = `🎬 *Subtitles added* · ${STYLES[opts.style].label} · ${provider}\n\nProvided by 𝐀𝐥-𝐉𝐢𝐧`;
+      const caption = `🎬 *Subtitles added* · ${STYLES[opts.style].label} · ${FONTS[opts.font].family} · ${provider}\n\nProvided by 𝐀𝐥-𝐉𝐢𝐧`;
       await status('📤 Sending…');
       if (size > VIDEO_AS_DOC_BYTES) {
         await sock.sendMessage(chat, { document: { url: output }, mimetype: 'video/mp4', fileName: 'subtitled.mp4', caption }, { quoted: msg });

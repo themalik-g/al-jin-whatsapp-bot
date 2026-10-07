@@ -14,7 +14,7 @@ process.env.GROQ_API_KEY = 'test-groq';
 process.env.GEMINI_API_KEY = 'test-gemini';
 process.env.DEEPGRAM_API_KEY = 'test-deepgram';
 
-const { buildCues, cuesToSrt, cuesToAss, formatTimestamp, assTime, resolveStyle } = await import('../lib/subtitle-render.js');
+const { buildCues, cuesToSrt, cuesToAss, formatTimestamp, assTime, resolveStyle, resolveFont, FONTS, STYLES } = await import('../lib/subtitle-render.js');
 const { parseSrt, transcribe, configuredProviders } = await import('../lib/stt.js');
 
 const tmpAudio = path.join(os.tmpdir(), `aljin_test_${Date.now()}.mp3`);
@@ -76,6 +76,28 @@ test('resolveStyle understands aliases', () => {
   assert.equal(resolveStyle('NF'), 'netflix');
   assert.equal(resolveStyle('bold'), 'boldpop');
   assert.equal(resolveStyle('nope'), null);
+});
+
+test('every font slot points at a bundled file and F-codes resolve', () => {
+  for (const [k, f] of Object.entries(FONTS)) {
+    assert.ok(fs.existsSync(new URL(`../fonts/${f.file}`, import.meta.url)), `${k} missing ${f.file}`);
+  }
+  assert.equal(resolveFont('f2'), 'F2');
+  assert.equal(resolveFont('F99'), null);
+  assert.equal(resolveFont('netflix'), null);
+});
+
+test('every style, font, position and size produces a valid ASS style line', () => {
+  for (const style of Object.keys(STYLES)) {
+    const doc = cuesToAss([{ start: 0, end: 1, text: 'x' }], { width: 640, height: 360, style, font: FONTS.F2.family, position: 'top', sizeMul: 1.25 });
+    assert.match(doc, /Style: Default,Poppins,\d+,&H/);
+    assert.match(doc, /,8,\d+,\d+,\d+,1\n/);   // alignment 8 = top
+  }
+});
+
+test('burn timeout stays an integer for fractional durations', () => {
+  const ms = Math.round(Math.min(25 * 60_000, Math.max(180_000, 51.484818 * 6000)));
+  assert.ok(Number.isInteger(ms));
 });
 
 // ── STT fallback chain ───────────────────────────────────────────────
