@@ -158,3 +158,43 @@ test('transcribe falls through to Deepgram and reports all failures when everyth
     await assert.rejects(() => transcribe(tmpAudio), /All speech-to-text providers failed.*Groq.*Gemini.*Deepgram/s);
   } finally { m.restore(); }
 });
+
+
+// ── .st / .subtitle: order-free options, defaults, Roman Urdu planning ──
+const { parseSubtitleArgs, planOutput, detectByScript, normalizeLang } = await import('../lib/subtitle-args.js');
+const { devanagariToRoman } = await import('../lib/subtitle-translate.js');
+
+test('.st options work in any order and fall back to defaults', () => {
+  const a = parseSubtitleArgs(['ur', 'f3', 'small', 'lower', 'youtube']);
+  assert.deepEqual([a.target, a.font, a.sizeMul, a.position, a.style], ['ur', 'F3', 0.8, 'bottom', 'youtube']);
+  const b = parseSubtitleArgs(['youtube', 'F1', 'middle', 'big']);
+  assert.deepEqual([b.target, b.font, b.sizeMul, b.position, b.style], ['', 'F1', 1.25, 'mid', 'youtube']);
+  const d = parseSubtitleArgs([]);
+  assert.deepEqual([d.target, d.font, d.sizeMul, d.position, d.style], ['', 'F1', 0.8, 'bottom', 'youtube']);
+  assert.equal(parseSubtitleArgs(['top', 'neon']).position, 'top');
+  assert.equal(parseSubtitleArgs(['font3']).font, 'F3');
+  assert.equal(parseSubtitleArgs(['from=en', 'ur']).from, 'en');
+});
+
+test('Urdu/Hindi speech defaults to Roman Urdu; other languages stay as spoken', () => {
+  assert.equal(planOutput(parseSubtitleArgs([]), 'urdu').kind, 'roman');
+  assert.equal(planOutput(parseSubtitleArgs([]), 'hindi').kind, 'roman');
+  assert.equal(planOutput(parseSubtitleArgs([]), 'english'), null);
+  assert.equal(planOutput(parseSubtitleArgs(['ur']), 'en').kind, 'roman');      // translate English → Roman Urdu
+  assert.equal(planOutput(parseSubtitleArgs(['en']), 'ur').code, 'en');         // Urdu speech → English
+  assert.equal(planOutput(parseSubtitleArgs(['ur', 'script']), 'hi').kind, 'urdu-script');
+  assert.equal(normalizeLang('Urdu'), 'ur');
+  assert.equal(detectByScript('यह एक परीक्षण है'), 'hi');
+  assert.equal(detectByScript('یہ ایک ٹیسٹ ہے'), 'ur');
+});
+
+test('offline Devanagari fallback yields Latin letters only', () => {
+  const r = devanagariToRoman('मैं तो आपको यही सलाह दूँगा कि काम करें');
+  assert.match(r, /^[a-z .]+$/i);
+  assert.ok(r.includes('aapko') && r.includes('kaam'), r);
+});
+
+test('Arabic-script text forces an Arabic-capable font in the ASS file', () => {
+  const ass = cuesToAss([{ start: 0, end: 2, text: 'یہ ٹیسٹ ہے' }], { width: 640, height: 360, font: 'Poppins' });
+  assert.match(ass, /Style: Default,DejaVu Sans,/);
+});

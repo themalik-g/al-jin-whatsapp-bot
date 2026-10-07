@@ -48,6 +48,7 @@ import { startPresenceHeartbeat, stopPresenceHeartbeat } from './modules/presenc
 import { revealDelete } from './modules/ghost.js';
 import { startPpsSync, stopPpsSync } from './modules/pps.js';
 import { sessionPath, statePath, inState } from './core/paths.js';
+import { repairIfRequested } from './core/session-repair.js';
 import { loadVars } from './core/vars.js';
 import { hasPrimaryOwner, setPrimaryOwner, getOwnerDetails } from './core/identity.js';
 import { newsletterContext } from './lib/buttons.js';
@@ -312,6 +313,8 @@ async function ignite() {
   if (isStarting) return;
   isStarting = true;
 
+  // .fixkeys / repair-sessions.flag → drop stale signal sessions BEFORE Baileys loads the keys
+  repairIfRequested(AUTH_DIR, STATE_DIR, (m) => console.log(tag, yellow(m)));
   const { state, saveCreds } = await useMultiFileAuthState(AUTH_DIR);
   const { version } = await fetchLatestBaileysVersion();
 

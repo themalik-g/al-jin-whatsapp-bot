@@ -4,14 +4,20 @@ Reply to a video with `.subtitle` and the bot transcribes the speech and burns t
 
 | Command | Result |
 |---|---|
-| `.subtitle` | YouTube style, font F1 |
-| `.subtitle netflix F2` | Style + font (any order) |
-| `.subtitle neon F3 top big` | Style, font, position (`top` `mid` `bottom`) and size (`small` `big`) |
-| `.subtitle ur` | Force the spoken language (2-letter code: en, ur, hi, ar …) |
-| `.subtitle srt` | Only the `.srt` file — no re-encoding, lightest option |
-| `.subtitle fonts` | Lists all styles and fonts |
+| `.st` | Defaults: detected language · youtube · F1 · lower · small |
+| `.st ur f3 small lower youtube` | Roman Urdu · font 3 · small · lower · YouTube style |
+| `.ssubtitle youtube F1 middle big` | Style, font, position, size — **any order, any part optional** |
+| `.st en` | Translate the subtitles to another language (en, ar, tr …) |
+| `.st ur script` | Urdu in Urdu script instead of Roman Urdu |
+| `.st from=en ur` | Force the *spoken* language (rarely needed) |
+| `.st srt` | Only the `.srt` file — no re-encoding |
+| `.st fonts` | Lists all styles and fonts |
 
-Aliases: `.subtitles`, `.subs`, `.sub`, `.addsub`.
+Aliases: `.st`, `.ssubtitle`, `.subtitle`, `.subtitles`, `.subs`, `.sub`, `.addsub`.
+Position words: `top/upper/up` · `mid/middle/center` · `bottom/lower/low`. Size: `small` (default) · `medium` · `big` · `huge`.
+
+**Urdu / Hindi speech → Roman Urdu automatically** ("main to aap ko yehi mashwara dunga ke …"), so there are no missing-glyph boxes. Any other speech stays as spoken unless you add a language (`.st ur` translates it to Roman Urdu).
+Roman Urdu / translation uses the bot's existing free AI chain (no new key needed; a Gemini or Groq key makes it faster). If it is unreachable, Hindi falls back to an offline Roman transliteration.
 
 **Styles:** `youtube` · `netflix` · `bold` · `neon` · `redbox` · `gold` · `comic` (meme) · `minimal`
 
