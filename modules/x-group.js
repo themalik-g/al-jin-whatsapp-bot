@@ -10,6 +10,7 @@ import {
 } from '../lib/x.js';
 import { cfgOf, groupCfg, globalCfg, statsStore, leftStore, userKey } from './x-hooks.js';
 import { getPrefix } from '../core/settings.js';
+import { migrateAction, actionSub, describeAction } from '../lib/guard-core.js';
 
 const P = () => getPrefix();
 const onOff = (v) => (v ? 'on ✅' : 'off ⭕');
@@ -19,10 +20,10 @@ const wantOff = (a) => ['off', 'disable', '0', 'false'].includes(String(a).toLow
 // ── antiword (alias antibadword) ───────────────
 export const antiword = safe('antiword', async (sock, chat, msg, args) => {
     const c = cfgOf(chat);
-    const a = (c.antiword ||= { on: false, words: [], action: 'delete', limit: 3 });
+    const a = migrateAction(c.antiword ||= { on: false, words: [], action: 'delete', limit: 3, v2: true });
     const sub = (args[0] || '').toLowerCase();
     const save = () => groupCfg().save();
-    if (wantOn(sub)) { a.on = true; save(); return reply(sock, chat, msg, `🧼 *antiword* on — ${a.words.length} word(s), action: ${a.action}.`); }
+    if (wantOn(sub)) { a.on = true; save(); return reply(sock, chat, msg, `🧼 *antiword* on — ${a.words.length} word(s), action: ${describeAction(a)}.`); }
     if (wantOff(sub)) { a.on = false; save(); return reply(sock, chat, msg, '🧼 *antiword* off.'); }
     if (sub === 'add') {
         const words = args.slice(1).map((w) => w.toLowerCase()).filter((w) => w.length > 1);
@@ -37,9 +38,9 @@ export const antiword = safe('antiword', async (sock, chat, msg, args) => {
     }
     if (sub === 'list') return reply(sock, chat, msg, a.words.length ? `🧼 *banned words*\n\n${a.words.join(', ')}` : 'No banned words yet.');
     if (sub === 'action') {
-        const v = (args[1] || '').toLowerCase();
-        if (!['delete', 'kick'].includes(v)) return reply(sock, chat, msg, `Usage: \`${P()}antiword action delete|kick\``);
-        a.action = v; save(); return reply(sock, chat, msg, `⚙️ action: *${v}*${v === 'kick' ? ` (after ${a.limit} strikes)` : ''}.`);
+        const r = actionSub(sub, args, a, `${P()}antiword`);
+        if (r.ok) save();
+        return reply(sock, chat, msg, r.err || r.ok);
     }
     if (sub === 'limit') {
         const n = parseInt(args[1], 10);
@@ -47,14 +48,14 @@ export const antiword = safe('antiword', async (sock, chat, msg, args) => {
         a.limit = n; save(); return reply(sock, chat, msg, `⚙️ strike limit: *${n}*.`);
     }
     return reply(sock, chat, msg, [
-        `🧼 *antiword* · ${onOff(a.on)}`, `words: ${a.words.length} · action: ${a.action} · limit: ${a.limit}`, '',
-        `\`${P()}antiword on|off\``, `\`${P()}antiword add <words…>\` / \`del\` / \`list\``, `\`${P()}antiword action delete|kick\``, `\`${P()}antiword limit <n>\``,
+        `🧼 *antiword* · ${onOff(a.on)}`, `words: ${a.words.length} · action: ${describeAction(a)} · limit: ${a.limit}`, '',
+        `\`${P()}antiword on|off\``, `\`${P()}antiword add <words…>\` / \`del\` / \`list\``, `\`${P()}antiword action delete|warn|kick|tkick [30m]\``, `\`${P()}antiword limit <n>\``,
     ].join('\n'));
 });
 
 // ── antitag ────────────────────────────────────
 export const antitag = safe('antitag', async (sock, chat, msg, args) => {
-    const a = (cfgOf(chat).antitag ||= { on: false, max: 5 });
+    const a = migrateAction(cfgOf(chat).antitag ||= { on: false, max: 5, action: 'delete', limit: 3, v2: true });
     const sub = (args[0] || '').toLowerCase();
     if (wantOn(sub)) { a.on = true; groupCfg().save(); return reply(sock, chat, msg, `🏷️ *antitag* on — messages with more than ${a.max} mentions are deleted.`); }
     if (wantOff(sub)) { a.on = false; groupCfg().save(); return reply(sock, chat, msg, '🏷️ *antitag* off.'); }
@@ -63,7 +64,11 @@ export const antitag = safe('antitag', async (sock, chat, msg, args) => {
         if (!(n >= 1 && n <= 50)) return reply(sock, chat, msg, `Usage: \`${P()}antitag max 1-50\``);
         a.max = n; groupCfg().save(); return reply(sock, chat, msg, `🏷️ limit set to *${n}* mentions.`);
     }
-    return reply(sock, chat, msg, `🏷️ *antitag* · ${onOff(a.on)} · max ${a.max}\n\n\`${P()}antitag on|off\`\n\`${P()}antitag max <n>\`\n_Non-admins only. The bot must be admin to delete._`);
+    {
+        const r = actionSub(sub, args, a, `${P()}antitag`);
+        if (r) { if (r.ok) groupCfg().save(); return reply(sock, chat, msg, r.err || r.ok); }
+    }
+    return reply(sock, chat, msg, `🏷️ *antitag* · ${onOff(a.on)} · max ${a.max} · ${describeAction(a)}\n\n\`${P()}antitag on|off\`\n\`${P()}antitag max <n>\`\n\`${P()}antitag action delete|warn|kick|tkick [30m]\`\n\`${P()}antitag limit <1-10>\`\n_Non-admins only. The bot must be admin to delete._`);
 });
 
 // ── antigm ─────────────────────────────────────

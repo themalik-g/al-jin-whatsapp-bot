@@ -4,11 +4,20 @@
 //  [verb, title, description, [usage…], owner?]
 // ─────────────────────────────────────────────
 
+import { EFFECTS, EFFECT_NAMES } from '../lib/audio-effects.js';
+
 const GROUP_PROTECT = [
-    ['antiword', '🧼 Banned Words', 'Deletes messages containing banned words (non-admins). Optional strikes then kick. Alias: antibadword.', ['.antiword on|off', '.antiword add <words…>', '.antiword del <word>', '.antiword list', '.antiword action delete|kick', '.antiword limit <1-10>']],
-    ['antitag', '🏷️ Anti Mass-Tag', 'Deletes messages from non-admins that mention more than N people.', ['.antitag on|off', '.antitag max <n>']],
+    ['antiword', '🧼 Banned Words', 'Deletes messages containing banned words (non-admins). Action ladder: delete, warn (strikes then kick), kick, or tkick (temporary kick, auto re-add). Alias: antibadword.', ['.antiword on|off', '.antiword add <words…>', '.antiword del <words…>', '.antiword list', '.antiword action delete|warn|kick|tkick [30m]', '.antiword limit <1-10>']],
+    ['antitag', '🏷️ Anti Mass-Tag', 'Deletes messages from non-admins that mention more than N people. Same action ladder as antiword.', ['.antitag on|off', '.antitag max <n>', '.antitag action delete|warn|kick|tkick [30m]', '.antitag limit <1-10>']],
     ['antigm', '🚫 Anti Group-Mention', 'Deletes "group mentioned in status" spam from non-admins. Alias: antigstatus.', ['.antigm on|off']],
     ['antifake', '🛡️ Anti Fake Numbers', 'Removes new members whose number starts with a blocked country code.', ['.antifake on|off', '.antifake add|del <codes…>', '.antifake list']],
+    ['antiforward', '⏩ Anti Forward', 'Removes forwarded messages from non-admins. Same action ladder as antiword. Aliases: antifw, afw.', ['.antiforward on|off', '.antiforward action delete|warn|kick|tkick [30m]', '.antiforward limit <1-10>']],
+    ['muteuser', '🔇 Mute Member', 'Deletes everything a member sends, for a set time or until unmuted (bot must be admin; admins can\'t be muted).', ['.muteuser @user [30m|2h|1d]', 'Reply: .muteuser 1h']],
+    ['unmuteuser', '🔊 Unmute Member', 'Lets a muted member talk again.', ['.unmuteuser @user']],
+    ['mutelist', '📋 Mute List', 'Shows muted members, time left, and banned-sticker count.', ['.mutelist']],
+    ['mutesticker', '🖼️ Ban a Sticker', 'Deletes one specific sticker (exact file) whenever a non-admin sends it.', ['Reply to a sticker: .mutesticker', '.mutesticker list|clear']],
+    ['unmutesticker', '✅ Allow a Sticker', 'Un-bans a sticker.', ['Reply to the sticker: .unmutesticker']],
+    ['dnd', '🔕 Do Not Disturb', 'Deletes messages from non-admins that tag the bot and replies with your message. Alias: donotdisturb.', ['.dnd on|off', '.dnd <your message>']],
     ['areact', '😀 Auto React', 'Reacts to messages in the group with random emojis.', ['.areact on|off', '.areact emoji 🔥 😂 ❤️']],
     ['filter', '🔁 Group Filters', 'Auto-reply when a trigger word appears in this group.', ['.filter <trigger> | <reply>', '.filter list']],
     ['stop', '🗑️ Remove Filter', 'Deletes a group filter.', ['.stop <trigger>']],
@@ -104,6 +113,11 @@ const MEDIA = [
     ['pdf', '📄 PDF Maker', 'Text, one photo, or many photos → PDF. Alias: topdf.', ['.pdf <text>', 'Reply to a photo: .pdf', '.pdf add … .pdf make [name]']],
 ];
 
+const EFFECT_ROWS = [
+    ['fx', '🎛️ Voice Effects List', 'Lists every voice effect. Alias: effects.', ['.fx']],
+    ...EFFECT_NAMES.map((n) => [n, `${EFFECTS[n].icon} ${n[0].toUpperCase()}${n.slice(1)}`, `${EFFECTS[n].desc} Works on voice notes, audio and video (audio is returned).`, [`Reply to audio/video: .${n}`]]),
+];
+
 const SECTIONS = [
     { id: 'xprotect', icon: '🛡️', title: 'GROUP PROTECTION+', rows: GROUP_PROTECT, adminHint: true },
     { id: 'xgroup', icon: '👥', title: 'GROUP TOOLS+', rows: GROUP_TOOLS },
@@ -112,6 +126,7 @@ const SECTIONS = [
     { id: 'xtools', icon: '🧰', title: 'HANDY TOOLS', rows: TOOLS },
     { id: 'xweb', icon: '🌐', title: 'WEB LOOKUPS', rows: WEB },
     { id: 'xmedia', icon: '🎞️', title: 'MEDIA STUDIO', rows: MEDIA },
+    { id: 'xeffects', icon: '🎛️', title: 'VOICE EFFECTS', rows: EFFECT_ROWS },
 ];
 
 /** Entries for modules/details.js */
@@ -121,7 +136,7 @@ for (const s of SECTIONS) {
 }
 // alias keys → same details
 const ALIASES = {
-    antibadword: 'antiword', antigstatus: 'antigm', autoreact: 'areact', listadmin: 'admins', invitelink: 'link', delete: 'del', roast: 'insult', ttt: 'tictactoe',
+    antibadword: 'antiword', antifw: 'antiforward', afw: 'antiforward', donotdisturb: 'dnd', effects: 'fx', antigstatus: 'antigm', autoreact: 'areact', listadmin: 'admins', invitelink: 'link', delete: 'del', roast: 'insult', ttt: 'tictactoe',
     calculate: 'calc', colour: 'color', b64: 'base64', genpass: 'password', todo: 'task', trt: 'translate', git: 'github', pokemon: 'pokedex',
     steal: 'take', scrop: 'stickercrop', grayscale: 'greyscale', bw: 'greyscale', topdf: 'pdf',
 };
