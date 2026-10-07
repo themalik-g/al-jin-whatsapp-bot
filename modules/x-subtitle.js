@@ -23,6 +23,8 @@ import { ffmpegPath, ffprobePath } from '../lib/ffmpeg-resolver.js';
 import { getPrefix } from '../core/settings.js';
 import { transcribe, configuredProviders, MAX_UPLOAD_BYTES } from '../lib/stt.js';
 import { aiKey } from '../lib/ai.js';
+import { parseSubtitleArgs, planOutput, detectByScript, normalizeLang } from '../lib/subtitle-args.js';
+import { translateSegments } from '../lib/subtitle-translate.js';
 import { buildCues, cuesToSrt, cuesToAss, resolveStyle, resolveFont, STYLES, FONTS, DEFAULT_FONT, POSITIONS } from '../lib/subtitle-render.js';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
@@ -52,22 +54,6 @@ function enqueue(job) {
 }
 
 // ── helpers ───────────────────────────────────
-function parseArgs(args) {
-  const out = { style: 'youtube', font: DEFAULT_FONT, position: 'bottom', sizeMul: 1, srtOnly: false, language: '', list: false, badFont: '' };
-  for (const raw of args) {
-    const a = String(raw).toLowerCase().replace(/^lang=/, '');
-    if (['srt', 'text', 'file'].includes(a)) out.srtOnly = true;
-    else if (['fonts', 'styles', 'list'].includes(a)) out.list = true;
-    else if (/^f\d+$/.test(a)) { if (resolveFont(a)) out.font = a.toUpperCase(); else out.badFont = a.toUpperCase(); }
-    else if (POSITIONS[a]) out.position = a === 'center' || a === 'middle' ? 'mid' : a;
-    else if (a === 'big' || a === 'large') out.sizeMul = 1.25;
-    else if (a === 'small') out.sizeMul = 0.8;
-    else if (resolveStyle(a)) out.style = resolveStyle(a);
-    else if (/^[a-z]{2}$/.test(a)) out.language = a;
-  }
-  return out;
-}
-
 const listText = (p) => [
   '🎨 *Subtitle styles*',
   Object.entries(STYLES).map(([k, v]) => `• ${v.label} — \`${k}\``).join('\n'),
@@ -75,8 +61,9 @@ const listText = (p) => [
   '🔤 *Fonts* (add F1–F8)',
   Object.entries(FONTS).map(([k, v]) => `• *${k}* ${v.label}`).join('\n'),
   '',
-  '📍 *Position:* top · mid · bottom     📏 *Size:* small · big',
-  `Example: \`${p}subtitle neon F2 top big\``,
+  '📍 *Position:* top · mid · bottom (lower)     📏 *Size:* small · medium · big',
+  '🌐 *Language:* ur · en · ar … (Urdu/Hindi speech → Roman Urdu automatically)',
+  `Examples: \`${p}st ur f3 small lower youtube\`  ·  \`${p}st youtube F1 middle big\`  ·  \`${p}st\``,
 ].join('\n');
 
 function sweepStale() {
@@ -151,14 +138,14 @@ export async function transcribeAudio(audio, dir, { language, onProvider, chunkS
   if (fs.statSync(audio).size <= maxBytes) return transcribe(audio, { language, onProvider });
   const chunks = await splitAudio(audio, dir, chunkSeconds);
   const all = [];
-  let provider = '';
+  let provider = '', detected = '';
   for (let i = 0; i < chunks.length; i++) {
     const r = await transcribe(chunks[i], { language, onProvider });
-    provider = r.provider;
+    provider = r.provider; detected = detected || r.language || '';
     all.push(...r.segments.map((s) => ({ ...s, start: s.start + i * chunkSeconds, end: s.end + i * chunkSeconds })));
     try { fs.unlinkSync(chunks[i]); } catch {}
   }
-  return { segments: all, provider };
+  return { segments: all, provider, language: detected };
 }
 
 /** Burns an ASS file into the video. Runs inside `dir` so no path ever needs filter-escaping. */
@@ -208,7 +195,7 @@ const NO_KEY_HELP = (p) => [
 
 // ── .subtitle ─────────────────────────────────
 export const subtitle = safe('subtitle', async (sock, chat, msg, args) => {
-  const opts = parseArgs(args);
+  const opts = parseSubtitleArgs(args);
   if (opts.list) return reply(sock, chat, msg, listText(P()));
   if (opts.badFont) return reply(sock, chat, msg, `❌ No font ${opts.badFont}.\n\n${listText(P())}`);
   const media = findMedia(msg, ['video', 'audio', 'document']);
@@ -219,12 +206,12 @@ export const subtitle = safe('subtitle', async (sock, chat, msg, args) => {
     return reply(sock, chat, msg, [
       '🎬 *Subtitles*',
       '',
-      `Reply to a video with \`${p}subtitle\``,
-      `• \`${p}subtitle netflix F2\` — pick a style and a font (default: youtube + F1)`,
-      `• \`${p}subtitle neon top big\` — position (top/mid/bottom) and size (small/big)`,
-      `• \`${p}subtitle fonts\` — all styles and fonts`,
-      `• \`${p}subtitle ur\` — force the spoken language (en, ur, hi, ar…)`,
-      `• \`${p}subtitle srt\` — only the .srt file, no re-encoding`,
+      `Reply to a video with \`${p}st\` (or ${p}subtitle). Every option is optional and can come in any order:`,
+      `• \`${p}st ur f3 small lower youtube\` — Urdu (Roman), font 3, small, lower, YouTube style`,
+      `• \`${p}st youtube F1 middle big\` — style, font, position (top/mid/lower), size (small/medium/big)`,
+      `• \`${p}st en\` — translate to another language (en, ur, ar, …)`,
+      `• \`${p}st fonts\` — all styles and fonts · \`${p}st srt\` — only the .srt file`,
+      'Defaults: detected language (Urdu/Hindi → Roman Urdu) · youtube · F1 · lower · small',
       '',
       `Styles: ${Object.values(STYLES).map((s) => s.label).join(' · ')}`,
       `Up to ${maxMinutes()} min and ${bytesToSize(MAX_DOWNLOAD_BYTES)} per video.`,
@@ -256,11 +243,21 @@ export const subtitle = safe('subtitle', async (sock, chat, msg, args) => {
 
       await status('🧠 Listening…');
       let engine = '';
-      const { segments, provider } = await transcribeAudio(audio, dir, {
-        language: opts.language,
+      const { segments: spoken, provider, language: sttLang } = await transcribeAudio(audio, dir, {
+        language: opts.from,
         onProvider: (n) => { if (n !== engine) { engine = n; status(`🧠 Transcribing with ${n}…`); } },
       });
       try { fs.unlinkSync(audio); } catch {}
+
+      // detected language → Roman Urdu for Urdu/Hindi, or the language the user asked for
+      const detected = normalizeLang(sttLang) || detectByScript(spoken.map((x) => x.text).join(' '));
+      const plan = planOutput(opts, detected);
+      let segments = spoken, langNote = '', warn = '';
+      if (plan) {
+        await status(`🌐 Writing ${plan.label} subtitles…`);
+        const tr = await translateSegments(spoken, plan);
+        segments = tr.segments; langNote = ` · ${plan.label}`; warn = tr.note ? `\n\n⚠️ ${tr.note}` : '';
+      }
 
       const portrait = info.height > info.width;
       const cues = buildCues(segments, { maxChars: portrait ? 44 : 70, duration: info.duration });
@@ -273,7 +270,7 @@ export const subtitle = safe('subtitle', async (sock, chat, msg, args) => {
         const why = !burn ? '' : '\n\nℹ️ This ffmpeg build cannot draw subtitles (no libass), so here is the subtitle file instead.';
         await sock.sendMessage(chat, {
           document: { url: srtPath }, mimetype: 'application/x-subrip', fileName: 'subtitles.srt',
-          caption: `📝 *Subtitles* · ${cues.length} lines · ${provider}${why}\n\nProvided by 𝐀𝐥-𝐉𝐢𝐧`,
+          caption: `📝 *Subtitles* · ${cues.length} lines${langNote} · ${provider}${why}${warn}\n\nProvided by 𝐀𝐥-𝐉𝐢𝐧`,
         }, { quoted: msg });
         return status('✅ Done');
       }
@@ -287,7 +284,7 @@ export const subtitle = safe('subtitle', async (sock, chat, msg, args) => {
       try { fs.unlinkSync(input); } catch {}   // free disk before uploading
 
       const size = fs.statSync(output).size;
-      const caption = `🎬 *Subtitles added* · ${STYLES[opts.style].label} · ${FONTS[opts.font].family} · ${provider}\n\nProvided by 𝐀𝐥-𝐉𝐢𝐧`;
+      const caption = `🎬 *Subtitles added* · ${STYLES[opts.style].label} · ${FONTS[opts.font].family}${langNote} · ${provider}${warn}\n\nProvided by 𝐀𝐥-𝐉𝐢𝐧`;
       await status('📤 Sending…');
       if (size > VIDEO_AS_DOC_BYTES) {
         await sock.sendMessage(chat, { document: { url: output }, mimetype: 'video/mp4', fileName: 'subtitled.mp4', caption }, { quoted: msg });

@@ -20,6 +20,7 @@ const LOADERS = {
     guard: () => import('./x-guard.js'),
     effects: () => import('./x-effects.js'),
     subtitle: () => import('./x-subtitle.js'),
+    repair: () => import('./x-repair.js'),
 };
 
 // [verb, module, export, perm, ...aliases]
@@ -125,7 +126,9 @@ const TABLE = [
     ['avm', 'media', 'avm', 'all'],
     ['pdf', 'media', 'pdf', 'all', 'topdf'],
     // subtitles (speech-to-text + ffmpeg)
-    ['subtitle', 'subtitle', 'subtitle', 'all', 'subtitles', 'subs', 'sub', 'addsub'],
+    ['subtitle', 'subtitle', 'subtitle', 'all', 'st', 'ssubtitle', 'subtitles', 'subs', 'sub', 'addsub'],
+    // own-phone "Waiting for this message" repair
+    ['fixkeys', 'repair', 'fixkeys', 'owner', 'fixown', 'resetkeys', 'fixsession', 'fixwaiting'],
     // voice effects (ffmpeg)
     ['fx', 'effects', 'fx', 'all', 'effects'],
     ['echo', 'effects', 'echo', 'all'],
