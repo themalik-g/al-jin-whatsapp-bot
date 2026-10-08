@@ -1,6 +1,6 @@
 // ─────────────────────────────────────────────
 // Al-Jin · modules/download.js
-// Platform downloaders — ytdlp-nodejs + @postfetch/core
+// Platform downloaders — ytdlp-nodejs + @postfetch/core + HLS (@lzwme/m3u8-dl)
 // ─────────────────────────────────────────────
 import fs from 'node:fs';
 import path from 'node:path';
@@ -13,7 +13,8 @@ import { sendInteractive, createQuickReply, sendWithCta } from '../lib/buttons.j
 import { getPrefix } from '../core/settings.js';
 import { getTmpDir, runYtdlp, cleanPrefix, cleanOldTmpFiles } from '../lib/ytdlp.js';
 import { reactMsg, editStatus, EMOJIS } from '../lib/reaction-helper.js';
-import { getMaxDownloadMB, getMaxDownloadBytes, getDocThresholdBytes, getDownloadTimeoutMs, videoHeightForDl } from '../core/limits.js';
+import { getMaxDownloadMB, getMaxDownloadBytes, getDocThresholdBytes, getDownloadTimeoutMs, videoHeightForDl, fmtMB } from '../core/limits.js';
+import { downloadHlsStream } from '../lib/m3u8.js';
 
 const MAX_BYTES       = 15 * 1024 * 1024;
 const MAX_VIDEO       = 60 * 1024 * 1024;
@@ -23,8 +24,6 @@ const ITEM_DL_TIMEOUT  = 90_000;   // per post item download
 const ITEM_GAP_MS      = 700;      // pause between sends (avoids WA throttling)
 const queue = new PQueue({ concurrency: 1 });
 
-// Small helpers used all over this file (they were never defined → "edit is not defined").
-// Both swallow errors on purpose: a failed status edit must never break a download.
 async function edit(sock, chat, statusMsg, text) {
   try {
     if (statusMsg?.key) return await sock.sendMessage(chat, { text, edit: statusMsg.key });
@@ -35,7 +34,6 @@ async function react(sock, chat, msg, emoji) {
   try { await sock.sendMessage(chat, { react: { text: emoji, key: msg.key } }); } catch {}
 }
 
-// ── ytdlp-nodejs supported-host whitelist ──
 const YTDLP_SUPPORTED_HOSTS = new Set([
   'youtube.com', 'www.youtube.com', 'm.youtube.com', 'music.youtube.com', 'youtu.be',
   'vimeo.com', 'www.vimeo.com',
@@ -57,8 +55,18 @@ const YTDLP_SUPPORTED_HOSTS = new Set([
   '9gag.com', 'www.9gag.com',
 ]);
 
+function isHlsUrl(url) {
+  if (!url || typeof url !== 'string') return false;
+  try {
+    const u = new URL(url);
+    if (u.protocol !== 'http:' && u.protocol !== 'https:') return false;
+    return u.pathname.includes('.m3u8') || u.search.includes('.m3u8');
+  } catch { return false; }
+}
+
 function isYtDlpSupportedUrl(url) {
   if (!url || typeof url !== 'string') return false;
+  if (isHlsUrl(url)) return true;
   try {
     const u = new URL(url);
     if (u.protocol !== 'http:' && u.protocol !== 'https:') return false;
@@ -148,8 +156,6 @@ function sniffImage(b) {
     (b[0] === 0x47 && b[1] === 0x49 && b[2] === 0x46);
 }
 
-// Sends ONE post item exactly like the old working build (raw buffer, no disk).
-// Never throws → returns { ok, reason }.
 async function sendPostfetchItem(sock, chat, msg, buffer, item, idx) {
   try {
     let type = await classifyBuffer(buffer);
@@ -183,7 +189,6 @@ async function sendPostfetchItem(sock, chat, msg, buffer, item, idx) {
   }
 }
 
-// Download + send every item of a post, one by one, with honest progress and result.
 async function deliverPostItems(sock, chat, msg, status, items) {
   const total = Math.min(items.length, 20);
   let sent = 0;
@@ -216,7 +221,6 @@ async function deliverPostItems(sock, chat, msg, status, items) {
   return { sent, total, failed };
 }
 
-// Final status + reaction. Green tick ONLY when everything was really delivered.
 async function finishPostDelivery(sock, chat, msg, status, r, extra = '') {
   if (r.failed.length === 0) {
     await editStatus(sock, chat, status, `✅ *Download complete* (${r.sent}/${r.total} sent)${extra}\n\nProvided by 𝐀𝐥-𝐉𝐢𝐧`);
@@ -287,6 +291,42 @@ function collectFiles(dir) {
   return out;
 }
 
+async function downloadHlsMedia(sock, chat, msg, url, status) {
+  let hlsFile = null;
+  try {
+    await reactMsg(sock, chat, msg.key, EMOJIS.DOWNLOAD);
+    await editStatus(sock, chat, status, '📥 Downloading HLS (.m3u8) stream…');
+
+    const onProgress = (s) => {
+      if (s?.downloadedSize) {
+        editStatus(sock, chat, status, `📥 Downloading HLS stream · ${fmtMB(s.downloadedSize)} MB`);
+      }
+    };
+
+    hlsFile = await downloadHlsStream(url, { onProgress });
+    const stat = fs.statSync(hlsFile);
+
+    await reactMsg(sock, chat, msg.key, EMOJIS.UPLOAD);
+    await editStatus(sock, chat, status, `📤 Uploading HLS video (${fmtMB(stat.size)} MB)…`);
+
+    const asDoc = stat.size > getDocThresholdBytes();
+    const fileName = `hls_video_${Date.now()}.mp4`;
+
+    await sock.sendMessage(chat, asDoc
+      ? { document: { url: hlsFile }, mimetype: 'video/mp4', fileName }
+      : { video: { url: hlsFile }, mimetype: 'video/mp4', fileName }, { quoted: msg });
+
+    await editStatus(sock, chat, status, `✅ *Download complete*\n\nProvided by 𝐀𝐥-𝐉𝐢𝐧`);
+    await reactMsg(sock, chat, msg.key, EMOJIS.SUCCESS);
+  } catch (e) {
+    console.error('[hls download]', e.message);
+    await edit(sock, chat, status, `❌ *HLS Download failed:* ${e.message}`).catch(() => {});
+    await react(sock, chat, msg, '❌');
+  } finally {
+    if (hlsFile) cleanFile(hlsFile);
+  }
+}
+
 async function downloadMedia(sock, chat, msg, query, audioOnly) {
   const verbLabel = audioOnly ? '.mp3' : '.dl';
   const status = await sock.sendMessage(chat, {
@@ -296,12 +336,16 @@ async function downloadMedia(sock, chat, msg, query, audioOnly) {
   try {
     const isUrl = /^https?:\/\//i.test(query);
 
+    if (isUrl && isHlsUrl(query) && !audioOnly) {
+      return await downloadHlsMedia(sock, chat, msg, query, status);
+    }
+
     if (isUrl && !isPostUrl(query) && !isYtDlpSupportedUrl(query)) {
       await edit(sock, chat, status,
         `❌ *Unsupported URL*\n\nThis site is not supported.\n\n` +
         `*Supported:* YouTube, SoundCloud, TikTok, Instagram, Facebook, ` +
         `Twitter/X, Reddit, Pinterest, Threads, Vimeo, Twitch, Dailymotion, ` +
-        `Streamable, Bilibili, and more.`
+        `Streamable, Bilibili, HLS (.m3u8), and more.`
       );
       await react(sock, chat, msg, '❌');
       return;
@@ -380,7 +424,6 @@ async function downloadMedia(sock, chat, msg, query, audioOnly) {
       if (!fs.existsSync(file)) continue;
       const fileSize = fs.statSync(file).size;
       if (fileSize < 1024) { cleanFile(file); continue; }
-      // Big files are streamed from disk (never loaded into RAM); only the first bytes are read to detect the type.
       let streamed = fileSize > 20 * 1024 * 1024;
       let buffer;
       if (streamed) {
@@ -395,7 +438,7 @@ async function downloadMedia(sock, chat, msg, query, audioOnly) {
       if (audioOnly && !(type.kind === 'audio' && type.ext === 'mp3')) {
         await editStatus(sock, chat, status, '⚙️ *Converting to mp3…*');
         try {
-          if (streamed) { buffer = fs.readFileSync(file); streamed = false; }   // conversion works in memory
+          if (streamed) { buffer = fs.readFileSync(file); streamed = false; }
           buffer = await withTimeout(bufferToMp3(buffer, 192), CONVERT_TIMEOUT, 'mp3 conversion');
           type = { kind: 'audio', ext: 'mp3', mime: 'audio/mpeg' };
         } catch (convErr) { console.warn('[download:mp3-convert]', convErr.message); }
@@ -409,7 +452,7 @@ async function downloadMedia(sock, chat, msg, query, audioOnly) {
       }
 
       const src = streamed ? { url: file } : buffer;
-      const asDoc = size > getDocThresholdBytes();   // large media → document (reliable up to 2 GB)
+      const asDoc = size > getDocThresholdBytes();
       try {
         if (type.kind === 'image') { await sock.sendMessage(chat, { image: src, mimetype: type.mime }, { quoted: msg }); sentCount++; }
         else if (type.kind === 'video' && !asDoc) { await sock.sendMessage(chat, { video: src, mimetype: type.mime || 'video/mp4', fileName: `${safeName}.${type.ext}` }, { quoted: msg }); sentCount++; }
@@ -451,7 +494,7 @@ export async function ytdlCommand(sock, chat, msg, args) {
       `❌ *Unsupported URL*\n\nThis site is not supported.\n\n` +
       `*Supported:* YouTube, SoundCloud, TikTok, Instagram, Facebook, ` +
       `Twitter/X, Reddit, Pinterest, Threads, Vimeo, Twitch, Dailymotion, ` +
-      `Streamable, Bilibili, and more.`, { quoted: msg });
+      `Streamable, Bilibili, HLS (.m3u8), and more.`, { quoted: msg });
   }
 
   if (isUrl && !isDirectMode && !args.includes('--direct')) {
