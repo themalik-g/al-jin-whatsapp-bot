@@ -46,3 +46,12 @@ Optional: `.setvar SUBTITLE_MAX_MINUTES 30` (default 15, max 60).
 
 The eight fonts above are bundled (~3 MB). Whatever font you pick, Urdu/Arabic letters automatically fall back to DejaVu so mixed text still renders.
 For other scripts (Hindi, Chinese, Thai …) drop a matching `.ttf` / `.otf` into `fonts/` — it is used as a glyph fallback automatically.
+
+## Update 5
+* **AI for translation / `.bot`:** Groq (all its free chat models, rotating automatically when one is rate-limited) → Gemini → keyless free GPT. Your Groq key is enough — no Gemini key needed.
+* **Better translation:** a short topic summary + neighbouring lines are sent with every batch so words are translated by meaning in context, not word by word.
+* **Urdu script** always uses the default font F1 (DejaVu) and the bundled fonts are registered with fontconfig, so no more boxes.
+* **Live progress:** one message is edited every ~6 s (`WRAITH_PROGRESS_SEC` to change): stage %, overall bar and estimated time left.
+* **`.trt <lang>`** replying to audio/voice/video → original text + translation (`.trt ur`, `.trt en`, `.trt ur roman`). Replying to normal text still translates the text.
+* **`.trb`** (alias `.transcribe`) replying to audio → text. `.trb roman` Roman Urdu · `.trb srt` timed file.
+* **`.bot` / `.chatbot`** fast AI chat with memory per chat (`.bot reset` to clear). Reply to a message with `.bot` to ask about it.

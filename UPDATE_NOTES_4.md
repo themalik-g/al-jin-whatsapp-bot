@@ -13,3 +13,7 @@ Cause: stale signal sessions between the bot and your main phone. Fix = delete o
 - Manual, brute force: stop bot, delete every file in instances/main/session/ EXCEPT creds.json, `pre-key-*` and `app-state-sync-*`, start bot.
 Do NOT delete creds.json (that logs the bot out) or pre-keys (new chats would fail to decrypt).
 Diagnose: set WRAITH_LOG_LEVEL=warn and look for "failed to decrypt" / "Bad MAC" lines.
+
+## Update 5
+New files: lib/llm.js, lib/progress.js, modules/x-audio.js (.trt audio, .trb), modules/x-chatbot.js (.bot).
+Changed: lib/subtitle-translate.js, lib/subtitle-render.js, lib/subtitle-args.js, modules/x-subtitle.js, modules/x-registry.js, test/subtitle.test.js, SUBTITLES.md.
