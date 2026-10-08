@@ -8,19 +8,16 @@
 //    .continue                      next 3 episodes of the last -full run in this chat
 //    .movieinfo <title>             ratings & plot lookup
 //
-//  Obeys .dlcap (core/limits.js): max size per file, max video height, and the
-//  "send as document above N MB" rule. One download at a time (RAM + disk friendly),
-//  every file is deleted right after it is sent.
+//  Streams straight into Baileys (lib/stream-send.js): no download-to-disk step, flat RAM,
+//  no transcoding. Obeys .dlcap AND the free disk. One transfer at a time.
+//  Titles: keyword clean-up + fuzzy ranking, plus Groq/Gemini when a key is set (lib/title-resolver.js).
 // ─────────────────────────────────────────────
-import fs from 'node:fs';
-import path from 'node:path';
 import crypto from 'node:crypto';
 import PQueue from 'p-queue';
 import { reply, prefix, safe } from '../lib/x.js';
 import { sendWithCta, createQuickReply } from '../lib/buttons.js';
 import { inPollRun } from '../lib/poll.js';
 import { editStatus } from '../lib/reaction-helper.js';
-import { downloadToFile } from '../lib/net.js';
 import {
   getMaxDownloadMB, getMaxDownloadBytes, getVideoHeight, getDocThresholdBytes, fmtMB,
 } from '../core/limits.js';
@@ -30,10 +27,10 @@ import {
   getMovieboxMovieStream,
   getMovieboxSeriesDetails,
   getMovieboxEpisodeStream,
-  downloadMovieboxStream,
 } from '../lib/moviebox.js';
+import { openRemote, openHls, sendStream, effectiveCapBytes, purgeLeftovers } from '../lib/stream-send.js';
+import { resolveQuery, rankResults, aiConfigured } from '../lib/title-resolver.js';
 
-const TMP_DIR = path.join(process.cwd(), 'vault', 'tmp', 'movies');
 const queue = new PQueue({ concurrency: 1 });          // one download at a time
 const SESSION_TTL = 15 * 60 * 1000;
 const RUN_TTL = 3 * 60 * 60 * 1000;
@@ -82,10 +79,12 @@ async function askChoice(sock, chat, msg, body, options) {
   return sendWithCta(sock, chat, body, { quoted: msg, buttons, footer: FOOTER });
 }
 
-/** Why a file may not be downloaded under the current .dlcap — '' when it is fine. */
-function capProblem(file) {
-  if (file.size && file.size > getMaxDownloadBytes()) {
-    return `${mb(file.size)} is above your download cap (${getMaxDownloadMB()} MB). Raise it with \`${P()}dlcap 1gb\` or pick a lower quality.`;
+/** Why a file may not be sent under the current .dlcap / free disk — '' when it is fine. */
+function capProblem(file, capBytes = getMaxDownloadBytes()) {
+  if (file.size && file.size > capBytes) {
+    return capBytes < getMaxDownloadBytes()
+      ? `${mb(file.size)} will not fit: only ~${fmtMB(capBytes)} MB of server disk is free (WhatsApp needs one temporary encrypted copy). Pick a lower quality.`
+      : `${mb(file.size)} is above your download cap (${getMaxDownloadMB()} MB). Raise it with \`${P()}dlcap 1gb\` or pick a lower quality.`;
   }
   const h = file.bucket || 480;
   if (h > getVideoHeight()) {
@@ -94,83 +93,79 @@ function capProblem(file) {
   return '';
 }
 
-// ── Moviebox download + send ────────────────
-async function fetchAndSendMoviebox(sock, chat, msg, { streamObj, name, caption }) {
-  fs.mkdirSync(TMP_DIR, { recursive: true });
-  const status = await sock.sendMessage(chat, { text: `📥 Downloading *${name}*…` }, { quoted: msg });
-  let filePath = null;
+// ── stream → WhatsApp (shared by both sources) ──
+async function pumpToWhatsApp(sock, chat, msg, status, { name, label = '', open, asDoc, mimetype, fileName, caption }) {
+  purgeLeftovers();
+  const cap = await effectiveCapBytes();
+  if (cap < 20 * 1024 * 1024) throw new Error('The server disk is almost full — free some space and try again.');
+  const { stream, size } = await open(cap);
+  const doc = typeof asDoc === 'function' ? asDoc(size) : asDoc;
+  const tag = label ? ` (${label})` : '';
+  let ticker = null; let last = '';
   try {
-    let last = '';
-    const onProgress = (info) => {
-      if (info?.downloadedSize) {
-        const pct = info.totalSize ? ` ${Math.min(99, Math.round((info.downloadedSize / info.totalSize) * 100))}%` : '';
-        const t = `📥 Downloading *${name}*${pct} · ${mb(info.downloadedSize)}`;
-        if (t !== last) { last = t; editStatus(sock, chat, status, t); }
-      }
+    const paint = () => {
+      const done = stream.bytes || 0;
+      const pct = size ? ` ${Math.min(99, Math.round((done / size) * 100))}%` : '';
+      const t = `📥 Streaming *${name}*${tag}${pct} · ${mb(done)}${size ? ` / ${mb(size)}` : ''}`;
+      if (t !== last) { last = t; editStatus(sock, chat, status, t); }
     };
-
-    filePath = await downloadMovieboxStream(streamObj, { title: name, onProgress });
-    const stat = fs.statSync(filePath);
-    if (stat.size > getMaxDownloadBytes()) {
-      throw new Error(`File size (${mb(stat.size)}) exceeds cap (${getMaxDownloadMB()} MB)`);
-    }
-
-    await editStatus(sock, chat, status, `📤 Uploading *${name}* (${mb(stat.size)})…`);
-    const asDoc = stat.size > getDocThresholdBytes();
-    const fileName = `${safeName(name)}.mp4`;
-    await sock.sendMessage(chat, asDoc
-      ? { document: { url: filePath }, mimetype: 'video/mp4', fileName, caption }
-      : { video: { url: filePath }, mimetype: 'video/mp4', fileName, caption }, { quoted: msg });
-    await editStatus(sock, chat, status, `✅ Sent *${name}*`);
-  } catch (err) {
-    await editStatus(sock, chat, status, `❌ Download failed: ${err.message}`);
-    throw err;
+    await editStatus(sock, chat, status, `📥 Streaming *${name}*${tag}${size ? ` · ${mb(size)}` : ''} — straight to WhatsApp, no copy kept…`);
+    ticker = setInterval(paint, 15000); ticker.unref?.();
+    stream.once('end', () => { clearInterval(ticker); ticker = null; editStatus(sock, chat, status, `📤 Uploading *${name}*${tag} (${mb(stream.bytes)})…`); });
+    await sendStream(sock, chat, msg, { stream, asDoc: doc, mimetype, fileName, caption });
+    await editStatus(sock, chat, status, `✅ Sent *${name}*${tag}`);
   } finally {
-    if (filePath) {
-      try { fs.unlinkSync(filePath); } catch {}
-    }
+    if (ticker) clearInterval(ticker);
+    try { stream.destroy(); } catch {}
   }
 }
 
-// ── Internet Archive download + send ─────────
-async function fetchAndSendIA(sock, chat, msg, { item, file, name, label, caption }) {
-  fs.mkdirSync(TMP_DIR, { recursive: true });
-  const dest = path.join(TMP_DIR, `mv_${Date.now()}_${crypto.randomBytes(3).toString('hex')}.${file.ext}`);
-  const maxBytes = getMaxDownloadBytes();
-  const status = await sock.sendMessage(chat, { text: `📥 Downloading *${name}* (${label}${file.size ? ` · ${mb(file.size)}` : ''})…` }, { quoted: msg });
-  let ticker = null;
+// ── Moviebox ─────────────────────────────────
+async function fetchAndSendMoviebox(sock, chat, msg, { streamObj, name, caption }) {
+  const status = await sock.sendMessage(chat, { text: `🔎 Preparing *${name}*…` }, { quoted: msg });
   try {
-    let last = '';
-    ticker = setInterval(() => {
-      try {
-        const done = fs.statSync(dest).size;
-        const pct = file.size ? ` ${Math.min(99, Math.round((done / file.size) * 100))}%` : '';
-        const t = `📥 Downloading *${name}* (${label})${pct} · ${mb(done)}`;
-        if (t !== last) { last = t; editStatus(sock, chat, status, t); }
-      } catch { /* file not created yet */ }
-    }, 15000);
-    ticker.unref?.();
+    const url = typeof streamObj === 'string' ? streamObj : streamObj?.stream?.url || streamObj?.url;
+    const headers = (typeof streamObj === 'object' && (streamObj?.headers || streamObj?.stream?.headers)) || {};
+    if (!url) throw new Error('No valid stream URL');
+    const hls = url.includes('.m3u8');
+    await pumpToWhatsApp(sock, chat, msg, status, {
+      name,
+      open: (cap) => (hls ? openHls(url, { headers, maxBytes: cap }) : openRemote(url, { headers, maxBytes: cap })),
+      asDoc: (size) => hls || size > getDocThresholdBytes(),   // HLS comes out as fragmented MP4 → send as a document so it always opens
+      mimetype: 'video/mp4',
+      fileName: `${safeName(name)}.mp4`,
+      caption,
+    });
+  } catch (err) {
+    await editStatus(sock, chat, status, `❌ Failed: ${err.message}`);
+    throw err;
+  }
+}
 
-    let lastErr = null; let ok = false;
-    for (const url of ia.downloadUrls(item, file)) {          // primary, then the item's own server
-      try { await downloadToFile(url, dest, maxBytes); ok = true; break; }
-      catch (e) { lastErr = e; try { fs.unlinkSync(dest); } catch {} }
-    }
-    if (!ok) throw lastErr || new Error('download failed');
-    clearInterval(ticker); ticker = null;
-
-    const size = fs.statSync(dest).size;
-    await editStatus(sock, chat, status, `📤 Uploading *${name}* (${label} · ${mb(size)})…`);
-    const asDoc = !file.playable || size > getDocThresholdBytes();   // big files → document (reliable up to 2 GB)
-    const fileName = `${safeName(`${name} ${label}`)}.${file.ext}`;
-    const mimetype = MIME[file.ext] || 'application/octet-stream';
-    await sock.sendMessage(chat, asDoc
-      ? { document: { url: dest }, mimetype, fileName, caption }
-      : { video: { url: dest }, mimetype: 'video/mp4', fileName, caption }, { quoted: msg });
-    await editStatus(sock, chat, status, `✅ Sent *${name}* (${label})`);
-  } finally {
-    if (ticker) clearInterval(ticker);
-    try { fs.unlinkSync(dest); } catch {}                      // always free the disk
+// ── Internet Archive ─────────────────────────
+async function fetchAndSendIA(sock, chat, msg, { item, file, name, label, caption }) {
+  const status = await sock.sendMessage(chat, { text: `🔎 Preparing *${name}* (${label})…` }, { quoted: msg });
+  try {
+    const asDoc = !file.playable || (file.size || 0) > getDocThresholdBytes();   // big files → document (reliable up to 2 GB)
+    let lastErr = null;
+    const urls = ia.downloadUrls(item, file);                                     // primary, then the item's own server
+    await pumpToWhatsApp(sock, chat, msg, status, {
+      name, label,
+      open: async (cap) => {
+        for (const u of urls) {
+          try { return await openRemote(u, { maxBytes: cap }); }
+          catch (e) { lastErr = e; if (/MB is more than/.test(e.message)) break; }
+        }
+        throw lastErr || new Error('source not reachable');
+      },
+      asDoc,
+      mimetype: asDoc ? (MIME[file.ext] || 'application/octet-stream') : 'video/mp4',
+      fileName: `${safeName(`${name} ${label}`)}.${file.ext}`,
+      caption,
+    });
+  } catch (err) {
+    await editStatus(sock, chat, status, `❌ Failed: ${err.message}`);
+    throw err;
   }
 }
 
@@ -186,56 +181,63 @@ function enqueue(sock, chat, msg, job) {
 // ── step 1: search ───────────────────────────
 async function startSearch(sock, chat, msg, kind, query, extra = {}) {
   const status = await sock.sendMessage(chat, { text: `🔍 Searching *${query}*…` }, { quoted: msg });
-  let results = [];
-  let source = 'moviebox';
-
-  // 1. Primary search via Moviebox
-  try {
-    const mbResults = await searchMoviebox(query, kind);
-    if (mbResults && mbResults.length) {
-      results = mbResults.slice(0, 5).map((r) => ({
-        title: r.title || r.name || 'Untitled',
-        detailPath: r.detailPath || r.path || r.id,
-        year: r.year ? String(r.year) : '',
-        source: 'moviebox',
-        raw: r,
-      }));
-    }
-  } catch (err) {
-    console.warn('[moviebox search error, falling back to IA]:', err.message);
+  const rq = await resolveQuery(query, kind);                       // keyword clean-up (+ Groq/Gemini if a key is set)
+  if (rq.by || rq.shown !== query.toLowerCase()) {
+    await editStatus(sock, chat, status, `🔍 Searching *${rq.shown}*${rq.year ? ` (${rq.year})` : ''}${rq.by ? ` _· matched by ${rq.by}_` : ''}…`);
   }
 
-  // 2. Fallback search via Internet Archive if Moviebox returned no results
-  if (!results.length) {
-    source = 'ia';
+  let results = []; let source = 'moviebox'; let topScore = 0;
+  const consider = (list, src) => {
+    if (!list?.length) return false;
+    const ranked = rankResults(list, rq.wanted || query, rq.year);
+    if (ranked.top > topScore || !results.length) { results = ranked.results.slice(0, 5); topScore = ranked.top; source = src; }
+    return ranked.top >= 0.6;                                       // good enough → stop trying variants
+  };
+
+  // 1. Moviebox — every spelling variant, best match wins
+  let mbDown = false;
+  for (const v of rq.variants.slice(0, 4)) {
     try {
-      const iaResults = await ia.searchTitles(query, kind, 5);
-      if (iaResults && iaResults.length) {
-        results = iaResults.map((r) => ({
-          title: r.title,
-          id: r.id,
-          year: r.year,
-          source: 'ia',
-          raw: r,
-        }));
-      }
-    } catch (e) {
-      await editStatus(sock, chat, status, `❌ Search unavailable (${e.message}). Try again in a minute.`);
+      const list = (await searchMoviebox(v, kind) || []).map((r) => ({
+        title: r.title || r.name || 'Untitled', detailPath: r.detailPath || r.path || r.id,
+        year: r.year ? String(r.year) : '', source: 'moviebox', raw: r,
+      }));
+      if (consider(list, 'moviebox')) break;
+    } catch (err) {
+      console.warn('[moviebox search error]:', err.message);
+      mbDown = true; break;                                         // service problem, not a spelling problem
+    }
+  }
+
+  // 2. Internet Archive (public domain) — only if Moviebox gave nothing usable
+  if (!results.length || topScore < 0.4) {
+    let iaErr = null;
+    for (const v of rq.variants.slice(0, 3)) {
+      try {
+        const list = (await ia.searchTitles(v, kind, 5) || []).map((r) => ({ title: r.title, id: r.id, year: r.year, source: 'ia', raw: r }));
+        if (consider(list, 'ia')) break;
+      } catch (e) { iaErr = e; break; }
+    }
+    if (!results.length && iaErr) {
+      await editStatus(sock, chat, status, `❌ Search unavailable (${iaErr.message}). Try again in a minute.`);
       return;
     }
   }
 
   if (!results.length) {
-    await editStatus(sock, chat, status, `❌ Nothing found for *${query}*. Try a different or simpler title.`);
+    await editStatus(sock, chat, status,
+      `❌ Nothing found for *${rq.shown || query}*.${mbDown ? '\n_The main source did not answer — check the bot log for "[moviebox search error]"._' : ''}` +
+      `\nTry just the main words (no quality or year).${aiConfigured() ? '' : `\n💡 _Add a free key for smart title matching:_ \`${P()}setvar GROQ_API_KEY <key>\` _or_ \`GEMINI_API_KEY\``}`);
     return;
   }
 
-  const token = newSession({ stage: 'title', kind, chat, query, results, source, ...extra });
+  const shownQuery = rq.shown || query;
+  const token = newSession({ stage: 'title', kind, chat, query: shownQuery, results, source, ...extra });
   const what = kind === 'series' ? (extra.full ? 'full series' : `episode ${extra.ep}`) : 'movie';
   const sourceLabel = source === 'moviebox' ? 'Moviebox' : `${ia.SOURCE_NAME} (public domain)`;
 
   await askChoice(sock, chat, msg,
-    `🎬 *${query}* — top ${results.length} (${what})\n_Source: ${sourceLabel}_\n\nPick one:`,
+    `🎬 *${shownQuery}* — top ${results.length} (${what})\n_Source: ${sourceLabel}_\n\nPick one:`,
     results.map((r, i) => ({ label: `${r.title}${r.year ? ` (${r.year})` : ''}`, cmd: `mvp ${token} ${i + 1}` })));
 }
 
@@ -394,10 +396,11 @@ async function promptQuality(sock, chat, msg, ctx) {
   const options = ia.qualityOptions(ctx.files);
   if (!options.length) return reply(sock, chat, msg, '❌ No usable quality found.');
   if (options.length === 1) return startDownload(sock, chat, msg, ctx, options[0]);
+  const room = await effectiveCapBytes();
   const token = newSession({ stage: 'quality', chat, ctx, options });
   await askChoice(sock, chat, msg,
-    `🎞️ *${ctx.name}*\nChoose a quality (${ctx.title}):\n${limitsLine()}`,
-    options.map((o, i) => ({ label: `${o.label} · ${mb(o.file.size)}${capProblem(o.file) ? ' ⛔' : ''}`, cmd: `mvq ${token} ${i + 1}` })));
+    `🎞️ *${ctx.name}*\nChoose a quality (${ctx.title}):\n${limitsLine()}${room < getMaxDownloadBytes() ? `\n_Server disk allows ≤ ${fmtMB(room)} MB per file right now_` : ''}`,
+    options.map((o, i) => ({ label: `${o.label} · ${mb(o.file.size)}${capProblem(o.file, room) ? ' ⛔' : ''}`, cmd: `mvq ${token} ${i + 1}` })));
 }
 
 // ── step 3: a quality was picked ─────────────
@@ -412,7 +415,7 @@ export const mvq = safe('mvq', async (sock, chat, msg, args) => {
 });
 
 async function startDownload(sock, chat, msg, ctx, opt) {
-  const problem = capProblem(opt.file);
+  const problem = capProblem(opt.file, await effectiveCapBytes());
   if (problem) return reply(sock, chat, msg, `⛔ *${opt.label}* can't be downloaded: ${problem}`);
   try {
     await enqueue(sock, chat, msg, {

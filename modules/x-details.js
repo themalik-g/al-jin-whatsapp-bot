@@ -46,6 +46,8 @@ const BOT = [
     ['cmds', '📃 Alias List', 'Shows your aliases.', ['.cmds'], true],
     ['cleartmp', '🧹 Clear Temp Files', 'Deletes leftover temporary files.', ['.cleartmp'], true],
     ['clearsession', '🧹 Clear Stale Session Files', 'Removes old re-creatable Signal files (dry run unless confirmed).', ['.clearsession', '.clearsession confirm'], true],
+    ['fixkeys', '🔑 Repair Signal Keys', 'Rebuilds Signal keys/sessions to fix "Waiting for this message" errors.', ['.fixkeys [own|all]'], true],
+    ['bot', '🤖 AI Chatbot', 'Fast AI chatbot using Groq, Gemini, or keyless models.', ['.bot <message>']],
     ['shutdown', '⏻ Shutdown', 'Stops the bot process.', ['.shutdown confirm'], true],
     ['save', '💾 Save Message', 'Sends the replied message/media/status to your own chat.', ['Reply with .save'], true],
     ['del', '🗑️ Delete Message', 'Deletes the replied message (admins in groups, owner elsewhere). Alias: delete.', ['Reply with .del']],
@@ -112,6 +114,13 @@ const MEDIA = [
     ['avm', '🎬 Audio → Video', 'Waveform video from a voice note.', ['Reply to audio: .avm']],
     ['subtitle', '💬 Auto Subtitles', 'Transcribes the speech in a video and burns subtitles into it. Styles: youtube, netflix, bold, neon, redbox, gold, comic, minimal. Fonts: F1–F8 (see .subtitle fonts). Also top/mid/bottom, small/big, a 2-letter language code (ur, en, hi…), or srt for just the .srt file. Needs a free GROQ_API_KEY, GEMINI_API_KEY or DEEPGRAM_API_KEY — the bot falls back between them. Aliases: subtitles, subs, sub.', ['Reply to a video: .subtitle', '.subtitle netflix F2', '.subtitle neon F3 top big', '.subtitle bold ur', '.subtitle srt', '.subtitle fonts']],
     ['pdf', '📄 PDF Maker', 'Text, one photo, or many photos → PDF. Alias: topdf.', ['.pdf <text>', 'Reply to a photo: .pdf', '.pdf add … .pdf make [name]']],
+    ['trb', '🎙️ Transcribe Audio', 'Transcribes speech in audio/voice note to text.', ['Reply to audio: .trb']],
+    ['movie', '🎬 Movie Downloader', 'Searches and streams movies or series directly.', ['.movie <title>']],
+    ['movieinfo', 'ℹ️ Movie Info', 'Shows plot and info for a movie.', ['.movieinfo <title>']],
+    ['series', '📺 Series Downloader', 'Searches and streams TV series.', ['.series <title>']],
+    ['continue', '▶️ Continue Search', 'Loads more results for movie search.', ['.continue']],
+    ['mvp', '🎬 Pick Movie', 'Selects a title from search results.', ['.mvp <number>']],
+    ['mvq', '🎬 Pick Quality', 'Selects quality or episode number.', ['.mvq <number>']],
 ];
 
 const EFFECT_ROWS = [
@@ -141,6 +150,8 @@ const ALIASES = {
     calculate: 'calc', colour: 'color', b64: 'base64', genpass: 'password', todo: 'task', trt: 'translate', git: 'github', pokemon: 'pokedex',
     steal: 'take', scrop: 'stickercrop', grayscale: 'greyscale', bw: 'greyscale', topdf: 'pdf',
     subtitles: 'subtitle', subs: 'subtitle', sub: 'subtitle', addsub: 'subtitle',
+    transcribe: 'trb', transcript: 'trb', totext: 'trb', chatbot: 'bot',
+    movies: 'movie', moviedl: 'movie', minfo: 'movieinfo', tvseries: 'series', seriesdl: 'series', cont: 'continue',
 };
 for (const [a, v] of Object.entries(ALIASES)) X_DETAILS[a] = X_DETAILS[v];
 

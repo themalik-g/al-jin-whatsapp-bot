@@ -105,7 +105,7 @@ const TABLE = [
     ['budget', 'tools', 'budget', 'all'],
     ['task', 'tools', 'task', 'all', 'todo'],
     // web (free APIs)
-    ['translate', 'web', 'translate', 'all', 'trt'],
+    ['translate', 'web', 'translate', 'all'],
     ['trivia', 'web', 'trivia', 'all'],
     ['quote', 'web', 'quote', 'all'],
     ['whois', 'web', 'whois', 'all'],
