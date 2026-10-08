@@ -384,9 +384,19 @@ const BASE_COMMAND_DETAILS = {
     usage: ['.couplepp'],
   },
   movie: {
+    title: '🎬 Movie Downloader',
+    description: 'Free movie downloader (Internet Archive: public-domain & freely licensed films). Shows the top 5 results, you pick one, then pick a quality (360p–1080p as available). Respects .dlcap size and quality limits and sends the file to the chat.',
+    usage: ['.movie <name>'],
+  },
+  series: {
+    title: '📺 Series Downloader',
+    description: 'Downloads one episode (-ep) or the whole series (-full). With -full the best quality that fits .dlcap is chosen per episode and 3 episodes are sent per batch; send .continue for the next 3.',
+    usage: ['.series <name> -ep 11', '.series <name> -full', '.continue'],
+  },
+  movieinfo: {
     title: '🎬 Movie Info Search',
     description: 'Looks up details, ratings, plot summaries, and release dates for movies.',
-    usage: ['.movie <movie_title>'],
+    usage: ['.movieinfo <movie_title>'],
   },
   songinfo: {
     title: '🎶 Song Details',

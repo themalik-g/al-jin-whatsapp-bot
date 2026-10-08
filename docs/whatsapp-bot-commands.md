@@ -104,7 +104,10 @@ URLs containing picture posts or carousels (e.g. Instagram `/p/`, TikTok `/photo
 | `.img <query>` | Search stock images (Wikimedia Commons / Openverse / LoremFlickr) |
 | `.gemini <prompt>` | Ask Gemini AI for simple text answers & explanations (or reply to text) |
 | `.photo <prompt>` | Generate AI photo from image prompt (Imagen 3 / Pollinations) |
-| `.movie <title>` | Search movie/show details (iTunes / TVmaze) |
+| `.movie <name>` | Free movie downloader: top 5 results → pick → pick quality → file is sent (see [guide](./whatsapp-movie-series-downloader.md)) |
+| `.series <name> -ep <n>` / `-full` | Download one episode, or a whole series 3 episodes at a time |
+| `.continue` | Send the next 3 episodes of a running `-full` series |
+| `.movieinfo <title>` | Movie/show details: rating, plot, release date (iTunes / TVmaze) |
 | `.songinfo <query>` | Lookup song details & artwork (Deezer / MusicBrainz) |
 | `.lyrics <artist> <title>` | Fetch plain lyrics (LRCLIB / lyrics.ovh) |
 | `.ppt <topic>;<subtopics>;<theme>;<slides>` | AI-powered PowerPoint presentation generator (Gemini) |
@@ -290,3 +293,189 @@ The bot must be a group admin to delete messages and remove members.
 ## 🎛️ Voice effects (reply to a voice note, audio or video)
 
 `.fx` lists them: `.echo` `.reverb` `.nightcore` `.chipmunk` `.slowed` `.deep` `.drunk` `.fast` `.tremolo` `.distort`
+
+---
+
+## 🤖 Free AI chat
+
+| Command | Description |
+|---|---|
+| `.jin <question>` | Free AI chat with automatic fallback between several free providers. `.jin2`, `.jin3` … use the next free models |
+| `.jin create <prompt>` | Generate an image (`.jincreate2` uses image model #2) |
+| `.bot <question>` (`.chatbot`) | Fast AI chat with a short memory per chat. `.bot reset` forgets the conversation |
+| `.gpt` `.claude` `.grok` `.deepseek` `.kimi` `<question>` | Chat through Puter (needs `PUTER_TOKEN`). `.gpt models` lists models; `.gpt use <id>` picks one (owner) |
+| `.gemini <prompt>` | Ask Gemini |
+| `.scholar <topic>` | Scholarly explanation of a topic |
+| `.photo` / `.imagine` / `.imagen <prompt>` | AI image generation |
+
+---
+
+## 🧞 ESM API commands
+
+Downloaders and AI helpers backed by a free API, each with a built-in fallback source. Size caps follow `.dlcap`.
+
+| Command | Description |
+|---|---|
+| `.jindl <url>` | Download from a link |
+| `.jinvideo <url or query>` | Download a video |
+| `.jinytsearch <query>` | Search YouTube |
+| `.jinimage <prompt>` | Generate an image |
+| `.jinai <prompt>` | AI answer |
+| `.jinapk <app>` | Download an APK |
+
+---
+
+## 📱 Apps & devices
+
+| Command | Description |
+|---|---|
+| `.apk <name or package>` | Download the real, unmodified APK (Aptoide, with an F-Droid fallback) |
+| `.betaapk <name or package>` | Newest beta / alpha / RC build when the store lists one |
+| `.mobileinfo <model>` | Phone specifications from GSMArena, with an AI-compiled card (clearly labelled) as fallback |
+| `.laptopinfo <model>` | Laptop specifications, AI-compiled and labelled, with a Notebookcheck link to verify |
+
+---
+
+## 📸 Instagram+ (owner only)
+
+These use a spare Instagram account's session: `.setvar IG_SESSIONID <cookie>`.
+
+| Command | Description |
+|---|---|
+| `.igzip <user>` | ZIP of a user's first media items |
+| `.igstory <user>` | Current stories |
+| `.igsearch <name>` | Find accounts by name |
+| `.igprofile <user>` | Extended profile card |
+
+---
+
+## 🎙️ Speech, transcripts & subtitles
+
+| Command | Description |
+|---|---|
+| `.trb` (`.transcribe`) | Reply to a voice note, audio or video → the speech as text |
+| `.trt <language>` | Reply to audio/video → transcript plus translation; replying to a text message translates it |
+| `.subtitle` (`.st`, `.subs`) | Reply to a video → speech is transcribed and burned in as subtitles. See [SUBTITLES.md](../SUBTITLES.md) |
+
+Speech-to-text tries Groq, Gemini, Deepgram and OpenAI in turn; keys are optional but make it faster.
+
+---
+
+## 🎭 Stickers, images & media tools
+
+| Command | Description |
+|---|---|
+| `.sticker` / `.s` | Image, video or GIF → sticker (static or animated) |
+| `.toimg` / `.tovid` | Sticker → image / video |
+| `.take` (`.steal`) | Re-pack a sticker with your pack name and author |
+| `.stickercrop` (`.scrop`) / `.circle` | Square-crop or circle-crop a sticker |
+| `.attp <text>` | Animated text sticker |
+| `.fancy <text>` | Fancy Unicode text styles |
+| `.meme "top" \| "bottom"` | Meme from an image |
+| `.blur` / `.greyscale` / `.pixelate` | Image filters |
+| `.hd` / `.enhance` | Upscale and enhance an image |
+| `.sanitize` / `.exifwipe` | Remove metadata from media |
+| `.pdf` (`.topdf`) | Images → PDF |
+| `.speed` / `.pitch` / `.reverse` / `.treble` / `.avm` | Audio and video adjustments |
+| `.waveform` / `.8d` / `.bassboost [1-10]` / `.robot` / `.vocal` | Audio effects |
+| `.ocr` / `.tts [lang] <text>` / `.barcode` / `.vcard @user` | Read text from images, text-to-speech, barcodes, contact cards |
+| `.dice [spec]` / `.coin [count]` | Dice and coin flips |
+
+---
+
+## 🛡️ Group protection & tools
+
+Admin commands need the bot to be a group admin to delete or remove. Admins and bot owners are always exempt.
+
+| Command | Description |
+|---|---|
+| `.antiword` (`.antibadword`) | Block listed words, with a punishment ladder (delete → warn → kick) |
+| `.antitag` | Block mass tagging by non-admins |
+| `.antigm` | Delete "group mentioned in a status" spam from non-admins |
+| `.antifake add 1 212 91` | Block members whose number starts with the listed country codes (`.antifake on\|off`) |
+| `.antiforward` / `.dnd` | Block forwarded messages; do-not-disturb mode |
+| `.antipromote` / `.antidemote` / `.antibot` / `.gshield` | Protect admin roles and the group from unwanted changes |
+| `.muteuser` / `.unmuteuser` / `.mutelist` / `.mutesticker` | Silence users or stickers |
+| `.warn @user` / `.warns` / `.resetwarns @user` | Warning system |
+| `.noaction @user` | Protect a member: demoted → promoted again; kicked → added back. Also `.noaction @user all`, `.noaction off @user`, `.noaction list` |
+| `.filter` / `.stop` / `.gfilter` / `.gstop` | Auto-replies for keywords (group / global) |
+| `.areact` | Auto-react to messages |
+| `.setgname` / `.setgdesc` / `.setgpp` / `.link` | Group name, description, picture, invite link |
+| `.admins` / `.msgs` / `.inactive` / `.left` / `.common` | Group statistics and member lists |
+| `.poll Question \| Option 1 \| Option 2 [--multi]` | Create a poll |
+| `.vote` / `.afk` | Voting and away status |
+| `.kickall` / `.kickcc <code>` / `.approveall` / `.declineall` | Bulk member actions |
+| `.gclone` / `.revoke` / `.purge [count]` | Clone group settings, reset the invite link, delete recent messages |
+| `.tagallnoadmin` / `.hidetagnoadmin` | Tag everyone except admins |
+| `.leave` / `.join <link>` | Leave a group or join with an invite link |
+
+---
+
+## 🕵️ Monitoring
+
+| Command | Description |
+|---|---|
+| `.stalk <number>` / `.stalk list` / `.stalk stop <number>` | Log when a contact goes online or offline, and for how long |
+| `.statusalert <number>` | Alert when a chosen person posts a status |
+| `.watch <number>` | Alert when a person changes profile picture, About or name |
+| `.ginfo <invite link>` | Inspect a group without joining |
+| `.chatstats <number>` | Detailed chat statistics |
+
+---
+
+## 🎮 Games & fun
+
+| Command | Description |
+|---|---|
+| `.tictactoe` (`.ttt`) / `.hangman` / `.guess` / `.rps` | Games |
+| `.8ball` / `.ship` / `.rate` / `.truth` / `.dare` / `.compliment` / `.insult` / `.flirt` | Party commands |
+| `.hug` / `.kiss` / `.pat` / `.cry` / `.poke` / `.wink` / `.nom` | Reaction GIFs |
+| `.trivia` / `.quote` / `.pokedex` / `.anime` / `.character` | Trivia, quotes, Pokémon, anime and character lookups |
+
+---
+
+## 🧰 Offline & web utilities
+
+| Command | Description |
+|---|---|
+| `.calc` / `.color` / `.base64` / `.hash` / `.morse` | Calculator, colour tools, encoders, hashes |
+| `.password` / `.uuid` / `.age` / `.bmi` / `.time` | Password and ID generators, age, BMI, time zones |
+| `.budget` / `.task` (`.todo`) | Budget tracker and to-do list |
+| `.translate` (`.trt`) / `.crypto` / `.github` / `.whois` | Translation, crypto prices, GitHub and domain lookups |
+| `.urban` / `.slang` / `.npm` / `.githubdiff` / `.unit` | Slang, npm, GitHub diffs, unit conversion |
+| `.tempmail` / `.readmail` / `.web2img` / `.unroll` / `.channelinfo` / `.commandcount` | Temporary email, website screenshot, link unroller, channel info, usage counts |
+
+---
+
+## 🧰 Owner & bot control
+
+| Command | Description |
+|---|---|
+| `.ban` / `.unban` / `.banlist` | Block users from the bot |
+| `.pmblocker` | Block or warn strangers who message the bot privately |
+| `.setcmd` / `.delcmd` / `.cmds` | Custom command aliases |
+| `.cpu` / `.ram` / `.rom` / `.cpulimit` / `.ramlimit` | System usage and limits |
+| `.dlcap` | Download size and quality limits |
+| `.replymode text\|poll\|buttons` | Choose how selection prompts appear |
+| `.imenu` | Menu preview image settings |
+| `.cleartmp` / `.clearsession` / `.shutdown` | Maintenance: clear temp files, remove stale session files, stop the bot |
+| `.save` | Reply to a message, photo, video or status to save it |
+| `.del` | Delete a message |
+| `.ison <number>` | Check whether numbers are on WhatsApp |
+| `.fixkeys [own\|all]` | Fix "Waiting for this message" on the bot's own phone without re-pairing |
+| `.privacy` / `.stealfull @user` / `.ytcookies` | Privacy settings, full-size profile picture, YouTube cookies |
+
+---
+
+## 🎨 Text effects (Ephoto360)
+
+`.textmaker <effect> <text>` or a direct effect command such as `.neon`, `.glitch`, `.3dgold`, `.cyberpunk`, `.galaxy`, `.hologram`, `.naruto`, `.pubg`, `.starwars`, `.dragon`, `.xmas` and 40+ more. Two-line effects (`.marvel`, `.pornhub`) take `text1 ; text2`.
+
+---
+
+## 📥 More downloaders
+
+| Command | Description |
+|---|---|
+| `.download <url>` | Alias of `.dl` |
+| `.pinterest` / `.threads` / `.reddit` / `.twitter <url>` | Download from those platforms |

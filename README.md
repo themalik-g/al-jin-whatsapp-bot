@@ -1,17 +1,17 @@
-# Open-Source WhatsApp MD User Bot (al-jin-whatsapp-bot) powered by Baileys v7.0.0-rc.14 & Node.js
+# Al-Jin — Free Open-Source WhatsApp Bot (Baileys v7, Node.js) with Downloaders, AI, Stickers & Group Management
 
-**al-jin-whatsapp-bot is a free, open-source WhatsApp multi-device (MD) bot built on official whiskeysockets Baileys v7.0.0-rc.14 (no custom fork)and Node.js 20+,having all features which payed forks do offer, featuring anti-delete message recovery, view-once media reveal, status auto-save,Native full dp and hd dp support along with interactive buttons,YouTube and other social media downloading system,Books downloader, Ephoto 360 features, full text and media scheduling for groups, communities,1on1 chats and channels, Gemini AI, PPT synthetic system, Quran & Hadith search, Bukhari, Muslim Hadith extractors,group admin commonds and 150+ more commands for WhatsApp automation and group management — all self-hosted with no QR scan and no WhatsApp Business API.**
+**Al-Jin (al-jin-whatsapp-bot) is a free, self-hosted WhatsApp multi-device bot built on the official `@whiskeysockets/baileys` v7.0.0-rc.14 (no custom fork) and Node.js 20+.** It recovers deleted and edited messages, reveals view-once media, saves statuses, downloads videos, music, apps, books and free movies, makes stickers, chats with free AI models, transcribes voice notes, burns subtitles into videos, generates PowerPoint presentations, and gives group admins a full protection toolkit — all with an 8-character pairing code (no QR scan) and no WhatsApp Business API.
 
 [![Stars](https://img.shields.io/github/stars/themalik-g/al-jin-whatsapp-bot?style=flat&logo=github)](https://github.com/themalik-g/al-jin-whatsapp-bot/stargazers)
 [![Forks](https://img.shields.io/github/forks/themalik-g/al-jin-whatsapp-bot?style=flat&logo=github)](https://github.com/themalik-g/al-jin-whatsapp-bot/network/members)
 [![Issues](https://img.shields.io/github/issues/themalik-g/al-jin-whatsapp-bot)](https://github.com/themalik-g/al-jin-whatsapp-bot/issues)
 [![Last commit](https://img.shields.io/github/last-commit/themalik-g/al-jin-whatsapp-bot)](https://github.com/themalik-g/al-jin-whatsapp-bot/commits/main)
-[![Version](https://img.shields.io/badge/version-1.3.4-blue)](https://github.com/themalik-g/al-jin-whatsapp-bot)
+[![Version](https://img.shields.io/badge/version-2.0.0-blue)](https://github.com/themalik-g/al-jin-whatsapp-bot)
 [![Node](https://img.shields.io/badge/node-%3E%3D20-brightgreen?logo=node.js&logoColor=white)](https://nodejs.org)
 [![Baileys](https://img.shields.io/badge/baileys-v7.0.0--rc.14-green)](https://github.com/WhiskeySockets/Baileys)
 [![License](https://img.shields.io/badge/license-MIT-yellow)](./LICENSE)
 
-**⭐ If Al-Jin helps you, please star the repository — it helps others discover the project!**
+**⭐ If Al-Jin helps you, please star the repository — it helps other people find the project.**
 
 ---
 
@@ -20,8 +20,12 @@
 - [What is Al-Jin?](#what-is-al-jin)
 - [Why Choose Al-Jin?](#why-choose-al-jin)
 - [Key Features](#key-features)
+- [Free Movie & Series Downloader](#free-movie--series-downloader)
 - [Command Categories](#command-categories)
 - [Quick Start](#quick-start)
+- [Free API Keys (optional)](#free-api-keys-optional)
+- [Download Limits (`.dlcap`)](#download-limits-dlcap)
+- [Reply Modes: Text, Poll, Buttons](#reply-modes-text-poll-buttons)
 - [Deployment Options](#deployment-options)
 - [Documentation](#documentation)
 - [FAQ](#faq)
@@ -37,13 +41,11 @@
 
 ## What is Al-Jin?
 
-**Al-Jin** is a self-hosted **WhatsApp MD bot** that links to your WhatsApp account through an 8-character **pairing code** — no QR scan needed. It runs on your own server, stores everything locally, and provides anti-delete recovery, view-once reveal, status saving, media downloading, Gemini AI tools, Islamic tools, and complete group administration.
+**Al-Jin** is a self-hosted **WhatsApp MD (multi-device) bot** that links to your WhatsApp account with a **pairing code**. It runs on your own server, keeps its data locally, and combines **anti-delete recovery, view-once reveal, status saving, media downloading, free AI chat, sticker and media tools, Islamic tools and complete group administration** in one project.
 
-It is built on the latest **Baileys v7.0.0-rc.14** with LID-aware JID resolution, so it keeps working with WhatsApp's newer identifier system.
+It runs on the stock **Baileys v7.0.0-rc.14** with LID-aware JID resolution, so it keeps working with WhatsApp's newer identifier system, and it is tuned for small servers: heavy jobs run one at a time, files are streamed to disk and deleted after sending, and `.cpulimit` / `.ramlimit` keep resource use under control.
 
-> **Looking for a WhatsApp bot you can self-host?** Al-Jin runs on a VPS, Docker, PM2, Pterodactyl panels, or Termux and keeps all data on your own machine.
-
-**Keywords:** al-jin · al jin bot · aljin whatsapp bot · al-jin whatsapp bot · whatsapp bot · whatsapp md bot · whatsapp multi device bot · baileys bot · baileys v7 · whatsapp bot nodejs · whatsapp anti delete bot · view once reveal · whatsapp status saver · whatsapp youtube downloader · fulldp hddp · whatsapp gemini ai bot · whatsapp group management bot · multi session whatsapp bot · self-hosted whatsapp bot · pairing code login
+> **Looking for a WhatsApp bot you can self-host?** Al-Jin runs on a VPS, Docker, PM2, Pterodactyl panels or Termux, and keeps every file on your own machine.
 
 ---
 
@@ -51,53 +53,94 @@ It is built on the latest **Baileys v7.0.0-rc.14** with LID-aware JID resolution
 
 | Capability | Al-Jin | Typical Baileys bots |
 |-----------|--------|---------------------|
-| Interactive buttons | ✅ Native, stock Baileys | ⚠️ Often needs a custom fork |
+| Interactive replies | ✅ Text, multi-select poll or native buttons (`.replymode`) | ⚠️ Often needs a custom fork |
 | Add sessions from inside WhatsApp | ✅ `.addsession` | ❌ SSH / terminal / web panel |
-| FullDP / HDDP profile pictures | ✅ Stock Baileys | ⚠️ Usually a patched fork |
-| YouTube downloader without cookies | ✅ Works out of the box | ❌ Often needs cookies |
+| Full-size and HD profile pictures | ✅ `.fulldp` / `.hddp` on stock Baileys | ⚠️ Usually a patched fork |
 | Anti-delete + anti-edit + view-once | ✅ All three | ⚠️ Usually anti-delete only |
+| Free AI chat (no paid key needed) | ✅ `.jin`, `.bot` with automatic fallbacks | ⚠️ Often one paid API |
+| Auto subtitles, voice-note transcription | ✅ `.subtitle`, `.trb`, `.trt` | ❌ Rare |
+| Download size / quality limits | ✅ Live-adjustable `.dlcap` | ⚠️ Hard-coded |
 | Login method | ✅ 8-character pairing code | ⚠️ QR scan |
 | Baileys version | ✅ v7.0.0-rc.14 | ⚠️ Often v6.x or old forks |
 | Cost / license | ✅ Free, MIT | ⚠️ Varies |
 
-Read the full write-up: [Al-Jin vs other WhatsApp bots](https://github.com/themalik-g/al-jin-whatsapp-bot/blob/main/docs/al-jin-vs-other-whatsapp-bots.md).
+Read the full write-up: [Al-Jin vs other WhatsApp bots](./docs/al-jin-vs-other-whatsapp-bots.md).
 
 ---
 
 ## Key Features
 
-- **🛡️ Anti-Delete & Anti-Edit Recovery** — Ghost module captures deleted and edited messages, media, and captions.
-- **👁️ View-Once Revealer** — Peek module auto-captures view-once photos and videos.
-- **📸 Status Auto-View & Saver** — Lurk module views and saves WhatsApp statuses without marking them seen.
-- **🎬 YouTube / Instagram / TikTok Downloader** — Zero authentication required. Works out of the box.
-- **🤖 Gemini AI Tools** — Chat, image generation, summarization, and Islamic scholar search.
-- **👥 Group Administration** — Promote, demote, kick, antilink, welcome messages, and more.
-- **🕌 Islamic Tools** — Quran, Hadith, prayer times, and full Surah PDFs.
-- **💬 Native Interactive Buttons** — Quick-reply, single-select, URL, and call buttons on stock Baileys.
-- **🔗 Multi-Session Pairing** — Add numbers from inside WhatsApp with `.addsession`.
-- **📦 100+ Commands** across 13 categories with default prefix `.`.
+- **🛡️ Anti-Delete & Anti-Edit Recovery** — the Ghost module captures deleted and edited messages, media and captions.
+- **👁️ View-Once Revealer** — the Peek module captures view-once photos and videos, including quoted replies.
+- **📸 Status Saver** — the Lurk module views and saves WhatsApp statuses; `.statusalert` and `.watch` notify you about new statuses and profile changes.
+- **⬇️ Video, Music & Social Downloader** — YouTube, Instagram, TikTok, Facebook, Twitter/X, Pinterest, Threads, Reddit, SoundCloud, GitHub repositories and MediaFire links.
+- **🎬 Free Movie & Series Downloader** — `.movie` and `.series` search public-domain and freely licensed titles, let you pick a quality and send the file, with `.dlcap` limits applied.
+- **📱 APK & Phone Info** — `.apk`, `.betaapk`, `.mobileinfo`, `.laptopinfo`.
+- **🤖 Free AI Chat & Image Generation** — `.jin`, `.bot`, `.gemini`, `.scholar`, `.photo`, plus Puter-powered `.gpt`, `.claude`, `.grok`, `.deepseek`, `.kimi` — each with fallbacks.
+- **🎙️ Speech Tools** — `.trb` voice-note to text, `.trt` translated transcript, `.subtitle` burned-in subtitles with Roman-Urdu support.
+- **🎭 Sticker Maker & Media Tools** — `.sticker` (image, video, GIF), `.toimg`, `.tovid`, `.take`, `.attp`, voice effects, image filters, OCR, TTS, compression.
+- **📊 PowerPoint Generator** — `.ppt <topic>` builds a presentation with an AI-written outline.
+- **👥 Group Administration & Protection** — promote, demote, kick, anti-link, anti-spam, anti-bad-word, anti-tag, anti-forward, mute users, warn system, `.noaction` guard for protected members, welcome/goodbye messages.
+- **🕵️ Monitoring** — `.stalk` presence logging, `.activity`, `.chatstats`, `.ginfo` for group invite links.
+- **🕌 Islamic Tools** — Quran, Hadith, Bukhari, Muslim, prayer times, full Surah PDFs.
+- **🎮 Games & Fun** — tic-tac-toe, hangman, guess, rock-paper-scissors, 8-ball, ship, trivia, reaction GIFs.
+- **🧰 Offline Utilities** — calculator, hashes, Base64, Morse, passwords, UUIDs, age and BMI, to-do list, budget tracker.
+- **🎨 Text-to-Image Effects** — 50+ Ephoto360 logo and text effects.
+- **🔗 Multi-Session Pairing** — add numbers from inside WhatsApp with `.addsession`.
+- **⚙️ Resource Control** — `.cpulimit`, `.ramlimit`, `.dlcap`, one-at-a-time heavy jobs.
+- **📦 300+ command names** across 20+ categories, default prefix `.`.
+
+---
+
+## Free Movie & Series Downloader
+
+Al-Jin includes a **free movie and series downloader for WhatsApp** that sends the file straight into the chat. It uses the **Internet Archive**, so it only finds **public-domain and freely licensed** films and shows. It does not use pirate sites or torrents.
+
+| Command | What it does |
+|---|---|
+| `.movie <name>` | Shows the top 5 results → you pick one → you pick a quality (360p–1080p, as the file offers) → the bot checks your limits, downloads and sends it |
+| `.series <name> -ep 11` | Top 5 results → pick the show → pick a quality → sends episode 11 |
+| `.series <name> -full` | Picks the best quality per episode that fits `.dlcap`, sends **3 episodes**, then waits |
+| `.continue` | Sends the next 3 episodes of the running `-full` series |
+| `.movieinfo <title>` | Ratings, plot and release date (the former `.movie` lookup) |
+
+Every download respects `.dlcap` (max size, max quality, send-as-document threshold), runs one at a time, and is deleted right after sending. Full guide: [docs/whatsapp-movie-series-downloader.md](./docs/whatsapp-movie-series-downloader.md).
 
 ---
 
 ## Command Categories
 
-> Default prefix: `.` — change it with `.prefix <new_prefix>`
+> Default prefix: `.` — change it with `.prefix <new_prefix>`. In **private mode** only the owner can use the bot; in **public mode** everyone can use non-owner commands.
 
 | Category | Commands |
 |----------|----------|
-| **System & General** | `.alive`, `.ping`, `.uptime`, `.help`, `.menu`, `.prefix`, `.mode`, `.settings`, `.update`, `.owner` |
+| **System & General** | `.alive`, `.ping`, `.uptime`, `.help`, `.menu`, `.prefix`, `.mode`, `.settings`, `.replymode`, `.update`, `.owner`, `.script`, `.repo` |
+| **Resource Control** | `.cpu`, `.ram`, `.rom`, `.cpulimit`, `.ramlimit`, `.dlcap` |
 | **Ghost (Anti-Delete/Edit)** | `.ghost`, `.ghost on\|off`, `.ghost edit on\|off` |
-| **Lurk (Status Watcher)** | `.lurk`, `.lurk on\|off`, `.lurk react on\|off`, `.lurk download on\|off`, `.lurk emoji` |
-| **Peek (View-Once Revealer)** | `.peek`, `.peek auto on\|off`, `.peek watch on\|off`, `.peek dest` |
-| **AI Tools** | `.gemini`, `.photo`, `.imagine`, `.scholar`, `.ppt`, `.quransearch`, `.hadeessearch`, `.islamsearch` |
-| **Islamic Tools** | `.prayertimes`, `.pts`, `.quran`, `.search quran`, `.sora`, `.para`, `.bukhari`, `.muslim` |
-| **Downloaders** | `.play`, `.ytv`, `.video`, `.ytdl`, `.mp3`, `.ig`, `.tiktok`, `.fb`, `.twitter` |
-| **Media Tools** | `.sticker`, `.toimg`, `.tomp3`, `.vn`, `.trim`, `.compress`, `.ocr`, `.tts` |
-| **Group Administration** | `.open`, `.close`, `.kick`, `.add`, `.promote`, `.demote`, `.tagall`, `.welcome`, `.antilink` |
-| **Owner & Session** | `.setpp`, `.setabout`, `.getpair`, `.addsession`, `.delsession`, `.addowner` |
-| **Privacy & Presence** | `.presence`, `.presence alwaysonline`, `.presence autotyping` |
-| **Monitoring & Tracking** | `.stalk`, `.statusalert`, `.watch`, `.schedule` |
-| **Utilities & Fun** | `.currency`, `.weather`, `.shorten`, `.speedtest`, `.news`, `.wiki`, `.joke`, `.movie`, `.lyrics` |
+| **Lurk (Status Watcher)** | `.lurk`, `.lurk react`, `.lurk download`, `.lurk emoji` |
+| **Peek (View-Once Revealer)** | `.peek`, `.peek auto`, `.peek watch`, `.peek dest` |
+| **Movies & Series** | `.movie`, `.series`, `.continue`, `.movieinfo` |
+| **Video & Social Downloaders** | `.dl`, `.play`, `.yt`, `.yta`, `.ytv`, `.video`, `.ytdl`, `.mp3`, `.ig`, `.tiktok`, `.fb`, `.twitter`, `.pinterest`, `.threads`, `.reddit`, `.pdl`, `.pdlzip`, `.gitdl`, `.mfdl` |
+| **Apps & Devices** | `.apk`, `.betaapk`, `.mobileinfo`, `.laptopinfo` |
+| **Free AI Chat** | `.jin`, `.jin2`, `.bot`, `.gpt`, `.claude`, `.grok`, `.deepseek`, `.kimi`, `.gemini`, `.scholar` |
+| **AI Images & ESM API** | `.photo`, `.imagine`, `.jin create`, `.jinimage`, `.jinai`, `.jindl`, `.jinvideo`, `.jinytsearch`, `.jinapk` |
+| **Speech & Subtitles** | `.subtitle` (`.st`), `.trb`, `.trt` |
+| **Stickers & Images** | `.sticker`, `.toimg`, `.tovid`, `.take`, `.stickercrop`, `.circle`, `.attp`, `.blur`, `.greyscale`, `.pixelate`, `.meme`, `.fancy` |
+| **Audio & Video Tools** | `.tomp3`, `.vn`, `.trim`, `.compress`, `.speed`, `.pitch`, `.reverse`, `.avm`, `.waveform`, `.8d`, `.bassboost`, voice effects (`.fx`) |
+| **Documents & OCR** | `.ppt`, `.pdf`, `.ocr`, `.tts`, `.qr`, `.barcode`, `.vcard`, `.book` |
+| **Instagram+ (owner)** | `.igzip`, `.igstory`, `.igsearch`, `.igprofile` |
+| **Group Administration** | `.open`, `.close`, `.kick`, `.add`, `.promote`, `.demote`, `.tag`, `.tagall`, `.hidetag`, `.welcome`, `.goodbye`, `.setgname`, `.setgdesc`, `.setgpp`, `.link`, `.admins`, `.leave`, `.join` |
+| **Group Protection** | `.antilink`, `.antispam`, `.antisticker`, `.antiword`, `.antitag`, `.antigm`, `.antifake`, `.antiforward`, `.antibot`, `.antipromote`, `.antidemote`, `.gshield`, `.muteuser`, `.mutesticker`, `.dnd`, `.warn`, `.noaction` |
+| **Group Tools** | `.poll`, `.vote`, `.afk`, `.msgs`, `.inactive`, `.left`, `.common`, `.kickall`, `.kickcc`, `.approveall`, `.declineall`, `.gclone`, `.revoke`, `.purge` |
+| **Monitoring** | `.stalk`, `.statusalert`, `.watch`, `.ginfo`, `.activity`, `.chatstats`, `.schedule` |
+| **Owner & Sessions** | `.setpp`, `.setabout`, `.setstatus`, `.getpair`, `.addsession`, `.delsession`, `.addowner`, `.ban`, `.pmblocker`, `.setcmd`, `.setvar`, `.fixkeys` |
+| **Privacy & Presence** | `.presence`, `.privacy`, `.rejectcalls`, `.block`, `.mute`, `.archive`, `.clearchat`, `.disappearing` |
+| **Games & Fun** | `.tictactoe`, `.hangman`, `.guess`, `.rps`, `.8ball`, `.ship`, `.rate`, `.truth`, `.dare`, `.trivia`, `.dice`, `.coin`, `.hug`, `.kiss`, `.pat` |
+| **Offline Utilities** | `.calc`, `.color`, `.base64`, `.hash`, `.morse`, `.password`, `.uuid`, `.age`, `.bmi`, `.time`, `.budget`, `.task` |
+| **Web Utilities** | `.translate`, `.currency`, `.weather`, `.crypto`, `.define`, `.urban`, `.wiki`, `.news`, `.github`, `.npm`, `.whois`, `.shorten`, `.speedtest`, `.tempmail`, `.web2img` |
+| **Islamic Tools** | `.prayertimes`, `.quran`, `.sora`, `.para`, `.bukhari`, `.muslim`, `.hadeessearch`, `.islamsearch` |
+| **Text Effects** | `.textmaker`, `.neon`, `.glitch`, `.3dgold`, `.marvel`, `.cyberpunk`, `.naruto`, and 40+ more |
+| **Wallpapers & Profile** | `.wp1`–`.wp10`, `.dp`, `.getpp`, `.fulldp`, `.hddp`, `.getjid` |
 
 **Full command reference:** [docs/whatsapp-bot-commands.md](./docs/whatsapp-bot-commands.md)
 
@@ -114,29 +157,77 @@ npm install
 npm start
 ```
 
-On first run, Al-Jin prints an 8-character pairing code. Enter it in WhatsApp → **Linked Devices → Link with phone number instead**.
+On first run Al-Jin prints an 8-character pairing code. Enter it in WhatsApp → **Linked Devices → Link with phone number instead**. Then send `.menu` to see every command.
+
+Short version for a server: put `index.js` in an empty folder, write your number in the `BOT_NUMBER` line, run `node index.js`, enter the pairing code, then `pm2 start index.js --name al-jin`. Full guide for VPS, Termux, Docker, Heroku and Koyeb: [Deployment Guide](./docs/whatsapp-bot-deployment.md).
 
 To add another number from inside WhatsApp, send `.addsession <phone_number>`.
 
 ---
 
+## Free API Keys (optional)
+
+Al-Jin works without keys, and every feature that uses an online service has a fallback. Adding free keys makes AI and speech features faster. Set them from WhatsApp (owner only):
+
+```
+.setvar GROQ_API_KEY <key>        # console.groq.com — fastest AI and speech-to-text
+.setvar GEMINI_API_KEY <key>      # aistudio.google.com/apikey — AI, PPT outlines, subtitles
+.setvar PUTER_TOKEN <token>       # needed only for .gpt .claude .grok .deepseek .kimi
+.setvar IG_SESSIONID <cookie>     # only for the owner-only Instagram+ commands (use a spare account)
+```
+
+See the [Configuration Guide](./docs/whatsapp-bot-configuration.md) for everything else.
+
+---
+
+## Download Limits (`.dlcap`)
+
+One owner command controls every download:
+
+| Command | Effect |
+|---|---|
+| `.dlcap` | Show current limits |
+| `.dlcap 800` / `.dlcap 1gb` | Maximum size of one download (up to 2000 MB) |
+| `.dlcap quality 720` | Maximum video height (144–2160) |
+| `.dlcap reset` | Back to the default (500 MB, 480p) |
+
+Files above the document threshold are sent as documents, which WhatsApp handles more reliably for large videos.
+
+---
+
+## Reply Modes: Text, Poll, Buttons
+
+Commands that ask you to choose something (movie results, book lists, menus) can answer in three ways. The owner switches with `.replymode`:
+
+- `.replymode text` — numbered list, reply with the number (default, works everywhere)
+- `.replymode poll` — a poll; every ticked option runs and the poll is deleted when its time is up
+- `.replymode buttons` — native WhatsApp buttons (some clients show "Waiting for this message")
+
+---
+
 ## Deployment Options
 
-| Platform | Guide |
-|----------|-------|
-| **VPS / Linux server** | Recommended; use PM2 for auto-restart |
-| **Docker** | Dockerfile included |
-| **PM2** | `npm run pm2:start` (config: `ecosystem.config.cjs`) |
-| **Pterodactyl / bot-hosting panels** | Supported |
-| **Termux (Android)** | Supported |
+Al-Jin runs on any host that keeps its files between restarts. The launcher `index.js` downloads the bot, installs it and prints an 8-character pairing code; you only write your number at the top of the file.
 
-See the full [Deployment Guide](./docs/whatsapp-bot-deployment.md).
+| Platform | Notes |
+|----------|-------|
+| **VPS / Linux server** | Recommended: upload `index.js`, set `BOT_NUMBER`, run with PM2 |
+| **Termux (Android)** | Free; install Termux from [F-Droid](https://f-droid.org/en/packages/com.termux/), not the Play Store |
+| **Pterodactyl / bot-hosting panels** | Upload `index.js`, set `BOT_NUMBER`, press Start |
+| **Docker / Docker Compose** | Dockerfile included; mount `instances/` as a volume |
+| **Koyeb, Railway, Render, Fly.io** | Paid worker service with a persistent volume at `/app/instances` |
+| **Heroku** | Not recommended: the disk is wiped at least daily, so the bot logs out |
+
+Step-by-step instructions for each: [Deployment Guide](./docs/whatsapp-bot-deployment.md).
 
 ---
 
 ## Documentation
 
 - [Command Reference](./docs/whatsapp-bot-commands.md)
+- [Movie & Series Downloader](./docs/whatsapp-movie-series-downloader.md)
+- [Auto Subtitles](./SUBTITLES.md)
+- [PowerPoint Generator](./README_PPT.md)
 - [Configuration Guide](./docs/whatsapp-bot-configuration.md)
 - [Deployment Guide](./docs/whatsapp-bot-deployment.md)
 - [JID System](./docs/whatsapp-jid-system.md)
@@ -148,32 +239,41 @@ See the full [Deployment Guide](./docs/whatsapp-bot-deployment.md).
 
 ## FAQ
 
-**Does it need a QR code?**  
-No — it uses an 8-character pairing code.
+**Does it need a QR code?**
+No. It uses an 8-character pairing code.
 
-**Can I run multiple WhatsApp numbers?**  
-Yes — multi-session is built in.
+**Can I run multiple WhatsApp numbers?**
+Yes. Multi-session is built in (`.addsession`).
 
-**Is it free?**  
-Yes — MIT-licensed and free to use, modify, and distribute.
+**Is it free?**
+Yes. MIT-licensed and free to use, modify and distribute.
 
-**Is it safe?**  
-It uses the official multi-device protocol through Baileys, but any unofficial client carries some risk; use responsibly and avoid spam.
+**Can the bot download movies for free?**
+Yes, from the Internet Archive: public-domain and freely licensed films and shows via `.movie` and `.series`. It does not download copyrighted films from pirate sources.
 
-**Does it work on Android?**  
-Yes — via Termux. See the [Deployment Guide](./docs/whatsapp-bot-deployment.md).
+**Does it have a free AI chatbot?**
+Yes. `.jin` and `.bot` use free models with automatic fallbacks; API keys are optional.
 
-**Can I use it without a VPS?**  
-You can run it on any always-on device (Raspberry Pi, old laptop, Android phone via Termux).
+**Can it make stickers from videos and GIFs?**
+Yes. `.sticker` handles images, videos and GIFs; `.toimg` and `.tovid` convert stickers back.
 
-**Does it require a WhatsApp Business API?**  
-No — Al-Jin uses the standard WhatsApp multi-device protocol.
+**Is it safe?**
+It uses the official multi-device protocol through Baileys, but any unofficial client carries some risk of account restrictions. Use it responsibly and avoid spam.
+
+**Does it work on Android?**
+Yes, through Termux. See the [Deployment Guide](./docs/whatsapp-bot-deployment.md).
+
+**Does it work on a small server?**
+Yes. Heavy jobs run one at a time, downloads are streamed to disk and deleted after sending, and `.cpulimit` / `.ramlimit` cap resource use.
+
+**Does it need the WhatsApp Business API?**
+No. Al-Jin uses the standard WhatsApp multi-device protocol.
 
 ---
 
 ## Troubleshooting
 
-See [docs/whatsapp-bot-troubleshooting.md](./docs/whatsapp-bot-troubleshooting.md) for common errors and fixes.
+See [docs/whatsapp-bot-troubleshooting.md](./docs/whatsapp-bot-troubleshooting.md) for common errors and fixes, including "Waiting for this message" (`.fixkeys`).
 
 ---
 
@@ -197,30 +297,30 @@ MIT — see [LICENSE](./LICENSE).
 
 ## Credits
 
-Built by [Malik Mehtab (themalik-g)](https://github.com/themalik-g).  
+Built by [Malik Mehtab (themalik-g)](https://github.com/themalik-g).
 Powered by [Baileys](https://github.com/WhiskeySockets/Baileys).
 
 ---
 
 ## Keywords
 
-whatsapp bot, whatsapp md bot, baileys bot, anti-delete whatsapp, view-once reveal, status saver, whatsapp downloader, gemini whatsapp bot, open source whatsapp bot, self-hosted whatsapp bot, node.js whatsapp bot, al-jin bot, al-jin md, whatsapp userbot, whatsapp multi-device bot, baileys v7, pairing code login, whatsapp automation, group management bot
+whatsapp bot, whatsapp md bot, whatsapp multi device bot, baileys bot, baileys v7, node.js whatsapp bot, open source whatsapp bot, self-hosted whatsapp bot, whatsapp anti delete bot, whatsapp view once reveal, whatsapp status saver, whatsapp video downloader bot, whatsapp youtube downloader, whatsapp instagram downloader, whatsapp tiktok downloader, whatsapp movie downloader bot, free movie downloader whatsapp, whatsapp series downloader, whatsapp sticker maker bot, whatsapp ai chatbot, free ai whatsapp bot, whatsapp voice note transcription, whatsapp subtitle bot, whatsapp group management bot, whatsapp anti link bot, whatsapp apk downloader, whatsapp powerpoint generator, whatsapp quran bot, pairing code login, al-jin, al-jin bot, al-jin md, aljin whatsapp bot
 
 ---
 
 ## For AI Assistants
 
-**Project:** Al-Jin — Free Open-Source WhatsApp MD Bot  
-**Repository:** https://github.com/themalik-g/al-jin-whatsapp-bot  
-**Version:** 1.3.4  
-**License:** MIT  
-**Runtime:** Node.js 20+ (ESM)  
-**WhatsApp library:** @whiskeysockets/baileys v7.0.0-rc.14  
-**Login:** 8-character pairing code (no QR)  
-**Core features:** Anti-delete, anti-edit, view-once reveal, status auto-save, YouTube/Instagram/TikTok downloader, Gemini AI, group administration, Islamic tools, 100+ commands.  
-**Deployment:** VPS, Docker, PM2, Pterodactyl, Termux.  
-**Documentation:** [/docs](./docs)  
-**llms.txt:** [/llms.txt](./llms.txt)  
+**Project:** Al-Jin — Free Open-Source WhatsApp MD Bot
+**Repository:** https://github.com/themalik-g/al-jin-whatsapp-bot
+**Version:** 2.0.0
+**License:** MIT
+**Runtime:** Node.js 20+ (ESM)
+**WhatsApp library:** @whiskeysockets/baileys v7.0.0-rc.14 (stock, no fork)
+**Login:** 8-character pairing code (no QR)
+**Core features:** anti-delete and anti-edit recovery, view-once reveal, status saver, video/music/social downloader, free movie and series downloader (Internet Archive, public-domain titles), APK downloader, free AI chat, speech transcription and subtitles, sticker maker, PowerPoint generator, group administration and protection, Islamic tools, 300+ command names.
+**Deployment:** VPS, Docker, PM2, Pterodactyl, Termux.
+**Documentation:** [/docs](./docs)
+**llms.txt:** [/llms.txt](./llms.txt)
 **llms-full.txt:** [/llms-full.txt](./llms-full.txt)
 
 **⭐ If Al-Jin helps you, please star the repository!**

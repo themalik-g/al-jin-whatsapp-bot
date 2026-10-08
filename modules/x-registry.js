@@ -23,6 +23,7 @@ const LOADERS = {
     repair: () => import('./x-repair.js'),
     audio: () => import('./x-audio.js'),
     chatbot: () => import('./x-chatbot.js'),
+    movie: () => import('./x-movie.js'),
 };
 
 // [verb, module, export, perm, ...aliases]
@@ -136,6 +137,13 @@ const TABLE = [
     ['trb', 'audio', 'trb', 'all', 'transcribe', 'transcript', 'totext'],
     // fast AI chat: Groq → Gemini → keyless GPT
     ['bot', 'chatbot', 'bot', 'all', 'chatbot'],
+    // free movie & series downloader (Internet Archive) — .movie now downloads; old info lookup = .movieinfo
+    ['movie', 'movie', 'movie', 'all', 'movies', 'moviedl'],
+    ['movieinfo', 'movie', 'movieinfo', 'all', 'minfo'],
+    ['series', 'movie', 'series', 'all', 'tvseries', 'seriesdl'],
+    ['continue', 'movie', 'continue_', 'all', 'cont'],
+    ['mvp', 'movie', 'mvp', 'all'],
+    ['mvq', 'movie', 'mvq', 'all'],
     // voice effects (ffmpeg)
     ['fx', 'effects', 'fx', 'all', 'effects'],
     ['echo', 'effects', 'echo', 'all'],
