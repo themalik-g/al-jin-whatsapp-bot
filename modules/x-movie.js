@@ -1,18 +1,16 @@
 // ─────────────────────────────────────────────
 //  Al-Jin · modules/x-movie.js
-//  Free movie & series downloader (Internet Archive — public-domain / free titles).
+//  Movie & series downloader with Moviebox SDK (primary) + Internet Archive fallback.
 //
-//    .movie <name>                  top 5 → pick one → pick quality → download + send
-//    .series <name> -ep 11          top 5 → pick show → pick quality → one episode
-//    .series <name> -full           top 5 → pick show → best quality that fits .dlcap,
-//                                   3 episodes per batch, then  .continue  for the next 3
-//    .continue                      next 3 episodes of the last  -full  run in this chat
-//    .movieinfo <title>             the old movie-INFO lookup (unchanged, just renamed)
+//    .movie <name>                  top 5 → pick one → download + send
+//    .series <name> -ep 1           top 5 → pick show → one episode
+//    .series <name> -full           top 5 → pick show → 3 episodes per batch, then .continue
+//    .continue                      next 3 episodes of the last -full run in this chat
+//    .movieinfo <title>             ratings & plot lookup
 //
-//  Obeys  .dlcap  (core/limits.js): max size per file, max video height, and the
+//  Obeys .dlcap (core/limits.js): max size per file, max video height, and the
 //  "send as document above N MB" rule. One download at a time (RAM + disk friendly),
 //  every file is deleted right after it is sent.
-//  Hidden helper verbs:  mvp (pick title)  ·  mvq (pick quality)
 // ─────────────────────────────────────────────
 import fs from 'node:fs';
 import path from 'node:path';
@@ -27,6 +25,13 @@ import {
   getMaxDownloadMB, getMaxDownloadBytes, getVideoHeight, getDocThresholdBytes, fmtMB,
 } from '../core/limits.js';
 import * as ia from '../lib/ia-movies.js';
+import {
+  searchMoviebox,
+  getMovieboxMovieStream,
+  getMovieboxSeriesDetails,
+  getMovieboxEpisodeStream,
+  downloadMovieboxStream,
+} from '../lib/moviebox.js';
 
 const TMP_DIR = path.join(process.cwd(), 'vault', 'tmp', 'movies');
 const queue = new PQueue({ concurrency: 1 });          // one download at a time
@@ -89,8 +94,46 @@ function capProblem(file) {
   return '';
 }
 
-// ── download + send (one file) ───────────────
-async function fetchAndSend(sock, chat, msg, { item, file, name, label, caption }) {
+// ── Moviebox download + send ────────────────
+async function fetchAndSendMoviebox(sock, chat, msg, { streamObj, name, caption }) {
+  fs.mkdirSync(TMP_DIR, { recursive: true });
+  const status = await sock.sendMessage(chat, { text: `📥 Downloading *${name}*…` }, { quoted: msg });
+  let filePath = null;
+  try {
+    let last = '';
+    const onProgress = (info) => {
+      if (info?.downloadedSize) {
+        const pct = info.totalSize ? ` ${Math.min(99, Math.round((info.downloadedSize / info.totalSize) * 100))}%` : '';
+        const t = `📥 Downloading *${name}*${pct} · ${mb(info.downloadedSize)}`;
+        if (t !== last) { last = t; editStatus(sock, chat, status, t); }
+      }
+    };
+
+    filePath = await downloadMovieboxStream(streamObj, { title: name, onProgress });
+    const stat = fs.statSync(filePath);
+    if (stat.size > getMaxDownloadBytes()) {
+      throw new Error(`File size (${mb(stat.size)}) exceeds cap (${getMaxDownloadMB()} MB)`);
+    }
+
+    await editStatus(sock, chat, status, `📤 Uploading *${name}* (${mb(stat.size)})…`);
+    const asDoc = stat.size > getDocThresholdBytes();
+    const fileName = `${safeName(name)}.mp4`;
+    await sock.sendMessage(chat, asDoc
+      ? { document: { url: filePath }, mimetype: 'video/mp4', fileName, caption }
+      : { video: { url: filePath }, mimetype: 'video/mp4', fileName, caption }, { quoted: msg });
+    await editStatus(sock, chat, status, `✅ Sent *${name}*`);
+  } catch (err) {
+    await editStatus(sock, chat, status, `❌ Download failed: ${err.message}`);
+    throw err;
+  } finally {
+    if (filePath) {
+      try { fs.unlinkSync(filePath); } catch {}
+    }
+  }
+}
+
+// ── Internet Archive download + send ─────────
+async function fetchAndSendIA(sock, chat, msg, { item, file, name, label, caption }) {
   fs.mkdirSync(TMP_DIR, { recursive: true });
   const dest = path.join(TMP_DIR, `mv_${Date.now()}_${crypto.randomBytes(3).toString('hex')}.${file.ext}`);
   const maxBytes = getMaxDownloadBytes();
@@ -135,33 +178,71 @@ function enqueue(sock, chat, msg, job) {
   if (queue.pending || queue.size) {
     sock.sendMessage(chat, { text: `⏳ Queued — ${queue.size + queue.pending} download(s) ahead of you.` }, { quoted: msg }).catch(() => {});
   }
-  return queue.add(() => fetchAndSend(sock, chat, msg, job));
+  return queue.add(() => job.source === 'moviebox'
+    ? fetchAndSendMoviebox(sock, chat, msg, job)
+    : fetchAndSendIA(sock, chat, msg, job));
 }
 
 // ── step 1: search ───────────────────────────
 async function startSearch(sock, chat, msg, kind, query, extra = {}) {
   const status = await sock.sendMessage(chat, { text: `🔍 Searching *${query}*…` }, { quoted: msg });
-  let results;
-  try { results = await ia.searchTitles(query, kind, 5); }
-  catch (e) {
-    await editStatus(sock, chat, status, `❌ ${ia.SOURCE_NAME} is not answering right now (${e.message}). Try again in a minute.`);
-    return;
+  let results = [];
+  let source = 'moviebox';
+
+  // 1. Primary search via Moviebox
+  try {
+    const mbResults = await searchMoviebox(query, kind);
+    if (mbResults && mbResults.length) {
+      results = mbResults.slice(0, 5).map((r) => ({
+        title: r.title || r.name || 'Untitled',
+        detailPath: r.detailPath || r.path || r.id,
+        year: r.year ? String(r.year) : '',
+        source: 'moviebox',
+        raw: r,
+      }));
+    }
+  } catch (err) {
+    console.warn('[moviebox search error, falling back to IA]:', err.message);
   }
+
+  // 2. Fallback search via Internet Archive if Moviebox returned no results
   if (!results.length) {
-    await editStatus(sock, chat, status, `❌ Nothing found for *${query}*.\n_This source only has public-domain and freely licensed ${kind === 'series' ? 'shows' : 'films'} — try an older or simpler title._`);
+    source = 'ia';
+    try {
+      const iaResults = await ia.searchTitles(query, kind, 5);
+      if (iaResults && iaResults.length) {
+        results = iaResults.map((r) => ({
+          title: r.title,
+          id: r.id,
+          year: r.year,
+          source: 'ia',
+          raw: r,
+        }));
+      }
+    } catch (e) {
+      await editStatus(sock, chat, status, `❌ Search unavailable (${e.message}). Try again in a minute.`);
+      return;
+    }
+  }
+
+  if (!results.length) {
+    await editStatus(sock, chat, status, `❌ Nothing found for *${query}*. Try a different or simpler title.`);
     return;
   }
-  const token = newSession({ stage: 'title', kind, chat, query, results, ...extra });
+
+  const token = newSession({ stage: 'title', kind, chat, query, results, source, ...extra });
   const what = kind === 'series' ? (extra.full ? 'full series' : `episode ${extra.ep}`) : 'movie';
+  const sourceLabel = source === 'moviebox' ? 'Moviebox' : `${ia.SOURCE_NAME} (public domain)`;
+
   await askChoice(sock, chat, msg,
-    `🎬 *${query}* — top ${results.length} (${what})\n_Source: ${ia.SOURCE_NAME}, public-domain & free titles_\n\nPick one:`,
+    `🎬 *${query}* — top ${results.length} (${what})\n_Source: ${sourceLabel}_\n\nPick one:`,
     results.map((r, i) => ({ label: `${r.title}${r.year ? ` (${r.year})` : ''}`, cmd: `mvp ${token} ${i + 1}` })));
 }
 
 export const movie = safe('movie', async (sock, chat, msg, args) => {
   const query = ia.cleanQuery(args.join(' '));
   if (!query) {
-    return reply(sock, chat, msg, `🎬 *Movie downloader*\n\n• \`${P()}movie <name>\` — search, pick, choose quality, get the file\n• \`${P()}series <name> -ep 11\` — one episode\n• \`${P()}series <name> -full\` — whole series, 3 episodes per batch, then \`${P()}continue\`\n• \`${P()}movieinfo <name>\` — ratings & plot\n\n${limitsLine()}\n_Free source: ${ia.SOURCE_NAME} (public-domain & freely licensed titles)._`);
+    return reply(sock, chat, msg, `🎬 *Movie downloader*\n\n• \`${P()}movie <name>\` — search, pick, get the movie\n• \`${P()}series <name> -ep 1\` — one episode\n• \`${P()}series <name> -full\` — whole series, 3 episodes per batch, then \`${P()}continue\`\n• \`${P()}movieinfo <name>\` — ratings & plot\n\n${limitsLine()}`);
   }
   await startSearch(sock, chat, msg, 'movie', query);
 });
@@ -172,9 +253,9 @@ export const series = safe('series', async (sock, chat, msg, args) => {
   const full = /(?:^|\s)--?full\b/i.test(text);
   const name = ia.cleanQuery(text.replace(/(?:^|\s)--?full\b/ig, ' ').replace(/(?:^|\s)--?(?:ep|e|episode)\s*[:=]?\s*\d{1,4}\b/ig, ' '));
   if (!name || (!epM && !full)) {
-    return reply(sock, chat, msg, `📺 *Series downloader*\n\n• \`${P()}series <name> -ep 11\` — one episode\n• \`${P()}series <name> -full\` — all episodes (3 per batch, then \`${P()}continue\`)\n\n${limitsLine()}`);
+    return reply(sock, chat, msg, `📺 *Series downloader*\n\n• \`${P()}series <name> -ep 1\` — one episode\n• \`${P()}series <name> -full\` — all episodes (3 per batch, then \`${P()}continue\`)\n\n${limitsLine()}`);
   }
-  await startSearch(sock, chat, msg, 'series', name, epM ? { ep: Number(epM[1]), full: false } : { ep: 0, full: true });
+  await startSearch(sock, chat, msg, 'series', name, epM ? { ep: Number(epM[1]), full: false } : { ep: 1, full: true });
 });
 
 // legacy info lookup, untouched (modules/media.js)
@@ -191,8 +272,77 @@ export const mvp = safe('mvp', async (sock, chat, msg, args) => {
   if (!pick) return reply(sock, chat, msg, '❌ Invalid choice.');
   if (s.busy) return;
   s.busy = true;
+
   try {
     const status = await sock.sendMessage(chat, { text: `📂 Loading *${pick.title}*…` }, { quoted: msg });
+
+    // --- MOVIEBOX PATH ---
+    if (pick.source === 'moviebox') {
+      if (s.kind === 'movie') {
+        let streamObj;
+        try {
+          streamObj = await getMovieboxMovieStream(pick.detailPath, 'best');
+        } catch (e) {
+          return editStatus(sock, chat, status, `❌ Could not load stream from Moviebox (${e.message}).`);
+        }
+
+        sessions.delete(String(args[0]).toLowerCase());
+        await enqueue(sock, chat, msg, {
+          source: 'moviebox',
+          streamObj,
+          name: pick.title,
+          caption: `🎬 ${pick.title}\n${FOOTER}`,
+        });
+        return;
+      }
+
+      // Series in Moviebox
+      if (s.kind === 'series') {
+        let details;
+        try {
+          details = await getMovieboxSeriesDetails(pick.detailPath);
+        } catch (e) {
+          return editStatus(sock, chat, status, `❌ Could not load series details (${e.message}).`);
+        }
+
+        const requestedEp = s.ep || 1;
+        if (!s.full) {
+          let epStream;
+          try {
+            epStream = await getMovieboxEpisodeStream(pick.detailPath, 1, requestedEp, 'best');
+          } catch (e) {
+            return editStatus(sock, chat, status, `❌ Could not load Episode ${requestedEp} (${e.message}).`);
+          }
+
+          sessions.delete(String(args[0]).toLowerCase());
+          await enqueue(sock, chat, msg, {
+            source: 'moviebox',
+            streamObj: epStream,
+            name: `${pick.title} E${String(requestedEp).padStart(2, '0')}`,
+            caption: `📺 ${pick.title} — Episode ${requestedEp}\n${FOOTER}`,
+          });
+          return;
+        }
+
+        // Series -full in Moviebox
+        const epList = details?.episodes || details?.list || [];
+        const totalEps = epList.length || 10;
+        const plan = [];
+        for (let ep = 1; ep <= totalEps; ep++) {
+          plan.push({ ep, detailPath: pick.detailPath });
+        }
+
+        const run = { chat, source: 'moviebox', title: pick.title, plan, next: 0, busy: false, at: Date.now() };
+        runs.set(chat, run);
+        await editStatus(sock, chat, status,
+          `📺 *${pick.title}* — ${totalEps} episode(s) found.\n\nSending ${Math.min(BATCH, totalEps)} now, \`${P()}continue\` for more.`);
+        sessions.delete(String(args[0]).toLowerCase());
+        await runBatchMoviebox(sock, chat, msg, run);
+        return;
+      }
+    }
+
+    // --- INTERNET ARCHIVE PATH ---
     let item;
     try { item = await ia.getItem(pick.id); }
     catch (e) { return editStatus(sock, chat, status, `❌ ${e.message}`); }
@@ -218,7 +368,7 @@ export const mvp = safe('mvp', async (sock, chat, msg, args) => {
       return;
     }
 
-    // -full: pick the best quality per episode that fits .dlcap, then run batches of 3
+    // -full IA: pick the best quality per episode that fits .dlcap, then run batches of 3
     const limits = { maxBytes: getMaxDownloadBytes(), maxHeight: getVideoHeight() };
     const plan = []; const skipped = [];
     for (const [ep, files] of eps) {
@@ -229,7 +379,7 @@ export const mvp = safe('mvp', async (sock, chat, msg, args) => {
       return editStatus(sock, chat, status, `❌ No episode of *${title}* fits your limits (${getMaxDownloadMB()} MB · ${getVideoHeight()}p).\nRaise them with \`${P()}dlcap 1gb\` / \`${P()}dlcap quality 720\`.`);
     }
     const total = plan.reduce((a, p) => a + (p.file.size || 0), 0);
-    const run = { chat, item, title, plan, next: 0, busy: false, at: Date.now() };
+    const run = { chat, source: 'ia', item, title, plan, next: 0, busy: false, at: Date.now() };
     runs.set(chat, run);
     await editStatus(sock, chat, status,
       `📺 *${title}* — ${eps.size} episode(s), ${plan.length} fit your limits${total ? ` (≈ ${mb(total)} in total)` : ''}.` +
@@ -266,6 +416,7 @@ async function startDownload(sock, chat, msg, ctx, opt) {
   if (problem) return reply(sock, chat, msg, `⛔ *${opt.label}* can't be downloaded: ${problem}`);
   try {
     await enqueue(sock, chat, msg, {
+      source: 'ia',
       item: ctx.item, file: opt.file, name: ctx.name, label: opt.label,
       caption: ctx.caption || `🎬 ${ctx.title} — ${opt.label}\n${FOOTER}`,
     });
@@ -275,7 +426,39 @@ async function startDownload(sock, chat, msg, ctx, opt) {
 }
 
 // ── series batches ───────────────────────────
+async function runBatchMoviebox(sock, chat, msg, run) {
+  if (run.busy) return reply(sock, chat, msg, '⏳ A batch is already running — wait for it to finish.');
+  run.busy = true; run.at = Date.now();
+  const done = []; const failed = [];
+  try {
+    for (let i = 0; i < BATCH && run.next < run.plan.length; i++) {
+      const p = run.plan[run.next];
+      try {
+        const epStream = await getMovieboxEpisodeStream(p.detailPath, 1, p.ep, 'best');
+        await enqueue(sock, chat, msg, {
+          source: 'moviebox',
+          streamObj: epStream,
+          name: `${run.title} E${String(p.ep).padStart(2, '0')}`,
+          caption: `📺 ${run.title} — Episode ${p.ep}\n${FOOTER}`,
+        });
+        done.push(p.ep);
+      } catch (e) {
+        failed.push(p.ep);
+        await reply(sock, chat, msg, `⚠️ Episode ${p.ep} failed: ${e.message}`);
+      }
+      run.next += 1;
+    }
+  } finally { run.busy = false; }
+
+  const left = run.plan.length - run.next;
+  let text = `📺 *${run.title}* — sent ${done.length ? `episode(s) ${done.join(', ')}` : 'nothing'}${failed.length ? ` · failed: ${failed.join(', ')}` : ''}.`;
+  if (left > 0) text += `\n\n${left} episode(s) left. Send \`${P()}continue\` for the next ${Math.min(BATCH, left)}.`;
+  else { text += '\n\n✅ That was the last one.'; runs.delete(chat); }
+  await reply(sock, chat, msg, text);
+}
+
 async function runBatch(sock, chat, msg, run) {
+  if (run.source === 'moviebox') return runBatchMoviebox(sock, chat, msg, run);
   if (run.busy) return reply(sock, chat, msg, '⏳ A batch is already running — wait for it to finish.');
   run.busy = true; run.at = Date.now();
   const done = []; const failed = [];
@@ -284,6 +467,7 @@ async function runBatch(sock, chat, msg, run) {
       const p = run.plan[run.next];
       try {
         await enqueue(sock, chat, msg, {
+          source: 'ia',
           item: run.item, file: p.file, name: `${run.title} E${String(p.ep).padStart(2, '0')}`, label: p.label,
           caption: `📺 ${run.title} — Episode ${p.ep} (${p.label})\n${FOOTER}`,
         });
