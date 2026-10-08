@@ -152,3 +152,19 @@ MIT License. See LICENSE file.
 - Author: MALIK MEHTAB
 - GitHub: https://github.com/themalik-g
 - Repository: https://github.com/themalik-g/al-jin-whatsapp-bot
+
+---
+
+## Feature summary (v2.0.0)
+
+- **Movies and series:** `.movie <name>`, `.series <name> -ep <n>`, `.series <name> -full`, `.continue` — free, legal downloads of public-domain and freely licensed titles from the Internet Archive, with quality choice and `.dlcap` limits. `.movieinfo` gives ratings and plot.
+- **Downloaders:** YouTube (`.play`, `.yt`, `.ytv`, `.yta`), Instagram, TikTok, Facebook, Twitter/X, Pinterest, Threads, Reddit, SoundCloud, GitHub repositories (`.gitdl`), MediaFire (`.mfdl`), APKs (`.apk`).
+- **AI:** `.jin`, `.bot`, `.gemini`, `.scholar`, `.photo`, `.gpt`, `.claude`, `.grok`, `.deepseek`, `.kimi` with automatic fallbacks; API keys optional.
+- **Speech:** `.trb` (voice note to text), `.trt` (translated transcript), `.subtitle` (burned-in subtitles).
+- **Stickers and media:** `.sticker`, `.toimg`, `.tovid`, `.take`, `.attp`, image filters, voice effects, OCR, text-to-speech, PDF and PowerPoint (`.ppt`) generation.
+- **Group management:** admin commands, welcome/goodbye, anti-link, anti-spam, anti-word, anti-tag, anti-forward, mute, warn, `.noaction` member guard, bulk actions.
+- **Monitoring and privacy:** `.stalk`, `.statusalert`, `.watch`, `.ginfo`, `.chatstats`, presence controls, call rejection.
+- **Control:** `.dlcap` (download size and quality), `.cpulimit` / `.ramlimit` (resources), `.replymode` (text, poll or buttons), `.mode` (public/private).
+- **Utilities and fun:** offline tools, web lookups, Islamic tools, games, 50+ text-effect logos.
+
+Full list: docs/whatsapp-bot-commands.md. Movie guide: docs/whatsapp-movie-series-downloader.md.

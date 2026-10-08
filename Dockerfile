@@ -20,10 +20,11 @@ RUN npm install --omit=dev
 COPY . .
 
 # Create directories for persistent data (session, state, vault)
-RUN mkdir -p /app/session /app/state /app/vault
+RUN mkdir -p /app/instances
 
-# Declare volumes so Kubeletto can mount persistent storage
-VOLUME ["/app/session", "/app/state", "/app/vault"]
+# The WhatsApp login (session), settings and state live in instances/ — mount it as a volume
+VOLUME ["/app/instances"]
 
-# Start the bot (your package.json main entry)
-CMD ["node", "start.js"]
+# Start through the launcher: it resumes linked sessions, or pairs with
+#   docker run ... al-jin node index.js --phone=923001234567
+CMD ["node", "index.js"]

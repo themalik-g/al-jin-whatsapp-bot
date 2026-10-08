@@ -17,6 +17,7 @@ PM2, or Pterodactyl environment.
 - [Configuration Guide](https://github.com/themalik-g/al-jin-whatsapp-bot/blob/main/docs/whatsapp-bot-configuration.md): Environment variables and config.json options
 - [Deployment Guide](https://github.com/themalik-g/al-jin-whatsapp-bot/blob/main/docs/whatsapp-bot-deployment.md): VPS, Docker, PM2, and Pterodactyl setup
 - [JID System](https://github.com/themalik-g/al-jin-whatsapp-bot/blob/main/docs/whatsapp-jid-system.md): How WhatsApp JIDs work in Al-Jin
+- [Movie & Series Downloader](https://github.com/themalik-g/al-jin-whatsapp-bot/blob/main/docs/whatsapp-movie-series-downloader.md): Free public-domain movie and series downloads with quality choice and download limits
 - [Architecture](https://github.com/themalik-g/al-jin-whatsapp-bot/blob/main/docs/whatsapp-bot-architecture.md): Code structure and module design
 
 ## Quick Facts
@@ -28,7 +29,7 @@ PM2, or Pterodactyl environment.
 - **WhatsApp library:** @whiskeysockets/baileys v7
 - **Login method:** Pairing code (no QR)
 - **License:** MIT
-- **Version:** 1.3.3
+- **Version:** 2.0.0
 - **Author:** MALIK MEHTAB (https://github.com/themalik-g)
 - **Repository:** https://github.com/themalik-g/al-jin-whatsapp-bot
 - **Deployment:** VPS, Docker, PM2, Pterodactyl, Termux
@@ -43,6 +44,12 @@ PM2, or Pterodactyl environment.
 - Group administration (promote, demote, kick, mute, antilink)
 - Media tools (sticker maker, image to PDF, TTS, OCR)
 - Auto message scheduling and autoresponders
+- Free movie and series downloader (Internet Archive, public-domain titles): .movie, .series, .continue
+- Free AI chat (.jin, .bot), voice-note transcription (.trb, .trt), auto subtitles (.subtitle)
+- Sticker maker for images, videos and GIFs (.sticker, .toimg, .tovid)
+- APK downloader (.apk) and phone specifications (.mobileinfo)
+- Group protection (anti-link, anti-word, anti-tag, .noaction), monitoring (.stalk, .watch, .statusalert)
+- Adjustable download limits (.dlcap) and resource limits (.cpulimit, .ramlimit)
 - Persistent session (no re-linking on restart)
 
 ## Common Use Cases
