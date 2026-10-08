@@ -198,3 +198,43 @@ test('Arabic-script text forces an Arabic-capable font in the ASS file', () => {
   const ass = cuesToAss([{ start: 0, end: 2, text: 'یہ ٹیسٹ ہے' }], { width: 640, height: 360, font: 'Poppins' });
   assert.match(ass, /Style: Default,DejaVu Sans,/);
 });
+
+// ── progress + llm fallback ──
+const { Progress, fmtEta } = await import('../lib/progress.js');
+const { smartChat, _resetLlm } = await import('../lib/llm.js');
+
+test('Progress shows stage %, overall bar and time left', () => {
+  const sent = [];
+  const p = new Progress((t) => sent.push(t), { intervalMs: 2000, title: 'T' });
+  p.plan([{ key: 'a', label: 'Translating', weight: 50 }, { key: 'b', label: 'Burning subtitles', weight: 50 }]);
+  p.begin('a'); p.set(0.5);
+  const txt = p.render();
+  assert.match(txt, /Translating… 50% done/);
+  assert.match(txt, /overall/);
+  assert.match(txt, /Remaining/);
+  p.stop();
+  assert.equal(fmtEta(138), '2 min 18 sec');
+  assert.equal(fmtEta(9), '9 sec');
+});
+
+test('smartChat: Groq rotates models, then Gemini, then keyless', async () => {
+  _resetLlm();
+  const realFetch = globalThis.fetch;
+  const calls = [];
+  globalThis.fetch = async (url, init) => {
+    calls.push(String(url));
+    const u = String(url);
+    const ok = (obj) => ({ ok: true, status: 200, headers: new Map(), text: async () => JSON.stringify(obj) });
+    const bad = (status) => ({ ok: false, status, headers: { get: () => '1' }, text: async () => JSON.stringify({ error: { message: 'busy' } }) });
+    if (u.endsWith('/models')) return ok({ data: [{ id: 'llama-3.1-8b-instant' }, { id: 'llama-3.3-70b-versatile' }, { id: 'whisper-large-v3' }] });
+    if (u.includes('groq.com') && JSON.parse(init.body).model === 'llama-3.3-70b-versatile') return bad(429);   // best model is rate-limited
+    if (u.includes('groq.com')) return ok({ choices: [{ message: { content: 'hello from groq' } }] });
+    return bad(500);
+  };
+  try {
+    const r = await smartChat([{ role: 'user', content: 'hi' }], { purpose: 'quality' });
+    assert.equal(r.provider, 'Groq');
+    assert.equal(r.model, 'llama-3.1-8b-instant');        // fell through to the next model
+    assert.ok(!calls.some((c) => c.includes('whisper')));
+  } finally { globalThis.fetch = realFetch; _resetLlm(); }
+});

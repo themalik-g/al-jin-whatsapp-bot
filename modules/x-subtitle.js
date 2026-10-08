@@ -16,7 +16,8 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { execFile } from 'node:child_process';
+import { execFile, spawn } from 'node:child_process';
+import { Progress } from '../lib/progress.js';
 import { downloadContentFromMessage } from '@whiskeysockets/baileys';
 import { reply, safe, findMedia, ffmpeg, ffmpegHasFilter, bytesToSize } from '../lib/x.js';
 import { ffmpegPath, ffprobePath } from '../lib/ffmpeg-resolver.js';
@@ -36,16 +37,16 @@ const VIDEO_AS_DOC_BYTES = (Number(process.env.WRAITH_VIDEO_AS_DOC_MB) || 64) * 
 const CHUNK_SECONDS = 600;                       // only used when the audio is too big for one request
 const MAX_QUEUE = 3;
 
-class UserError extends Error {}
-const need = (cond, msg) => { if (!cond) throw new UserError(msg); };
+export class UserError extends Error {}
+export const need = (cond, msg) => { if (!cond) throw new UserError(msg); };
 
 /** Longest video accepted, in minutes (change live:  .setvar SUBTITLE_MAX_MINUTES 30). */
-const maxMinutes = () => Math.min(60, Math.max(1, Number(aiKey('SUBTITLE_MAX_MINUTES')) || 15));
+export const maxMinutes = () => Math.min(60, Math.max(1, Number(aiKey('SUBTITLE_MAX_MINUTES')) || 15));
 
 // ── one job at a time ─────────────────────────
 let tail = Promise.resolve();
 let waiting = 0;
-function enqueue(job) {
+export function enqueue(job) {
   need(waiting < MAX_QUEUE, '⏳ Too many subtitle jobs queued — try again in a minute.');
   waiting++;
   const run = tail.then(job, job);
@@ -77,7 +78,7 @@ function sweepStale() {
 }
 
 /** Streams a WhatsApp media message straight to a file (no big buffer in RAM). */
-async function downloadToFile(media, file) {
+export async function downloadToFile(media, file, onProgress) {
   const declared = Number(media.node.fileLength || 0);
   need(!declared || declared <= MAX_DOWNLOAD_BYTES, `📦 That file is ${bytesToSize(declared)} — the limit is ${bytesToSize(MAX_DOWNLOAD_BYTES)}.`);
   const stream = await downloadContentFromMessage(media.node, media.kind);
@@ -86,6 +87,7 @@ async function downloadToFile(media, file) {
   try {
     for await (const chunk of stream) {
       size += chunk.length;
+      try { onProgress?.(size, declared); } catch {}
       if (size > MAX_DOWNLOAD_BYTES) throw new UserError(`📦 File is bigger than ${bytesToSize(MAX_DOWNLOAD_BYTES)}.`);
       if (!out.write(chunk)) await new Promise((r) => out.once('drain', r));
     }
@@ -95,7 +97,7 @@ async function downloadToFile(media, file) {
   return size;
 }
 
-function probe(file) {
+export function probe(file) {
   return new Promise((resolve, reject) => {
     execFile(ffprobePath, [
       '-v', 'error',
@@ -123,7 +125,7 @@ function targetSize(w, h, cap = 1280) {
   return { W: even(w), H: even(h) };
 }
 
-async function extractAudio(input, outFile) {
+export async function extractAudio(input, outFile) {
   // 16 kHz mono 32 kbps MP3 ≈ 0.24 MB per minute — plenty for speech recognition
   await ffmpeg(['-i', input, '-vn', '-ac', '1', '-ar', '16000', '-c:a', 'libmp3lame', '-b:a', '32k', outFile], 180000);
 }
@@ -134,12 +136,13 @@ async function splitAudio(audio, dir, seconds = CHUNK_SECONDS) {
 }
 
 /** Transcribes the whole audio file (in chunks when it is too big for one request). */
-export async function transcribeAudio(audio, dir, { language, onProvider, chunkSeconds = CHUNK_SECONDS, maxBytes = MAX_UPLOAD_BYTES } = {}) {
+export async function transcribeAudio(audio, dir, { language, onProvider, chunkSeconds = CHUNK_SECONDS, maxBytes = MAX_UPLOAD_BYTES, onChunk } = {}) {
   if (fs.statSync(audio).size <= maxBytes) return transcribe(audio, { language, onProvider });
   const chunks = await splitAudio(audio, dir, chunkSeconds);
   const all = [];
   let provider = '', detected = '';
   for (let i = 0; i < chunks.length; i++) {
+    try { onChunk?.(i, chunks.length); } catch {}
     const r = await transcribe(chunks[i], { language, onProvider });
     provider = r.provider; detected = detected || r.language || '';
     all.push(...r.segments.map((s) => ({ ...s, start: s.start + i * chunkSeconds, end: s.end + i * chunkSeconds })));
@@ -148,18 +151,34 @@ export async function transcribeAudio(audio, dir, { language, onProvider, chunkS
   return { segments: all, provider, language: detected };
 }
 
-/** Burns an ASS file into the video. Runs inside `dir` so no path ever needs filter-escaping. */
-export function burnSubtitles({ dir, input, output, W, H, timeoutMs }) {
+/** Burns an ASS file into the video. Runs inside `dir` so no path ever needs filter-escaping. Reports 0..1 progress. */
+export function burnSubtitles({ dir, input, output, W, H, timeoutMs, duration = 0, onProgress }) {
   return new Promise((resolve, reject) => {
     const args = [
-      '-y', '-v', 'error', '-threads', '2', '-i', input,
+      '-y', '-v', 'error', '-nostats', '-progress', 'pipe:1', '-threads', '2', '-i', input,
       '-vf', `scale=${W}:${H},subtitles=subs.ass:fontsdir=fonts`,
       '-c:v', 'libx264', '-preset', 'veryfast', '-crf', '24', '-pix_fmt', 'yuv420p',
       '-c:a', 'aac', '-b:a', '128k', '-movflags', '+faststart', '-map', '0:v:0', '-map', '0:a:0?', '-dn', '-sn', output,
     ];
-    execFile(ffmpegPath, args, { cwd: dir, timeout: Math.round(timeoutMs), maxBuffer: 8 * 1024 * 1024 }, (err, _o, stderr) => {
-      if (err) return reject(new Error(String(stderr || err.message).trim().split('\n').pop() || 'ffmpeg failed'));
-      resolve();
+    const env = { ...process.env };
+    if (fs.existsSync(path.join(dir, 'fonts.conf'))) env.FONTCONFIG_FILE = path.join(dir, 'fonts.conf');
+    const child = spawn(ffmpegPath, args, { cwd: dir, env });
+    let err = '', buf = '';
+    const timer = setTimeout(() => { try { child.kill('SIGKILL'); } catch {} }, Math.round(timeoutMs));
+    child.stdout.on('data', (d) => {
+      buf += d;
+      const lines = buf.split('\n'); buf = lines.pop();
+      for (const l of lines) {
+        const m = l.match(/^out_time_(?:us|ms)=(\d+)/);
+        if (m && duration > 0) { try { onProgress?.(Math.min(1, Number(m[1]) / 1e6 / duration)); } catch {} }
+      }
+    });
+    child.stderr.on('data', (d) => { err = (err + d).slice(-2000); });
+    child.on('error', (e) => { clearTimeout(timer); reject(e); });
+    child.on('close', (code) => {
+      clearTimeout(timer);
+      if (code === 0) return resolve();
+      reject(new Error(err.trim().split('\n').pop() || `ffmpeg exited with ${code}`));
     });
   });
 }
@@ -170,9 +189,14 @@ function copyFonts(dir) {
   try {
     for (const f of fs.readdirSync(FONT_DIR)) if (/\.(ttf|otf)$/i.test(f)) fs.copyFileSync(path.join(FONT_DIR, f), path.join(target, f));
   } catch {}
+  // Make fontconfig see the bundled fonts too (system config first, so system fonts stay available) —
+  // otherwise Urdu/Arabic glyph fallback can fail on servers with no fonts installed (boxes).
+  try {
+    fs.writeFileSync(path.join(dir, 'fonts.conf'), `<?xml version="1.0"?>\n<!DOCTYPE fontconfig SYSTEM "fonts.dtd">\n<fontconfig>\n<include ignore_missing="yes">/etc/fonts/fonts.conf</include>\n<dir>${target}</dir>\n<cachedir>${path.join(dir, 'fccache')}</cachedir>\n</fontconfig>\n`);
+  } catch {}
 }
 
-function makeStatus(sock, chat, msg) {
+export function makeStatus(sock, chat, msg) {
   let key = null;
   return async (text) => {
     try {
@@ -194,6 +218,8 @@ const NO_KEY_HELP = (p) => [
 ].join('\n');
 
 // ── .subtitle ─────────────────────────────────
+const progressMs = () => Math.max(3, Number(process.env.WRAITH_PROGRESS_SEC) || 6) * 1000;
+
 export const subtitle = safe('subtitle', async (sock, chat, msg, args) => {
   const opts = parseSubtitleArgs(args);
   if (opts.list) return reply(sock, chat, msg, listText(P()));
@@ -212,7 +238,6 @@ export const subtitle = safe('subtitle', async (sock, chat, msg, args) => {
       `• \`${p}st en\` — translate to another language (en, ur, ar, …)`,
       `• \`${p}st fonts\` — all styles and fonts · \`${p}st srt\` — only the .srt file`,
       'Defaults: detected language (Urdu/Hindi → Roman Urdu) · youtube · F1 · lower · small',
-      '',
       `Styles: ${Object.values(STYLES).map((s) => s.label).join(' · ')}`,
       `Up to ${maxMinutes()} min and ${bytesToSize(MAX_DOWNLOAD_BYTES)} per video.`,
       configuredProviders().length ? `Speech engines ready: ${configuredProviders().map((x) => x.name).join(' → ')}` : '⚠️ No speech-to-text key set yet — send this command with a video for setup help.',
@@ -227,25 +252,32 @@ export const subtitle = safe('subtitle', async (sock, chat, msg, args) => {
 
   await enqueue(async () => {
     const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'aljin_sub_'));
+    const prog = new Progress(status, { intervalMs: progressMs(), title: '🎬 *Subtitles*' });
     try {
+      prog.plan([
+        { key: 'download', label: '📥 Downloading video', weight: 8, expectSec: 15 },
+        { key: 'audio', label: '🎧 Extracting audio', weight: 4, expectSec: 8 },
+        { key: 'stt', label: '🧠 Transcribing speech', weight: 28, expectSec: 30 },
+        { key: 'send', label: '📤 Sending', weight: 5, expectSec: 8 },
+      ]);
       const input = path.join(dir, 'input.bin');
-      await status('📥 Downloading video…');
-      await downloadToFile(media, input);
+      prog.begin('download');
+      await downloadToFile(media, input, (size, total) => { if (total) prog.set(size / total); });
 
       const info = await probe(input);
       need(info.hasAudio, '🔇 This file has no audio track, so there is nothing to transcribe.');
       need(!info.duration || info.duration <= maxMinutes() * 60, `⏱️ Video is ${Math.ceil(info.duration / 60)} min — the limit is ${maxMinutes()} min.`);
       const burn = media.kind !== 'audio' && info.hasVideo && !opts.srtOnly;
+      if (burn) prog.insertBefore('send', { key: 'burn', label: '🔥 Burning subtitles', weight: 42, expectSec: Math.max(15, (info.duration || 60) * 0.6) });
 
-      await status('🎧 Extracting audio…');
+      prog.begin('audio');
       const audio = path.join(dir, 'audio.mp3');
       await extractAudio(input, audio);
 
-      await status('🧠 Listening…');
-      let engine = '';
+      prog.begin('stt', Math.max(10, (info.duration || 60) / 8));
       const { segments: spoken, provider, language: sttLang } = await transcribeAudio(audio, dir, {
         language: opts.from,
-        onProvider: (n) => { if (n !== engine) { engine = n; status(`🧠 Transcribing with ${n}…`); } },
+        onChunk: (i, n) => prog.set(i / n),
       });
       try { fs.unlinkSync(audio); } catch {}
 
@@ -254,8 +286,9 @@ export const subtitle = safe('subtitle', async (sock, chat, msg, args) => {
       const plan = planOutput(opts, detected);
       let segments = spoken, langNote = '', warn = '';
       if (plan) {
-        await status(`🌐 Writing ${plan.label} subtitles…`);
-        const tr = await translateSegments(spoken, plan);
+        prog.insertBefore(burn ? 'burn' : 'send', { key: 'translate', label: `🌐 Translating to ${plan.label}`, weight: 20, expectSec: Math.max(8, spoken.length * 0.7) });
+        prog.begin('translate');
+        const tr = await translateSegments(spoken, plan, (done, total) => prog.set(total ? done / total : 0));
         segments = tr.segments; langNote = ` · ${plan.label}`; warn = tr.note ? `\n\n⚠️ ${tr.note}` : '';
       }
 
@@ -268,34 +301,39 @@ export const subtitle = safe('subtitle', async (sock, chat, msg, args) => {
       const canBurn = burn && (await ffmpegHasFilter('subtitles'));
       if (!canBurn) {
         const why = !burn ? '' : '\n\nℹ️ This ffmpeg build cannot draw subtitles (no libass), so here is the subtitle file instead.';
+        prog.begin('send');
         await sock.sendMessage(chat, {
           document: { url: srtPath }, mimetype: 'application/x-subrip', fileName: 'subtitles.srt',
           caption: `📝 *Subtitles* · ${cues.length} lines${langNote} · ${provider}${why}${warn}\n\nProvided by 𝐀𝐥-𝐉𝐢𝐧`,
         }, { quoted: msg });
+        prog.stop();
         return status('✅ Done');
       }
 
-      await status('🎨 Burning subtitles…');
+      prog.begin('burn');
       const { W, H } = targetSize(info.width || 1280, info.height || 720);
       fs.writeFileSync(path.join(dir, 'subs.ass'), cuesToAss(cues, { width: W, height: H, style: opts.style, font: FONTS[opts.font].family, position: opts.position, sizeMul: opts.sizeMul }), 'utf8');
       copyFonts(dir);
       const output = path.join(dir, 'subtitled.mp4');
-      await burnSubtitles({ dir, input, output, W, H, timeoutMs: Math.round(Math.min(25 * 60_000, Math.max(180_000, (info.duration || 60) * 6000))) });
+      await burnSubtitles({ dir, input, output, W, H, duration: info.duration, onProgress: (f) => prog.set(f), timeoutMs: Math.round(Math.min(25 * 60_000, Math.max(180_000, (info.duration || 60) * 6000))) });
       try { fs.unlinkSync(input); } catch {}   // free disk before uploading
 
       const size = fs.statSync(output).size;
       const caption = `🎬 *Subtitles added* · ${STYLES[opts.style].label} · ${FONTS[opts.font].family}${langNote} · ${provider}${warn}\n\nProvided by 𝐀𝐥-𝐉𝐢𝐧`;
-      await status('📤 Sending…');
+      prog.begin('send');
       if (size > VIDEO_AS_DOC_BYTES) {
         await sock.sendMessage(chat, { document: { url: output }, mimetype: 'video/mp4', fileName: 'subtitled.mp4', caption }, { quoted: msg });
       } else {
         await sock.sendMessage(chat, { video: { url: output }, mimetype: 'video/mp4', caption }, { quoted: msg });
       }
+      prog.stop();
       await status('✅ Done');
     } catch (e) {
+      prog.stop();
       if (e instanceof UserError) { await status(e.message); return; }
       throw e;
     } finally {
+      prog.stop();
       try { fs.rmSync(dir, { recursive: true, force: true }); } catch {}
     }
   });

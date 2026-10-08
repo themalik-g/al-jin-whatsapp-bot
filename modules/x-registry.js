@@ -21,6 +21,8 @@ const LOADERS = {
     effects: () => import('./x-effects.js'),
     subtitle: () => import('./x-subtitle.js'),
     repair: () => import('./x-repair.js'),
+    audio: () => import('./x-audio.js'),
+    chatbot: () => import('./x-chatbot.js'),
 };
 
 // [verb, module, export, perm, ...aliases]
@@ -129,6 +131,11 @@ const TABLE = [
     ['subtitle', 'subtitle', 'subtitle', 'all', 'st', 'ssubtitle', 'subtitles', 'subs', 'sub', 'addsub'],
     // own-phone "Waiting for this message" repair
     ['fixkeys', 'repair', 'fixkeys', 'owner', 'fixown', 'resetkeys', 'fixsession', 'fixwaiting'],
+    // audio → text / translated text (replaces the old text-only .trt alias; text replies still work)
+    ['trt', 'audio', 'trt', 'all'],
+    ['trb', 'audio', 'trb', 'all', 'transcribe', 'transcript', 'totext'],
+    // fast AI chat: Groq → Gemini → keyless GPT
+    ['bot', 'chatbot', 'bot', 'all', 'chatbot'],
     // voice effects (ffmpeg)
     ['fx', 'effects', 'fx', 'all', 'effects'],
     ['echo', 'effects', 'echo', 'all'],
