@@ -271,7 +271,7 @@ function repoRoot() {
     }
 
     if (!ok) {
-      say(yellow('git not available - downloading the zip instead…'));
+      say(yellow('git not available - downloading the bot as an archive instead…'));
       downloadZip(dir);
     }
   }
@@ -279,16 +279,16 @@ function repoRoot() {
   return dir;
 }
 
-// Download the repo as a zip and unpack it with the system `tar`
-// (built into Windows 10/11, macOS and Linux). No git, no admin rights.
+// Download the repo as a .tar.gz and unpack it with the system `tar`
+// (built into Windows 10/11, macOS, Linux and Termux). No git, no admin rights.
 function downloadZip(dir) {
   const url =
     SOURCE.replace(/\.git$/, '') +
     '/archive/refs/heads/' +
     BRANCH +
-    '.zip';
+    '.tar.gz';
 
-  const tmp = path.join(__dirname, 'al-jin-source.zip');
+  const tmp = path.join(__dirname, 'al-jin-source.tar.gz');
 
   const dl = spawnSync(
     process.execPath,
@@ -312,14 +312,14 @@ function downloadZip(dir) {
 
   const ex = spawnSync(
     'tar',
-    ['-xf', tmp, '-C', dir, '--strip-components=1'],
+    ['-xzf', tmp, '-C', dir, '--strip-components=1'],
     { stdio: 'inherit', timeout: CLONE_TIMEOUT }
   );
 
   try { fs.rmSync(tmp, { force: true }); } catch {}
 
   if (ex.status !== 0 || !fs.existsSync(path.join(dir, 'start.js'))) {
-    throw new Error('could not unpack the downloaded zip (tar failed)');
+    throw new Error('could not unpack the downloaded archive (tar failed)');
   }
 }
 

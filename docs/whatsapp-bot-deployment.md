@@ -2,8 +2,12 @@
 
 This guide shows how to run **Al-Jin** 24/7 on every common hosting option. Pick one section; you do not need the others.
 
-> **Want the shortest path?** On Windows, Termux, Linux or macOS use the [One-Click Start](./one-click-deploy.md): one script installs the tools, asks your number once and keeps the bot running.
+> ## ⭐ Start with One-Click
+> **Beginners: do not use the manual sections below.** On a Windows PC, an Android phone (Termux), Linux or macOS, the [One-Click Start](./one-click-deploy.md) needs no skills: download one file, open it, type your number, enter the code in WhatsApp. It needs no Node.js, npm, git or administrator rights installed beforehand, and to restart after the window is closed or the PC was off you simply open the same file again.
+>
+> **Use the manual methods in this guide only if one-click fails on your machine, or when you need a 24/7 server, Docker or a hosting panel.**
 
+- [0. One-Click (easiest, start here)](#0-one-click-easiest-start-here)
 - [1. Which host should I choose?](#1-which-host-should-i-choose)
 - [2. Before you start (all hosts)](#2-before-you-start-all-hosts)
 - [Movie and video downloader requirements](#movie-and-video-downloader-requirements)
@@ -17,6 +21,22 @@ This guide shows how to run **Al-Jin** 24/7 on every common hosting option. Pick
 - [10. After the bot is online](#10-after-the-bot-is-online)
 - [11. Backup, restore and moving to another host](#11-backup-restore-and-moving-to-another-host)
 - [12. Deployment troubleshooting](#12-deployment-troubleshooting)
+
+---
+
+## 0. One-Click (easiest, start here)
+
+For a Windows PC, an Android phone, Linux or macOS, this replaces everything in sections 3 and 4:
+
+| Where | What to do |
+|---|---|
+| **Windows** | Download [`Al-Jin-Start.bat`](https://raw.githubusercontent.com/themalik-g/al-jin-whatsapp-bot/main/Al-Jin-Start.bat) into a new folder, click **Keep** if the browser asks, double-click it (**More info → Run anyway** if Windows warns), type your number, enter the code in WhatsApp. |
+| **Android (Termux)** | In Termux paste: `pkg install -y curl && curl -fsSL -o aljin.sh https://raw.githubusercontent.com/themalik-g/al-jin-whatsapp-bot/main/aljin.sh && bash aljin.sh` |
+| **Linux / macOS** | `curl -fsSL -o aljin.sh https://raw.githubusercontent.com/themalik-g/al-jin-whatsapp-bot/main/aljin.sh && bash aljin.sh` |
+
+**To start it again** after closing the window, a reboot or a power cut: open the same file again (`Al-Jin-Start.bat`, or `bash aljin.sh`). No new code is needed. Full steps, auto-start on boot and troubleshooting: [One-Click Start](./one-click-deploy.md).
+
+The bot is online only while the window is open and the device is awake. For an always-on bot, continue with the manual sections below (VPS is best).
 
 ---
 
@@ -42,7 +62,7 @@ Al-Jin keeps its WhatsApp login (the *session*) in files on disk, in the `instan
 
 - A WhatsApp account to link to the bot (a spare number is best).
 - **Node.js 22 LTS** (Node 20 or newer works; 22 is recommended).
-- `git` (the launcher downloads the bot with it).
+- `git` is optional: the launcher uses it when present and otherwise downloads the bot as a plain archive (`tar` is needed, which every current system has).
 - Optional but recommended: `ffmpeg` installed on the system, for stickers, subtitles and video tools.
 
 **Your number**
@@ -208,6 +228,8 @@ pm2 save && pm2 startup
 ---
 
 ## 4. Termux on Android
+
+> **Easiest:** skip this manual section and use the [one-click line](#0-one-click-easiest-start-here) (one paste). Use the steps below only if that fails.
 
 Termux runs the bot on an Android phone with no server. It is free, but the bot is only online while the phone is on, charged and connected to the internet.
 
@@ -494,7 +516,9 @@ tar czf al-jin-backup-$(date +%F).tar.gz instances/
 | `Cannot use import statement outside a module` | Node is too old. Install Node 22 LTS. |
 | `no phone number configured` | Set `const BOT_NUMBER = '923001234567';` at the top of `index.js`, or start with `node index.js --phone=923001234567`. |
 | `ignoring invalid phone value` | The number must be 10–15 digits, no `+`, no spaces. |
-| `git clone failed` | The server cannot reach GitHub, or `git` is not installed (`apt install git` / `pkg install git`). |
+| `git clone failed` | The launcher then downloads the bot as an archive instead. If that also fails, the host cannot reach GitHub: check the network or proxy. |
+| One-click: `Windows "tar" not found` | Windows older than 10 (1803). Install Node.js LTS from nodejs.org and run the file again. |
+| One-click: stops after "failed 3 times in a row" | Read the last error lines above the message (usually no internet or no free disk), fix it and open the file again. |
 | `npm install failed` | Not enough disk or RAM, or a flaky connection. Free some space and start again. On a 512 MB host, add swap on a VPS. |
 | No pairing code appears | Wait one to two minutes during the first install. Check the console or logs. The number must be the WhatsApp account you want to link. |
 | Code is rejected or expired | Restart the bot for a new code and enter it within five minutes. |

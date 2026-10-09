@@ -32,7 +32,7 @@ PM2, or Pterodactyl environment.
 - **Version:** 2.0.0
 - **Author:** MALIK MEHTAB (https://github.com/themalik-g)
 - **Repository:** https://github.com/themalik-g/al-jin-whatsapp-bot
-- **Deployment:** VPS, Docker, PM2, Pterodactyl, Termux
+- **Deployment:** one-click start (Windows .bat, Termux/Linux/macOS aljin.sh; no prerequisites), VPS, Docker, PM2, Pterodactyl, Termux
 
 ## Key Features
 
