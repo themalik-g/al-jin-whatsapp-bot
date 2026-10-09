@@ -120,6 +120,7 @@ const MEDIA = [
     ['series', '📺 Series Downloader', 'Searches and streams TV series.', ['.series <title>']],
     ['continue', '▶️ Continue Search', 'Loads more results for movie search.', ['.continue']],
     ['mvp', '🎬 Pick Movie', 'Selects a title from search results.', ['.mvp <number>']],
+    ['mvm', '🎬 More Results', 'Shows the next page of movie/series search results.', ['.mvm <token>']],
     ['mvq', '🎬 Pick Quality', 'Selects quality or episode number.', ['.mvq <number>']],
 ];
 

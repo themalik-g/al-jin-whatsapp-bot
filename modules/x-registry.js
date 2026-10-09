@@ -144,6 +144,7 @@ const TABLE = [
     ['continue', 'movie', 'continue_', 'all', 'cont'],
     ['mvp', 'movie', 'mvp', 'all'],
     ['mvq', 'movie', 'mvq', 'all'],
+    ['mvm', 'movie', 'mvm', 'all'],
     // voice effects (ffmpeg)
     ['fx', 'effects', 'fx', 'all', 'effects'],
     ['echo', 'effects', 'echo', 'all'],
