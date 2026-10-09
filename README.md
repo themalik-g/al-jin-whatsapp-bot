@@ -6,7 +6,7 @@
 [![Forks](https://img.shields.io/github/forks/themalik-g/al-jin-whatsapp-bot?style=flat&logo=github)](https://github.com/themalik-g/al-jin-whatsapp-bot/network/members)
 [![Issues](https://img.shields.io/github/issues/themalik-g/al-jin-whatsapp-bot)](https://github.com/themalik-g/al-jin-whatsapp-bot/issues)
 [![Last commit](https://img.shields.io/github/last-commit/themalik-g/al-jin-whatsapp-bot)](https://github.com/themalik-g/al-jin-whatsapp-bot/commits/main)
-[![Version](https://img.shields.io/badge/version-2.0.0-blue)](https://github.com/themalik-g/al-jin-whatsapp-bot)
+[![Version](https://img.shields.io/badge/version-2.1.0-blue)](https://github.com/themalik-g/al-jin-whatsapp-bot)
 [![Node](https://img.shields.io/badge/node-%3E%3D20-brightgreen?logo=node.js&logoColor=white)](https://nodejs.org)
 [![Baileys](https://img.shields.io/badge/baileys-v7.0.0--rc.14-green)](https://github.com/WhiskeySockets/Baileys)
 [![License](https://img.shields.io/badge/license-MIT-yellow)](./LICENSE)
@@ -375,7 +375,7 @@ whatsapp bot, whatsapp md bot, whatsapp multi device bot, baileys bot, baileys v
 
 **Project:** Al-Jin — Free Open-Source WhatsApp MD Bot
 **Repository:** https://github.com/themalik-g/al-jin-whatsapp-bot
-**Version:** 2.0.0
+**Version:** 2.1.0
 **License:** MIT
 **Runtime:** Node.js 20+ (ESM)
 **WhatsApp library:** @whiskeysockets/baileys v7.0.0-rc.14 (stock, no fork)
