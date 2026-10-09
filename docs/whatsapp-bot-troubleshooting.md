@@ -23,6 +23,19 @@ Tunables: `WRAITH_MSG_STORE_MAX` (default 3000), `WRAITH_MSG_STORE_TTL_H` (defau
 
 ---
 
+## One-click start problems
+
+**Symptom:** `Al-Jin-Start.bat` or `aljin.sh` stops, hangs or keeps restarting.
+
+**Fix:**
+1. Windows blocks the file: **More info → Run anyway**. Browser blocks the download: open the downloads list and click **Keep → Keep anyway**.
+2. Run it from a normal folder, not from inside a zip.
+3. If it says it failed 3 times in a row, read the error lines just above that message (most often no internet or no free disk space), fix that, and open the file again. It continues where it stopped.
+4. To start again after closing the window or restarting the device, open the same file again (`Al-Jin-Start.bat`, or `bash aljin.sh`). No new pairing code is needed as long as the `Al-Jin` folder was kept.
+5. Still stuck: see the table in [One-Click Start](./one-click-deploy.md#troubleshooting).
+
+---
+
 ## Bot won't pair
 
 **Symptom:** Pairing code shown but phone rejects it, or no code appears.

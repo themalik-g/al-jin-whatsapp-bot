@@ -106,6 +106,7 @@ and owner-only.
 ## Deployment
 
 Supported deployment targets:
+- **One-click (easiest):** Al-Jin-Start.bat (Windows) or aljin.sh (Termux, Linux, macOS) — installs nothing system-wide, no admin rights, resumes the saved session when run again
 - **VPS:** Ubuntu/Debian with Node.js and PM2
 - **Docker:** Provided Dockerfile and docker-compose.yml
 - **Pterodactyl:** Panel-compatible startup

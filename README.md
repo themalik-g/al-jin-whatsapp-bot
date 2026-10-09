@@ -15,18 +15,65 @@
 
 ---
 
+## 🚀 Start Here — Deploy in One Click (no skills needed)
+
+**You do not need to know anything about programming, servers or the terminal.** Download one small file, open it, type your WhatsApp number, and enter a code in WhatsApp. The file sets up everything the bot needs (no Node.js, npm or git to install first, **no administrator rights**), downloads the bot, starts it, and starts it again if it stops.
+
+### 🪟 Windows laptop or PC
+
+1. **Make a folder** (for example `Al-Jin-Bot` on your Desktop) and **download [`Al-Jin-Start.bat`](https://raw.githubusercontent.com/themalik-g/al-jin-whatsapp-bot/main/Al-Jin-Start.bat)** into it (right-click the link → *Save link as*).
+2. If your browser says the file "can't be downloaded safely", open the downloads list and click **Keep** (Edge: `…` → **Keep** → **Keep anyway**).
+3. **Double-click it.** If Windows shows a blue "protected your PC" box, click **More info → Run anyway**.
+4. **Wait a few minutes** while it sets up (a black window with text is normal; do not close it).
+5. **Type your WhatsApp number** (digits only, with country code, e.g. `923001234567`) and press Enter.
+6. An **8-character code** appears. On your phone: WhatsApp → **Settings → Linked devices → Link a device → Link with phone number instead** → type the code.
+7. **Done.** Send `.menu` in WhatsApp.
+
+### 📱 Android phone (Termux)
+
+Install **Termux from [F-Droid](https://f-droid.org/en/packages/com.termux/)** (not the Play Store), open it, paste this one line and press Enter:
+
+```bash
+pkg install -y curl && curl -fsSL -o aljin.sh https://raw.githubusercontent.com/themalik-g/al-jin-whatsapp-bot/main/aljin.sh && bash aljin.sh
+```
+
+Then type your number and enter the pairing code in WhatsApp, as in steps 5–6 above.
+
+### 🐧 Linux / 🍎 macOS
+
+```bash
+curl -fsSL -o aljin.sh https://raw.githubusercontent.com/themalik-g/al-jin-whatsapp-bot/main/aljin.sh
+bash aljin.sh
+```
+
+### 🔁 If the window is closed, the PC shuts down, or Termux is closed
+
+The bot runs only while it is open. To start it again, **do the same thing again — no code, no number, no download**:
+
+| Where | How to start it again |
+|---|---|
+| **Windows** | Double-click the same `Al-Jin-Start.bat` (in the same folder) |
+| **Android (Termux)** | Open Termux and run `bash aljin.sh` |
+| **Linux / macOS** | Open a terminal in that folder and run `bash aljin.sh` |
+
+Your WhatsApp login is saved in the `Al-Jin` folder next to the file, so **do not delete or move that folder**. Want it to start by itself when the computer or phone turns on? See [One-Click Start](./docs/one-click-deploy.md#if-you-close-the-window-restart-the-pc-or-the-power-goes-off).
+
+**More help, step by step with every detail:** [One-Click Start guide](./docs/one-click-deploy.md). Hosting 24/7 on a server, Docker or a panel instead? See [Deployment Options](#deployment-options).
+
+---
+
 ## 📖 Table of Contents
 
+- [Start Here — Deploy in One Click](#-start-here--deploy-in-one-click-no-skills-needed)
 - [What is Al-Jin?](#what-is-al-jin)
 - [Why Choose Al-Jin?](#why-choose-al-jin)
 - [Key Features](#key-features)
 - [Free Movie & Series Downloader](#free-movie--series-downloader)
 - [Command Categories](#command-categories)
-- [Quick Start](#quick-start)
+- [Manual Install (only if one-click fails)](#manual-install-only-if-one-click-fails)
 - [Free API Keys (optional)](#free-api-keys-optional)
 - [Download Limits (`.dlcap`)](#download-limits-dlcap)
 - [Reply Modes: Text, Poll, Buttons](#reply-modes-text-poll-buttons)
-- [One-Click Start](#one-click-start)
 - [Deployment Options](#deployment-options)
 - [Documentation](#documentation)
 - [FAQ](#faq)
@@ -147,9 +194,11 @@ Every download respects `.dlcap` (max size, max quality, send-as-document thresh
 
 ---
 
-## Quick Start
+## Manual Install (only if one-click fails)
 
-**Requirements:** Node.js 20+, a WhatsApp account to link, and optionally PM2 for 24/7 uptime.
+Most people should use [Start Here — Deploy in One Click](#-start-here--deploy-in-one-click-no-skills-needed). Use this section only if the one-click file does not work on your machine, or if you are a developer.
+
+**Requirements:** Node.js 20+ (22 LTS recommended), `git`, a WhatsApp account to link, and optionally PM2 for 24/7 uptime.
 
 ```bash
 git clone https://github.com/themalik-g/al-jin-whatsapp-bot.git
@@ -160,9 +209,9 @@ npm start
 
 On first run Al-Jin prints an 8-character pairing code. Enter it in WhatsApp → **Linked Devices → Link with phone number instead**. Then send `.menu` to see every command.
 
-**Easiest:** use the [One-Click Start](#one-click-start) script for your system.
-
 Short version for a server: put `index.js` in an empty folder, write your number in the `BOT_NUMBER` line, run `node index.js`, enter the pairing code, then `pm2 start index.js --name al-jin`. Full guide for VPS, Termux, Docker, Heroku and Koyeb: [Deployment Guide](./docs/whatsapp-bot-deployment.md).
+
+To restart after a reboot (manual install): `cd al-jin-whatsapp-bot && npm start` (or `pm2 resurrect` / `pm2 restart al-jin` if you use PM2). The saved WhatsApp login is reused, so no new code is needed.
 
 To add another number from inside WhatsApp, send `.addsession <phone_number>`.
 
@@ -208,34 +257,15 @@ Commands that ask you to choose something (movie results, book lists, menus) can
 
 ---
 
-## One-Click Start
-
-No terminal skills needed. Download one script, run it, enter your number, and enter the pairing code in WhatsApp. It installs Node.js, git and ffmpeg when they are missing and restarts the bot if it stops.
-
-| Where | Script | Start it with |
-|---|---|---|
-| **Windows** laptop or PC | [`Al-Jin-Start.bat`](./Al-Jin-Start.bat) | double-click |
-| **Termux** (Android), **Linux**, **macOS** | [`aljin.sh`](./aljin.sh) | `bash aljin.sh` |
-
-Termux in one paste (install Termux from F-Droid first):
-
-```bash
-pkg install -y curl && mkdir -p ~/al-jin && cd ~/al-jin && curl -fsSL -o aljin.sh https://raw.githubusercontent.com/themalik-g/al-jin-whatsapp-bot/main/aljin.sh && bash aljin.sh
-```
-
-Full guide, boot-start for Termux and troubleshooting: [One-Click Start](./docs/one-click-deploy.md).
-
----
-
 ## Deployment Options
 
-Al-Jin runs on any host that keeps its files between restarts. The launcher `index.js` downloads the bot, installs it and prints an 8-character pairing code; you only write your number at the top of the file.
+Al-Jin runs on any host that keeps its files between restarts. For a home PC or phone, use the [one-click start](#-start-here--deploy-in-one-click-no-skills-needed). For an always-on server, the launcher `index.js` downloads the bot, installs it and prints an 8-character pairing code; you only write your number at the top of the file.
 
 | Platform | Notes |
 |----------|-------|
-| **Windows / Termux / Linux / macOS, one click** | Run `Al-Jin-Start.bat` or `bash aljin.sh`: installs what is missing, asks your number once, restarts on stop ([guide](./docs/one-click-deploy.md)) |
-| **VPS / Linux server** | Recommended: upload `index.js`, set `BOT_NUMBER`, run with PM2 |
-| **Termux (Android)** | Free; install Termux from [F-Droid](https://f-droid.org/en/packages/com.termux/), not the Play Store |
+| ⭐ **Windows / Termux / Linux / macOS, one click (start here)** | Run `Al-Jin-Start.bat` or `bash aljin.sh`: sets up everything, asks your number once, restarts on stop, no admin rights ([guide](./docs/one-click-deploy.md)) |
+| **VPS / Linux server** | Manual: upload `index.js`, set `BOT_NUMBER`, run with PM2 (best for 24/7) |
+| **Termux (Android)** | Free; use the one-click line above. Install Termux from [F-Droid](https://f-droid.org/en/packages/com.termux/), not the Play Store |
 | **Pterodactyl / bot-hosting panels** | Upload `index.js`, set `BOT_NUMBER`, press Start |
 | **Docker / Docker Compose** | Dockerfile included; mount `instances/` as a volume |
 | **Koyeb, Railway, Render, Fly.io** | Paid worker service with a persistent volume at `/app/instances` |
@@ -263,6 +293,15 @@ Step-by-step instructions for each: [Deployment Guide](./docs/whatsapp-bot-deplo
 
 ## FAQ
 
+**I know nothing about computers. Can I really run this?**
+Yes. On Windows, download `Al-Jin-Start.bat`, double-click it, type your number and enter the code in WhatsApp. See [Start Here](#-start-here--deploy-in-one-click-no-skills-needed).
+
+**Do I need to install Node.js, npm or git first?**
+No. The one-click file sets up what is missing by itself, without administrator rights.
+
+**I closed the window / my PC restarted. What now?**
+Open the same file again (`Al-Jin-Start.bat` on Windows, `bash aljin.sh` on Termux, Linux and macOS). Your WhatsApp login is saved, so there is no new code.
+
 **Does it need a QR code?**
 No. It uses an 8-character pairing code.
 
@@ -285,7 +324,7 @@ Yes. `.sticker` handles images, videos and GIFs; `.toimg` and `.tovid` convert s
 It uses the official multi-device protocol through Baileys, but any unofficial client carries some risk of account restrictions. Use it responsibly and avoid spam.
 
 **Does it work on Android?**
-Yes, through Termux. See the [Deployment Guide](./docs/whatsapp-bot-deployment.md).
+Yes, through Termux, with one pasted line. See [Start Here](#-start-here--deploy-in-one-click-no-skills-needed).
 
 **Does it work on a small server?**
 Yes. Heavy jobs run one at a time, downloads are streamed to disk and deleted after sending, and `.cpulimit` / `.ramlimit` cap resource use.
