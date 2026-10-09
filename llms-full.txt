@@ -156,7 +156,7 @@ MIT License. See LICENSE file.
 
 ---
 
-## Feature summary (v2.0.0)
+## Feature summary (v2.1.0)
 
 - **Movies and series:** `.movie <name>`, `.series <name> -ep <n>`, `.series <name> -full`, `.continue` — free, legal downloads of public-domain and freely licensed titles from the Internet Archive, with quality choice and `.dlcap` limits. `.movieinfo` gives ratings and plot.
 - **Downloaders:** YouTube (`.play`, `.yt`, `.ytv`, `.yta`), Instagram, TikTok, Facebook, Twitter/X, Pinterest, Threads, Reddit, SoundCloud, GitHub repositories (`.gitdl`), MediaFire (`.mfdl`), APKs (`.apk`).
