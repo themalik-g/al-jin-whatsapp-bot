@@ -663,12 +663,12 @@ const BASE_COMMAND_DETAILS = {
   setsession: {
     title: '📱 Set Primary Session Number',
     description: 'Updates owner primary session configuration.',
-    usage: ['.setsession <owner_number>'],
+    usage: ['.setsession <owner_number> (reply to creds.json)', '.setsession <Session ID>'],
   },
   addsession: {
     title: '➕ Add Multi-Session Instance',
     description: 'Spawns and initializes a new isolated session instance.',
-    usage: ['.addsession <phone_number>'],
+    usage: ['.addsession <phone_number>', '.addsession <Session ID>'],
   },
   delsession: {
     title: '🗑️ Delete Session Instance',
