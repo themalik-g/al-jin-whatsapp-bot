@@ -34,8 +34,10 @@ export async function playCommand(sock, chat, msg, args) {
 
   return queue.add(async () => {
     cleanOldTmpFiles();
-    await reactMsg(sock, chat, msg.key, EMOJIS.SEARCH);
-    const status = await sock.sendMessage(chat, { text: `🔍 *Searching:* ${query}` }, { quoted: msg });
+    // Don't make the download wait for WhatsApp round-trips: the status message + reaction go out while yt-dlp already runs.
+    reactMsg(sock, chat, msg.key, EMOJIS.SEARCH);
+    const statusP = sock.sendMessage(chat, { text: `🔍 *Searching:* ${query}` }, { quoted: msg }).catch(() => null);
+    let status = null; statusP.then((s) => { status = s; });
     const filePrefix = `play_${Date.now()}_${Math.floor(Math.random() * 1000)}`;
     const outputDir = getTmpDir();
     const outputTemplate = path.join(outputDir, `${filePrefix}_%(title).50s.%(ext)s`);
@@ -55,7 +57,7 @@ export async function playCommand(sock, chat, msg, args) {
 
       for (const target of targets) {
         try {
-          await reactMsg(sock, chat, msg.key, EMOJIS.DOWNLOAD);
+          reactMsg(sock, chat, msg.key, EMOJIS.DOWNLOAD);
           // Native m4a/aac audio — no mp3 re-encode.
           downloaded = await runYtdlp(target, outputDir, filePrefix, (dl) =>
             dl.addArgs('-f', AUDIO_FORMAT, '-o', outputTemplate), onProgress);
@@ -71,7 +73,8 @@ export async function playCommand(sock, chat, msg, args) {
       const size = fs.statSync(audio.path).size;
       if (size > getMaxDownloadBytes()) throw new Error(`Audio (${MB(size)} MB) exceeds the ${getMaxDownloadMB()} MB cap — raise it with .dlcap`);
 
-      await reactMsg(sock, chat, msg.key, EMOJIS.UPLOAD);
+      await statusP;
+      reactMsg(sock, chat, msg.key, EMOJIS.UPLOAD);
       await editStatus(sock, chat, status, `Downloading complete ✅ now sending`);
 
       if (size > getDocThresholdBytes()) {
@@ -94,6 +97,7 @@ export async function playCommand(sock, chat, msg, args) {
       await reactMsg(sock, chat, msg.key, EMOJIS.SUCCESS);
     } catch (e) {
       console.error('[playCommand]', e);
+      await statusP;
       await editStatus(sock, chat, status, `❌ *Play failed:* ${capHint(e)}`);
       await reactMsg(sock, chat, msg.key, EMOJIS.FAILED);
     } finally {
@@ -106,8 +110,9 @@ export async function playCommand(sock, chat, msg, args) {
 async function videoJob(sock, chat, msg, { target, tag, icon, label }) {
   return queue.add(async () => {
     cleanOldTmpFiles();
-    await reactMsg(sock, chat, msg.key, EMOJIS.DOWNLOAD);
-    const status = await sock.sendMessage(chat, { text: `${icon} Downloading 0% done...` }, { quoted: msg });
+    reactMsg(sock, chat, msg.key, EMOJIS.DOWNLOAD);
+    const statusP = sock.sendMessage(chat, { text: `${icon} Downloading 0% done...` }, { quoted: msg }).catch(() => null);
+    let status = null; statusP.then((s) => { status = s; });
     const filePrefix = `${tag}_${Date.now()}_${Math.floor(Math.random() * 1000)}`;
     const outputDir = getTmpDir();
     const outputTemplate = path.join(outputDir, `${filePrefix}_%(title).50s.%(ext)s`);
@@ -130,7 +135,8 @@ async function videoJob(sock, chat, msg, { target, tag, icon, label }) {
       const size = fs.statSync(finalPath).size;
       if (size > getMaxDownloadBytes()) throw new Error(`Video (${MB(size)} MB) exceeds the ${getMaxDownloadMB()} MB cap — raise it with .dlcap`);
 
-      await reactMsg(sock, chat, msg.key, EMOJIS.UPLOAD);
+      await statusP;
+      reactMsg(sock, chat, msg.key, EMOJIS.UPLOAD);
       await editStatus(sock, chat, status, `Downloading complete ✅ now sending`);
 
       // Final safety net: if it still isn't WhatsApp-playable, send as a document so it never arrives broken.
@@ -147,6 +153,7 @@ async function videoJob(sock, chat, msg, { target, tag, icon, label }) {
       await reactMsg(sock, chat, msg.key, EMOJIS.SUCCESS);
     } catch (e) {
       console.error(`[${tag}]`, e);
+      await statusP;
       await editStatus(sock, chat, status, `❌ *${label} failed:* ${capHint(e)}`);
       await reactMsg(sock, chat, msg.key, EMOJIS.FAILED);
     } finally {

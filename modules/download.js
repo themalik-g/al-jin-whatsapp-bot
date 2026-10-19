@@ -21,7 +21,7 @@ const MAX_VIDEO       = 60 * 1024 * 1024;
 const YTDLP_TIMEOUT   = 120_000;
 const CONVERT_TIMEOUT = 60_000;
 const ITEM_DL_TIMEOUT  = 90_000;   // per post item download
-const ITEM_GAP_MS      = 700;      // pause between sends (avoids WA throttling)
+const ITEM_GAP_MS      = 400;      // pause between sends (avoids WA throttling)
 const queue = new PQueue({ concurrency: 1 });
 
 async function edit(sock, chat, statusMsg, text) {

@@ -22,3 +22,13 @@ Any ONE of these (first found wins): `node index.js --session-id=JIN_...` → `S
 2. In your GitHub project run: `node scripts/set-session-urls.js https://YOUR-SITE https://YOUR-WORKER`
    It fills in: `README.md` (button link), `index.js` (`SESSION_API`) and `lib/session-id.js` (`DEFAULT_API`).
 3. Commit + push those files and `assets/get-session-id.svg`. Users now only need their `SESSION_ID`.
+
+
+## Use a Session ID from chat (no number, no pairing code)
+Owner commands accept a Session ID wherever they would ask for a phone number:
+
+- `.setsession JIN_xxxx` – creates a new session from the saved login and starts it (a creds.json file is not needed). Optionally add the owner number: `.setsession 923001234567 JIN_xxxx`.
+- `.addsession JIN_xxxx` – same, from `.addsession`.
+- `.kb <api>,<server id>,JIN_xxxx` (`.kbstart` on Lite) – deploys Al-Jin Lite on KataBump with the Session ID; the bot logs in directly, no pairing code. With a number instead, you get a pairing code as before.
+
+Notes: the bot deletes your message when WhatsApp allows it (the ID is a secret). It needs the store address, so set `SESSION_API` (variable, or at the top of `index.js`). `.kb` checks the Session ID **before** touching your server. A login that already runs as another session is refused.
