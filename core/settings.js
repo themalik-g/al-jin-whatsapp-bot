@@ -57,14 +57,16 @@ export function getReplyMode() {
   // text    (default) plain text, numbered replies — safe on every WhatsApp client
   // poll              multi-select poll; every newly ticked option runs its command
   // buttons           native-flow buttons (many non-business clients show "Waiting for this message")
+  // list              one "Select option" button that opens a list menu to pick from
   const m = load().replyMode || process.env.WRAITH_REPLY_MODE;
   if (m === 'poll') return 'poll';
   if (m === 'buttons') return 'buttons';
+  if (m === 'list') return 'list';
   return 'text';
 }
 
 export function setReplyMode(mode) {
   const s = load();
-  s.replyMode = mode === 'poll' ? 'poll' : mode === 'buttons' ? 'buttons' : 'text';
+  s.replyMode = mode === 'poll' ? 'poll' : mode === 'buttons' ? 'buttons' : mode === 'list' ? 'list' : 'text';
   persist();
 }

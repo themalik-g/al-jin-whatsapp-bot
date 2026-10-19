@@ -10,6 +10,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import { isOwner } from '../core/identity.js';
 import { sendWithCta } from '../lib/buttons.js';
+import { autoHealStatus } from '../core/autoheal.js';
 import {
     bar as barS, fmtBytes, qualityPct,
     containerMemory as ctrMemory, sampleCpu, cpuModel, gpuList, romInfo,
@@ -190,6 +191,21 @@ function mb(bytes) {
 // ─────────────────────────────────────────────
 //  .ping
 // ─────────────────────────────────────────────
+// Auto-heal summary for the memory block of .ping
+function healLines() {
+    try {
+        const h = autoHealStatus();
+        if (!h.on) return [`• auto-heal · off`];
+        const out = [`• auto-heal · on _(≥${h.pct}% for ${h.minutes} min → restart)_`];
+        if (h.high) out.push(`• memory high for ${h.high.heldSec} s _(${h.high.pct}%)_ — healing if it stays`);
+        if (h.lastRestart?.at) {
+            const mins = Math.round((Date.now() - h.lastRestart.at) / 60000);
+            out.push(`• last auto-restart · ${mins < 120 ? `${mins} min` : `${Math.round(mins / 60)} h`} ago _(was ${h.lastRestart.pct}%)_`);
+        }
+        return out;
+    } catch { return []; }
+}
+
 export async function pingCommand(sock, chat, msg) {
     const from = msg.key.participant || msg.key.remoteJid;
 
@@ -253,6 +269,7 @@ export async function pingCommand(sock, chat, msg) {
         ...(mem.cache > 1048576 ? [`• file cache · ${mb(mem.cache)} MB _(freeable, not counted)_`] : []),
         `• process rss · ${mb(proc.rss)} MB`,
         `• heap used · ${mb(proc.heapUsed)} / ${mb(proc.heapTotal)} MB`,
+        ...healLines(),
         ``,
         `*uptime* · ${uptime()}`
     );

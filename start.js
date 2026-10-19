@@ -59,6 +59,7 @@ import { hasPrimaryOwner, setPrimaryOwner, getOwnerDetails } from './core/identi
 import { newsletterContext } from './lib/buttons.js';
 import { getPollMessage, handlePollUpdates, handlePollMessage, setPollRunner } from './lib/poll.js';
 import { onMemoryPressure } from './core/limiter.js';
+import { startAutoHeal } from './core/autoheal.js';
 import { warmOwnIdentity, baileysPatchStatus } from './lib/own-warmup.js';
 import { requestPairCode, pairCodeCandidates } from './lib/pair-codes.js';
 import { restoreSession, wrapSaveCreds } from './lib/session-id.js';
@@ -174,6 +175,9 @@ function flushStore(rt) {
     rt.storeDirty = false;
   } catch (e) { try { console.error('[msgstore:flush]', e?.message); } catch {} }
 }
+
+// Memory self-healing: soft heal when memory stays high, restart if it still does after a few minutes.
+try { startAutoHeal(); } catch (e) { console.error('[autoheal]', e?.message || e); }
 
 // ONE maintenance timer for all sessions: expire old retry data, flush to disk, run GC.
 // Saving the whole store means serialising up to ~1200 messages into one big string, so it only

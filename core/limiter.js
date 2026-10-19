@@ -413,6 +413,23 @@ function stopRamLoop() {
 // ─────────────────────────────────────────────
 //  Public API
 // ─────────────────────────────────────────────
+/** Frees what can be freed without a restart: runs every cache-trim handler and the garbage collector. */
+export function trimMemory() {
+  for (const fn of pressureHandlers) { try { fn('high'); ram.stats.trims++; } catch {} }
+  runGc();
+}
+
+/** Memory of the bot process, and of the jobs (ffmpeg / yt-dlp …) it started: { self, kids, count } in bytes. */
+export function botMemory() {
+  const self = process.memoryUsage().rss;
+  let kids = 0, count = 0;
+  if (HAS_PROC) {
+    try { refreshChildren(); } catch {}
+    for (const c of children.values()) { const st = readStat(c.pid); if (st) { kids += st.rss; count++; } }
+  }
+  return { self, kids, count };
+}
+
 export const hasProc = () => HAS_PROC;
 export const containerCores = () => { try { return cgCpuCores(); } catch { return null; } };
 
