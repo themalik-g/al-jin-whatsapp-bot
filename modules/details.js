@@ -86,8 +86,8 @@ const BASE_COMMAND_DETAILS = {
   },
   replymode: {
     title: '🔘 Reply Mode Command',
-    description: 'Switches the reply interface: plain text with numbered replies (default), a multi-select poll (every newly ticked option runs, the poll stays open until its time is up), or native buttons.',
-    usage: ['.replymode text', '.replymode poll', '.replymode buttons'],
+    description: 'Switches the reply interface: plain text with numbered replies (default), a multi-select poll (every newly ticked option runs, the poll stays open until its time is up), a list menu (one "Select option" button that opens a list to pick from), or native buttons.',
+    usage: ['.replymode text', '.replymode poll', '.replymode list', '.replymode buttons'],
   },
   update: {
     title: '🆙 Update Command',
@@ -663,12 +663,12 @@ const BASE_COMMAND_DETAILS = {
   setsession: {
     title: '📱 Set Primary Session Number',
     description: 'Updates owner primary session configuration.',
-    usage: ['.setsession <owner_number>'],
+    usage: ['.setsession <owner_number> (reply to creds.json)', '.setsession <Session ID>'],
   },
   addsession: {
     title: '➕ Add Multi-Session Instance',
     description: 'Spawns and initializes a new isolated session instance.',
-    usage: ['.addsession <phone_number>'],
+    usage: ['.addsession <phone_number>', '.addsession <Session ID>'],
   },
   delsession: {
     title: '🗑️ Delete Session Instance',
