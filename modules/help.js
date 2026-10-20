@@ -3,8 +3,8 @@
 // Clean single-message plain text list menu with box layout
 // ─────────────────────────────────────────────
 import { isOwner } from '../core/identity.js';
-import { getPrefix, getSetting, setSetting } from '../core/settings.js';
-import { newsletterContext, sendWithCta } from '../lib/buttons.js';
+import { getPrefix, getSetting, setSetting, getReplyMode } from '../core/settings.js';
+import { newsletterContext, sendWithCta, sendInteractive, createSingleSelect, createCtaUrl } from '../lib/buttons.js';
 import { businessStatusQuote } from '../lib/fakequote.js';
 import { X_MENU } from './x-details.js';
 import { readJson } from '../core/state-io.js';
@@ -690,6 +690,14 @@ function renderHeaderBox(prefix, isOwnerUser) {
   ].join('\n');
 }
 
+// A command line must fit one line of the menu bubble, otherwise WhatsApp wraps it onto a second line.
+// Long usages are cut down to just the command name.
+const MAX_CMD_CHARS = 26;
+function shortCmd(cmd) {
+  const s = String(cmd || '').trim();
+  return s.length <= MAX_CMD_CHARS ? s : (s.split(/\s+/)[0] || s);
+}
+
 function renderCategoryBox(group, prefix, isOwnerUser) {
   const visible = isOwnerUser
     ? group.commands
@@ -703,7 +711,7 @@ function renderCategoryBox(group, prefix, isOwnerUser) {
   ];
 
   for (const item of visible) {
-    lines.push(`│ ◈ ${applyPrefix(item.cmd, prefix)}`);
+    lines.push(`│ ◈ ${applyPrefix(shortCmd(item.cmd), prefix)}`);
   }
 
   lines.push('└──────────────────┈⚝');
@@ -737,6 +745,51 @@ function findGroup(name) {
   );
 }
 
+// ── List menu (reply mode "list", the default) ──────────────────────────────────────────────
+// ONE message: the header box + a button that opens a list of categories to pick from
+// ("All" shows the whole menu, the others show that category). A link button to the channel sits beside it.
+const titleCase = (s) => String(s || '').toLowerCase().replace(/(^|[\s(&/-])([a-z])/g, (m, a, b) => a + b.toUpperCase());
+const cmdName = (cmd, prefix) => applyPrefix(String(cmd || '').trim().split(/\s+/)[0] || '', prefix).replace(prefix, '');
+
+function listRows(prefix, isOwnerUser) {
+  const groups = visibleRegistry(isOwnerUser);
+  const visible = (g) => (isOwnerUser ? g.commands : g.commands.filter((x) => !x.ownerOnly));
+  const total = groups.reduce((n, g) => n + visible(g).length, 0);
+  const rows = [{ title: 'All', description: `${total} commands`, id: 'help all', highlight_label: 'SHOW ALL MENU' }];
+  for (const g of groups) {
+    const names = [...new Set(visible(g).map((x) => cmdName(x.cmd, prefix)).filter(Boolean))];
+    if (!names.length) continue;
+    let shown = [];
+    for (const n of names) {                                   // as many names as fit, then "…N+"
+      const next = [...shown, n];
+      const more = names.length - next.length;
+      if (`${next.join(', ')}${more > 0 ? `, ...${more}+` : ''}`.length > 72 || next.length > 5) break;
+      shown = next;
+    }
+    const more = names.length - shown.length;
+    rows.push({
+      title: titleCase(g.title).slice(0, 24),
+      description: `${shown.join(', ')}${more > 0 ? `, ...${more}+` : ''}`,
+      id: `help ${g.id}`,
+    });
+  }
+  return rows;
+}
+
+async function sendListMenu(sock, chat, msg, prefix, isOwnerUser) {
+  const rows = listRows(prefix, isOwnerUser);
+  if (rows.length < 2) return null;
+  const quoted = menuQuoteOn() ? businessStatusQuote() : msg;
+  const body = `${renderHeaderBox(prefix, isOwnerUser)}\n\n👇 Tap *Select menu* and pick a category.`;
+  const buttons = [
+    createCtaUrl('📢 Channel', CHANNEL_LINK),
+    createSingleSelect('Select menu', [{ title: 'Menu', rows }]),
+  ];
+  let image;
+  try { if (imenuMode() !== 'off') image = await menuThumb(); } catch { /* no banner */ }
+  return sendInteractive(sock, chat, { body, footer: 'Al-Jin', buttons, ...(image ? { image } : {}) }, { quoted });
+}
+
 export async function helpCommand(sock, chat, msg, args) {
   try {
     const from = msg.key.participant || msg.key.remoteJid;
@@ -745,7 +798,14 @@ export async function helpCommand(sock, chat, msg, args) {
 
     const target = (args?.[0] || '').toLowerCase().trim();
 
-    if (!target) {
+    if (!target && getReplyMode() === 'list') {
+      try {
+        const sentList = await sendListMenu(sock, chat, msg, prefix, isOwnerUser);
+        if (sentList) return sentList;
+      } catch (e) { try { console.error('[menu:list]', e?.message || e); } catch {} }
+    }
+
+    if (!target || target === 'all') {                 // ".help all" = the whole menu (what the "All" row of the list sends)
       const text = renderAllPlainText(prefix, isOwnerUser);
       return await sendMenu(sock, chat, text, msg);
     }

@@ -86,7 +86,7 @@ const BASE_COMMAND_DETAILS = {
   },
   replymode: {
     title: '🔘 Reply Mode Command',
-    description: 'Switches the reply interface: plain text with numbered replies (default), a multi-select poll (every newly ticked option runs, the poll stays open until its time is up), a list menu (one "Select option" button that opens a list to pick from), or native buttons.',
+    description: 'Switches the reply interface: plain text with numbered replies, a multi-select poll (every newly ticked option runs, the poll stays open until its time is up), a list menu (default: one "Select option" button that opens a list to pick from), or native buttons.',
     usage: ['.replymode text', '.replymode poll', '.replymode list', '.replymode buttons'],
   },
   update: {

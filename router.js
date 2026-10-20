@@ -839,7 +839,7 @@ export async function dispatch(sock, update, sessionId = 'main') {
               await sock.sendMessage(chat, { text: `✅ Reply mode set to *${modeArg}*` }, { quoted: msg });
             } else {
               const cur = getReplyMode();
-              await sock.sendMessage(chat, { text: `ℹ️ Current reply mode: *${cur}*\n\nUsage:\n• \`${prefix}replymode text\` — numbered replies (default)\n• \`${prefix}replymode poll\` — multi-select poll: every newly ticked option runs; the poll stays open and is deleted when its time is up\n• \`${prefix}replymode list\` — one \"Select option\" button that opens a list menu to pick from\n• \`${prefix}replymode buttons\` — native buttons (may show "Waiting for this message" on some clients)` }, { quoted: msg });
+              await sock.sendMessage(chat, { text: `ℹ️ Current reply mode: *${cur}*\n\nUsage:\n• \`${prefix}replymode text\` — numbered replies\n• \`${prefix}replymode poll\` — multi-select poll: every newly ticked option runs; the poll stays open and is deleted when its time is up\n• \`${prefix}replymode list\` — one \"Select option\" button that opens a list menu to pick from (default)\n• \`${prefix}replymode buttons\` — native buttons (may show "Waiting for this message" on some clients)` }, { quoted: msg });
             }
             break;
           }
