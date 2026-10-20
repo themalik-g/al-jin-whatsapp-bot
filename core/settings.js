@@ -61,8 +61,8 @@ export function getReplyMode() {
   const m = load().replyMode || process.env.WRAITH_REPLY_MODE;
   if (m === 'poll') return 'poll';
   if (m === 'buttons') return 'buttons';
-  if (m === 'list') return 'list';
-  return 'text';
+  if (m === 'text') return 'text';
+  return 'list';                // default: a list menu to pick from
 }
 
 export function setReplyMode(mode) {
