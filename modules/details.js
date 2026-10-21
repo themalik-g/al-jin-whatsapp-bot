@@ -435,6 +435,16 @@ const BASE_COMMAND_DETAILS = {
     description: 'Downloads YouTube videos and optimizes them to WhatsApp playable MP4 video.',
     usage: ['.ytv <video title or URL>', '.video <video title or URL>'],
   },
+  upload: {
+    title: '📤 File Upload',
+    description: 'Reply to any file (or send one with the caption .upload) and get a public link. The host is chosen by size so the file stays online as long as possible: Catbox (up to 200 MB, never expires), 0x0.st (up to 512 MB, 30 days to 1 year), then Buzzheavier / Gofile (no size cap, about 10–45 days). A host that fails hands over to the next. Owner only.',
+    usage: ['.upload (reply to a file)', '.upload info', '.upload catbox|0x0|buzz|gofile|litter'],
+  },
+  gd: {
+    title: '📁 Google Drive Downloader',
+    description: 'Downloads a Google Drive file (shared as "Anyone with the link"), exports a Google Doc / Sheet / Slides as pdf, docx, xlsx, csv or pptx, or lists the files of a public folder to pick from. Also works as a reply to a message with the link.',
+    usage: ['.gd <drive link>', '.gd <docs/sheets/slides link> pdf', '.gd <folder link>'],
+  },
   ytdl: {
     title: '📹 YouTube Downloader',
     description: 'Downloads YouTube videos directly via yt-dlp with cookie support.',
