@@ -444,6 +444,8 @@ export const REGISTRY = [
       c('.ytv <query/url>'),
       c('.video <query/url>'),
       c('.ytdl <url>'),
+      c('.gd <drive link>'),
+      c('.upload [info|host]', true),
       c('.dlcap [size|quality]', true),
       c('.disk [tmp|reserve|limit|room]', true),
       c('.pdl <post-url>'),

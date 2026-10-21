@@ -222,6 +222,9 @@ const playCommand   = lazy('./modules/ytdlp-commands.js', 'playCommand');
 const ytvCommand    = lazy('./modules/ytdlp-commands.js', 'ytvCommand');
 const videoCommand  = lazy('./modules/ytdlp-commands.js', 'videoCommand');
 const ytdlCommand   = lazy('./modules/ytdlp-commands.js', 'ytdlCommand');
+const ytaCommand    = lazy('./modules/ytdlp-commands.js', 'ytaCommand');
+const gdCommand     = lazy('./modules/gdrive.js', 'gdCommand');
+const uploadCommand = lazy('./modules/upload.js', 'uploadCommand');
 const wpCommand     = lazy('./modules/theme.js', 'wpCommand');
 const dpCommand     = lazy('./modules/theme.js', 'dpCommand');
 
@@ -537,7 +540,7 @@ export async function dispatch(sock, update, sessionId = 'main') {
         'igpost', 'tiktokpost', 'fbpost', 'pdl', 'pdlzip', 'postdl',
         'alive', 'uptime', 'restart', 'replymode', 'reqlocation',
         'twitter', 'tw', 'pinterest', 'pin', 'threads', 'reddit', 'youtube', 'yt', 'yta',
-        'gemini', 'scholar', 'scholor', 'photo', 'imagine', 'imagen', 'pinchat', 'unpinchat', 'disappearing', 'play', 'ytv', 'video', 'ytdl',
+        'gemini', 'scholar', 'scholor', 'photo', 'imagine', 'imagen', 'pinchat', 'unpinchat', 'disappearing', 'play', 'ytv', 'video', 'ytdl', 'gd', 'gdrive', 'upload',
         'shorten', 'tinyurl', 'shorturl', 'news', 'hackernews', 'hn', 'wiki', 'wikipedia', 'joke', 'advice', 'fact',
         'wp', 'dp', 'resetwp',
         'prayertimes', 'pts', 'quran', 'sora', 'para', 'muslim', 'bukhari', 'search',
@@ -685,6 +688,9 @@ export async function dispatch(sock, update, sessionId = 'main') {
           case 'ytv':
           case 'video': await ytvCommand(csock, chat, msg, rest); break;
           case 'ytdl': await ytdlCommand(csock, chat, msg, rest); break;
+          case 'gd':
+          case 'gdrive': await gdCommand(csock, chat, msg, rest); break;   // .gd <google drive link>
+          case 'upload': await uploadCommand(csock, chat, msg, rest); break;   // .upload (reply to a file) → public link
           case 'disappearing': await disappearingCommand(csock, chat, msg, rest); break;
           case 'dl':
           case 'download': await dlCommand(csock, chat, msg, rest); break;
@@ -700,7 +706,7 @@ export async function dispatch(sock, update, sessionId = 'main') {
           case 'reddit': await redditCommand(csock, chat, msg, rest); break;
           case 'youtube':
           case 'yt': await ytvCommand(csock, chat, msg, rest); break;      // .yt <query/url> → video
-          case 'yta': await playCommand(csock, chat, msg, rest); break;    // .yta <query/url> → audio
+          case 'yta': await ytaCommand(csock, chat, msg, rest); break;     // .yta <query/url> → top 5 → quality → audio
           case 'textmaker': await textmakerCommand(csock, chat, msg, rest); break;
           case 'gemini': await geminiCommand(csock, chat, msg, rest); break;
           case 'scholar':
@@ -928,7 +934,7 @@ export async function dispatch(sock, update, sessionId = 'main') {
         await reactMsg(sock, chat, msg.key, EMOJIS.FAILED);
         try { await sock.sendMessage(chat, { text: `⚠️ *command failed*\n\n\`${verb}\` — ${e.message}` }, { quoted: msg }); } catch {}
       } finally {
-        if (!cmdFailed && KNOWN.has(verb) && !['play', 'ytv', 'video', 'ytdl', 'yt', 'yta', 'youtube', 'dl', 'download', 'mp3', 'pdl', 'pdlzip', 'url'].includes(verb)) {
+        if (!cmdFailed && KNOWN.has(verb) && !['play', 'ytv', 'video', 'ytdl', 'yt', 'yta', 'youtube', 'dl', 'download', 'mp3', 'pdl', 'pdlzip', 'url', 'gd', 'gdrive', 'upload'].includes(verb)) {
           await reactMsg(sock, chat, msg.key, EMOJIS.SUCCESS);
         }
       }
