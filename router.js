@@ -222,6 +222,7 @@ const playCommand   = lazy('./modules/ytdlp-commands.js', 'playCommand');
 const ytvCommand    = lazy('./modules/ytdlp-commands.js', 'ytvCommand');
 const videoCommand  = lazy('./modules/ytdlp-commands.js', 'videoCommand');
 const ytdlCommand   = lazy('./modules/ytdlp-commands.js', 'ytdlCommand');
+const ytaCommand    = lazy('./modules/ytdlp-commands.js', 'ytaCommand');
 const wpCommand     = lazy('./modules/theme.js', 'wpCommand');
 const dpCommand     = lazy('./modules/theme.js', 'dpCommand');
 
@@ -700,7 +701,7 @@ export async function dispatch(sock, update, sessionId = 'main') {
           case 'reddit': await redditCommand(csock, chat, msg, rest); break;
           case 'youtube':
           case 'yt': await ytvCommand(csock, chat, msg, rest); break;      // .yt <query/url> → video
-          case 'yta': await playCommand(csock, chat, msg, rest); break;    // .yta <query/url> → audio
+          case 'yta': await ytaCommand(csock, chat, msg, rest); break;     // .yta <query/url> → top 5 → quality → audio
           case 'textmaker': await textmakerCommand(csock, chat, msg, rest); break;
           case 'gemini': await geminiCommand(csock, chat, msg, rest); break;
           case 'scholar':

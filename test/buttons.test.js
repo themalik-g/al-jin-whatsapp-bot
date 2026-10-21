@@ -6,7 +6,7 @@ import path from 'node:path';
 // Isolate from the real project data/ folder so a saved reply-mode setting
 // (or WRAITH_REPLY_MODE) can never change the result of this test.
 process.env.WRAITH_DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), 'aljin-btn-'));
-delete process.env.WRAITH_REPLY_MODE;
+process.env.WRAITH_REPLY_MODE = 'text';
 
 const {
   createQuickReply,

@@ -69,19 +69,36 @@ async function deliver(sock, chat, msg, t, style) {
     }, { quoted: msg });
 }
 
-async function run(sock, chat, msg, args, name, chain) {
-    const query = argOrQuoted(msg, args);
-    if (!query) return usage(sock, chat, msg, [`🎵 *${name}* — song search`, `Usage: \`${prefix()}${name} <song or artist>\``, `Example: \`${prefix()}${name} con calma\``]);
-
+// Tries each provider in turn; true as soon as one delivered the song.
+async function deliverFromChain(sock, chat, msg, query, name, chain) {
     for (const [label, source, style] of chain) {
         try {
             const track = await source(query);
             await deliver(sock, chat, msg, track, style);
-            return;
+            return true;
         } catch (e) {
             console.error(`[x:${name}] ${label} failed:`, e?.message);
         }
     }
+    return false;
+}
+
+/**
+ * The Spotify downloader as a fallback for .play: Spotify API → YouTube-music API.
+ * Returns true when the song was sent (never calls .play again, so there is no loop).
+ */
+export async function spotifyDownload(sock, chat, msg, query) {
+    return deliverFromChain(sock, chat, msg, String(query || '').trim(), 'spotify', [
+        ['spotify api', fromSpotifyApi, 'spotify'],
+        ['youtube api', fromYoutubeApi, 'youtube'],
+    ]);
+}
+
+async function run(sock, chat, msg, args, name, chain) {
+    const query = argOrQuoted(msg, args);
+    if (!query) return usage(sock, chat, msg, [`🎵 *${name}* — song search`, `Usage: \`${prefix()}${name} <song or artist>\``, `Example: \`${prefix()}${name} con calma\``]);
+
+    if (await deliverFromChain(sock, chat, msg, query, name, chain)) return;
     // last resort: the built-in YouTube downloader
     const { playCommand } = await import('./ytdlp-commands.js');
     await playCommand(sock, chat, msg, query.split(/\s+/));
